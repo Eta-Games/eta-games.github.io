@@ -12,45 +12,65 @@
 
       .foot {
         border-top-color:#000000;
-        border-top-size:4px;
+        border-top-width:4px;
         border-top-style:solid;
         background-color:#555555;
+        position: absolute;
+        bottom:0;
+        width: 100%
+      }
+
+      #not-footer {
+        margin: 10px;
+      }
+
+      html {
+        height: 100%;
+        margin: 0;
+      }
+
+      body {
+        height: 100%;
+        margin: 0;
       }
     </style>
   </head>
 
   <body>
-    <hgroup>
-      <h1>ηGames</h1>
-      <h2>Siamo un gruppo di sviluppatori di giochi indipendenti.</h2>
-      <h3>E stiamo lavorando a qualcosa.</h3>
-    </hgroup>
-    <br>
-    <h1>Il team.</h1>
-    <table>
-      <tbody>
-        <tr>
-          <td class="box">
-            <h2>Gabry</h2>
-            <p>Colui che lavora di più ai nostri giochi. Grandissima parte dei giochi li fa lui, con aiuto dell'IA.</p>
-          </td>
-          <td class="box">
-            <h2>Kappa</h2>
-            <p>Lavora al computer, a volte da una mano a Gabry componendo musica o in altri modi.</p>
-          </td>
-          <td class="box">
-            <h2>Sportos</h2>
-            <p>Colui che nel futuro prossimo si occuperà del sito. Al momento, Kappa sta maneggiando questo sito.</p>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </body>
-  
-  <footer class="foot">
-    <div style="text-align:center; text-color:#ffffff">
-      <p style="font-size:7pt">ηGames, 2025</p>
-      <p style="font-size:4pt">Valzerhaus</p>
+    <div id="not-footer">
+      <header>
+        <h1>ηGames</h1>
+        <h2>Siamo un gruppo di sviluppatori di giochi indipendenti.</h2>
+        <h3>E stiamo lavorando a qualcosa.</h3>
+      </header>
+      <br>
+      <h1>Il team.</h1>
+
+      <table>
+        <tbody>
+          <tr>
+            <td class="box">
+              <h2>Gabry</h2>
+              <p>Colui che lavora di più ai nostri giochi. Grandissima parte dei giochi li fa lui, con aiuto dell'IA.</p>
+            </td>
+            <td class="box">
+              <h2>Kappa</h2>
+              <p>Lavora al computer, a volte da una mano a Gabry componendo musica o in altri modi.</p>
+            </td>
+            <td class="box">
+              <h2>Sportos</h2>
+              <p>Colui che nel futuro prossimo si occuperà del sito. Al momento, Kappa sta maneggiando questo sito.</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-  </footer>
+
+    <footer class="foot">
+      <div style="text-align:center; color:#ffffff">
+        <p style="font-size:10pt">ηGames, 2025</p>
+        <p style="font-size:7pt">Valzerhaus</p>
+      </div>
+    </footer>
+  </body>
 </html>
