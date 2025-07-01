@@ -7,16 +7,21 @@
         border-radius:20px;
         margin:10px;
         padding:20px;
-        background-color:#dddddd
+        background-color:#222222
+        
+      }
+
+      .title{
+        text-align: center;
       }
 
       .foot {
-        border-top-color:#000000;
-        border-top-width:4px;
+        border-top-color:#ffffff;
+        border-top-width:1px;
         border-top-style:solid;
         background-color:#555555;
-        position: absolute;
-        bottom:0;
+        position:fixed;
+        bottom: 0;
         width: 100%
       }
 
@@ -27,10 +32,12 @@
       html {
         height: 100%;
         margin: 0;
+        background-color: #000000;
+        color:#ffffff;
       }
 
       body {
-        height: 100%;
+        height: auto;
         margin: 0;
       }
     </style>
@@ -38,34 +45,33 @@
 
   <body>
     <div id="not-footer">
-      <header>
+      <header class="title">
         <h1>ηGames</h1>
         <h2>Siamo un gruppo di sviluppatori di giochi indipendenti.</h2>
         <h3>E stiamo lavorando a qualcosa.</h3>
       </header>
       <br>
       <h1>Il team.</h1>
-
       <table>
         <tbody>
           <tr>
             <td class="box">
-              <h2>Gabry</h2>
-              <p>Colui che lavora di più ai nostri giochi. Grandissima parte dei giochi li fa lui, con aiuto dell'IA.</p>
+              <h2 class="title">Gabry</h2>
+              <p>Colui che lavora di più ai nostri giochi. Grandissima parte dei giochi li fa lui, a volte fa uso dell'IA.</p>
             </td>
             <td class="box">
-              <h2>Kappa</h2>
+              <h2 class="title">Kappa</h2>
               <p>Lavora al computer, a volte da una mano a Gabry componendo musica o in altri modi.</p>
             </td>
             <td class="box">
-              <h2>Sportos</h2>
+              <h2 class="title">Sportos</h2>
               <p>Colui che nel futuro prossimo si occuperà del sito. Al momento, Kappa sta maneggiando questo sito.</p>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-
+    <br><br><br><br>
     <footer class="foot">
       <div style="text-align:center; color:#ffffff">
         <p style="font-size:10pt">ηGames, 2025</p>
