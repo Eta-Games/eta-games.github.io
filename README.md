@@ -49,7 +49,6 @@ comando:
 
 $ git pull
 
-(il '$' sta a indicare la riga di comando, ignoralo)
 Tuttavia, alla prima esecuzione di tale comando ti chiederà di come farlo.
 sei libero di scegliere quello che vuoi ma io ti consiglio:
 
