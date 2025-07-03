@@ -1,6 +1,4 @@
-# ////////////
 # // README //
-# ////////////
 
 Le repository su github possono essere "maneggiate" con un programma
 chiamato 'git', un programma inizialmente creato da Linus Torvalds, che è
