@@ -1,0 +1,71 @@
+﻿* {
+    font-family: "OCR A Std", monospace;
+}
+
+.box {
+    border-radius: 20px;
+    margin: 10px;
+    padding: 20px;
+    background-color: #222222
+}
+
+.title {
+    text-align: center;
+    color: #FF0000;
+}
+
+.subsection-1 {
+    margin-left: 20px;
+}
+
+.title-eta-games {
+    text-align: center;
+    color: #FF00FF;
+    text-shadow: #00FFFF -4px 0px, #FF0000 4px 0px;
+    font-size: 50pt;
+}
+
+.foot {
+    border-top-color: #ffffff;
+    border-top-width: 1px;
+    border-top-style: solid;
+    background-color: #555555;
+    position: fixed;
+    bottom: 0;
+    width: 100%
+}
+
+#not-footer {
+    margin: 10px;
+}
+
+html {
+    height: 100%;
+    margin: 0;
+    background-color: #000000;
+    color: #ffffff;
+}
+
+body {
+    height: auto;
+    margin: 0;
+}
+
+.ico {
+    width: 120px;
+    height: auto;
+    border-radius: 50%;      
+    display: block;          
+    margin-left: auto;
+    margin-right: auto;      
+}
+
+.cit {
+    font-family: "Playfair Display", "Merriweather", serif;
+    color: goldenrod;
+    font-size: 12pt;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+}
