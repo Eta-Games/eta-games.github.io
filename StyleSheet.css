@@ -69,3 +69,36 @@ body {
     letter-spacing: 1px;
     text-align: center;
 }
+
+.cat {
+    font-family:'Courier New', Courier, monospace;
+    color: #FFFFFF;
+    font-size: 12pt;
+    text-align: center;
+}
+
+#social {
+    text-align: center;
+    
+    a:link, a:visited {
+        border-radius: 10px;
+        border-width: 1px;
+        border-color: #FFFFFF;
+        border-style: solid;
+        padding: 10px;
+        color: #FFFFFF;
+        font-style: normal;
+        text-decoration: none;
+    }
+
+    a:hover {
+        color: #000000;
+        background-color: #FFFFFF;
+    }
+
+    a:active {
+        color: #FF00FF;
+        text-shadow: #00FFFF -1px 0px, #FF0000 1px 0px;
+    }
+
+}
