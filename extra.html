@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ETA Games — The Valter House Quiz</title>
+  <meta name="description" content="Scopri The Valter House - Shattered Memories e partecipa al nostro quiz.">
+  <link rel="stylesheet" href="extra.css">
+</head>
+<body>
+  <!-- HEADER -->
+    <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <img src="img/channels4_profile.jpg" alt="Logo ETA Games" class="logo-img">
+          <div>
+            <div>ETA Games</div>
+            <div class="muted" style="font-size:12px;margin-top:2px">Studio</div>
+          </div>
+        </div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="the valter house.html" >Giochi</a>
+          <a href="extra.html" class="active">Extra</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <!-- SEZIONE CONTENUTO -->
+  <div class="section">
+    <h1>THE VALTER HOUSE - SHATTERED MEMORIES</h1>
+    <p>
+      Scopri il nuovo segreto di <strong>The Valter House</strong> ed esplora la sua lore.  
+      Un horror psicologico che indaga ricordi e misteri in un luogo oscuro, 
+      con un gameplay immersivo e atmosfere uniche.  
+      Esplora la cantina, affronta enigmi e vivi un'esperienza incredibile...  
+      ma fai attenzione al vecchio.
+    </p>
+
+    <!-- TIMER -->
+    <div id="countdown"></div>
+
+    <!-- QUIZ -->
+    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSf0bKPxsncA7cza_j1Wfdb2xM9tBBGleUxZ36UjCwMdch6U5Q/viewform?embedded=true" 
+      width="640" height="568" frameborder="0" marginheight="0" marginwidth="0">
+      Caricamento…
+    </iframe>
+  </div>
+
+  <script>
+    // Imposta la data di fine countdown
+    const countDownDate = new Date("Sep 16, 2025 23:59:59").getTime();
+    const countdownEl = document.getElementById("countdown");
+
+    const timer = setInterval(function() {
+      const now = new Date().getTime();
+      const distance = countDownDate - now;
+
+      if (distance > 0) {
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000*60*60));
+        const minutes = Math.floor((distance % (1000*60*60)) / (1000*60));
+        const seconds = Math.floor((distance % (1000*60)) / 1000);
+        countdownEl.innerHTML = `Tempo rimanente: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+      } else {
+        clearInterval(timer);
+        countdownEl.innerHTML = "Il quiz è terminato!";
+      }
+    }, 1000);
+  </script>
+    
+	<!-- FOOTER -->
+  <footer>
+    <div class="container footer-grid">
+      <p>© 2025 ETA Games. Tutti i diritti riservati.</p>
+      <div class="socials">
+        <a href="#">YouTube</a>
+        <a href="#">Discord</a>
+        <a href="#">Twitter</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

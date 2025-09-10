@@ -1,88 +1,146 @@
-<!Doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="it">
 <head>
-    <title>ηGames</title>
-    <link rel="stylesheet" href="StyleSheet.css" />
-    <link rel="" href="StyleSheet.css" />
-    <meta charset="UTF-8">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ETA Games — Home</title>
+  <meta name="description" content="ETA Games: giochi horror psicologici, crafting narrativo e atmosfere uniche. Scopri i nostri progetti, notizie e come unirti alla community.">
+  <meta property="og:title" content="ETA Games">
+  <meta property="og:description" content="Giochi horror psicologici, sogni e storytelling unico.">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="StyleSheet.css">
 </head>
-
-  <body>
-    <div id="not-footer">
-      <header class="title">
-        <h1 class="title-eta-games">ηGames</h1>
-        <h2>Siamo un gruppo di sviluppatori di giochi indipendenti.</h2>
-        <h3>E stiamo lavorando a qualcosa.</h3>
-      </header>
-      <br>
-      <main>
-        <h1 class="subsection-1">Il team.</h1>
-        <table class="devteam">
-          <tbody>
-            <tr>
-              <td class="box">
-                <h2 class="title">Gabry</h2>
-                <p>Colui che lavora di più ai nostri giochi. Grandissima parte dei giochi li fa lui, a volte fa uso dell'IA.</p>
-                <img src="img/gabry_ico.jpeg" alt="icona profilo di Gabry" class="ico">
-                <p class="cit">"luighe of legend's è oggettivamente un gioco da obesi"</p>
-              </td>
-              <td class="box">
-                <h2 class="title">Kappa</h2>
-                <p>Lavora al computer, a volte da una mano a Gabry componendo musica o in altri modi.</p>
-                <img src="img/kappa_ico.png" alt="icona profilo di kappa" class="ico">
-                <p class="cat">"ls /usr/bin/ | grep gcc"</p>
-              </td>
-              <td class="box">
-                <h2 class="title">Sportos</h2>
-                <p>Colui che in si occuperà del sito. Al momento, Kappa lo sta mantenendo.</p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <br>
-      <div id="social">
-        <table>
-          <tr>
-            <th colspan="3">
-              <h2>Seguici su:</h2>
-            </th>
-          </tr>
-          <tr>
-            <td>
-              <p style="font-size:14pt;">
-                <a href="https://www.youtube.com/@HGames_DEV/" target="_blank">
-                  <img src="img/youtube.png" alt="logo youtube" class="icon">
-                  Youtube
-                </a>
-              </p>
-            </td>
-            <td>
-              <p style="font-size:14pt;">
-                <a href="https://discord.gg/b29pVgTGjQ" target="_blank">
-                  <img src="img/discord.png" alt="logo di discord" class="icon">
-                  Discord
-                </a>
-              </p>
-            </td>
-            <td>
-              <p style="font-size:14pt;">
-                <a href="https://eta-games.itch.io/" target="_blank">
-                  <img src="img/itchdotio.png" alt="logo itch" class="icon">
-                  itch.io
-                </a>
-              </p>
-            </td>
-          </tr>
-        </table>
+<body>
+  <!-- HEADER -->
+  <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <img src="img/channels4_profile.jpg" alt="Logo ETA Games" class="logo-img">
+          <div>
+            <div>ETA Games</div>
+            <div class="muted" style="font-size:12px;margin-top:2px">Studio</div>
+          </div>
         </div>
-    </main>
-    <br><br><br><br>
-    <footer class="foot">
-      <div style="text-align:center; color:#ffffff">
-        <p style="font-size:10pt">ηGames, 2025</p>
-        <p style="font-size:7pt">Valzerhaus</p>
+        <div class="nav-links">
+          <a href="index.html" class="active">Home</a>
+          <a href="the valter house.html" >Giochi</a>
+          <a href="extra.html">Extra</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <!-- MAIN -->
+  <main>
+    <div class="container">
+      <!-- HERO -->
+      <section class="hero" id="home">
+        <div>
+          <h1>Benvenuto in ETA Games</h1>
+          <p>Creiamo mondi, viviamo il Gaming</p>
+          <div class="btn-group">
+            <a class="btn" href="https://discord.gg/Da7sq3Mwpw" target="_blank">Unisciti alla community</a>
+          </div>
+        </div>
+
+        <aside>
+          <div class="card">
+            <h3>Notizie</h3>
+            <div class="muted">Iscriviti per essere aggiornato su build, patch ed eventi playtest.</div>
+            <form class="newsletter">
+              <input type="email" placeholder="La tua email">
+              <button class="btn" type="submit">Iscriviti</button>
+            </form>
+          </div>
+        </aside>
+      </section>
+
+      <!-- ABOUT -->
+      <section id="about">
+        <h2>Chi siamo</h2>
+        <p class="muted">
+          ETA Games è uno studio indipendente dedicato all’arte di creare e vivere i videogiochi.  
+          Non ci concentriamo solo su generi o tendenze: il nostro obiettivo è raccontare storie, 
+          costruire mondi e creare esperienze che stimolino la curiosità e la creatività dei giocatori.  
+          Ogni progetto è una testimonianza della nostra passione e del nostro impegno 
+          nel portare avanti l’arte del videogioco, oggi e domani.
+        </p>
+      </section>
+	  
+	  <!-- SEZIONE TEAM -->
+<section id="team" class="container">
+  <h2>Il nostro team</h2>
+  <div class="cards">
+    <!-- Gabry -->
+    <div class="card-tvhouse">
+      <img src="img/gabry_ico.jpeg" alt="Gabry" style="width:100%; border-radius:8px; margin-bottom:12px;">
+      <h3>Gabry</h3>
+      <p class="muted">Il cuore creativo dello studio. Sviluppa la maggior parte dei nostri giochi, dal gameplay alla narrativa, e a volte sperimenta con l’IA per aggiungere quel tocco unico ai nostri progetti.</p>
+      <p class="muted" style="font-style:italic;">"Luighe of Legend è un gioco da obesi senza vita sociale che non toccano l'erba deal 2016."</p>
+    </div>
+
+    <!-- Kappa -->
+    <div class="card-tvhouse">
+      <img src="img/kappa_ico.png" alt="Kappa" style="width:100%; border-radius:8px; margin-bottom:12px;">
+      <h3>Kappa</h3>
+      <p class="muted">Il supporto tecnico e musicale dello studio. Aiuta Gabry nella creazione dei giochi, dalla programmazione al sound design, con precisione e pazienza.</p>
+      <p class="muted" style="font-style:italic;">"ls /usr/bin/ | grep gcc"</p>
+    </div>
+
+    <!-- Sportos -->
+    <div class="card-tvhouse">
+      <img src="img/sportos_ico.png" alt="Sportos" style="width:100%; border-radius:8px; margin-bottom:12px;">
+      <h3>Sportos</h3>
+      <p class="muted">Il custode del sito e dell’esperienza online. Al momento supportato da Kappa, si occupa di aggiornamenti, design web e ottimizzazione della nostra presenza digitale.</p>
+      <p class="muted" style="font-style:italic;">Sempre pronto a mantenere tutto funzionante dietro le quinte.</p>
+    </div>
+  </div>
+</section>
+
+
+      <!-- GAMES -->
+      <section id="games">
+		<h2>Progetti in sviluppo</h2>
+		<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px">
+			<div class="card-tvhouse">
+			<h3>The Valter House</h3>
+			<p class="muted">Un horror psicologico che mescola atmosfere oniriche e inquietanti. Vivi un incubo interattivo dove nulla è come sembra.</p>
+			<div style="margin-top:10px"><span class="badge">In sviluppo</span> <span class="muted" style="margin-left:8px">PC</span></div>
+			</div>
+		</div>
+		</section>
+
+      <!-- COMMUNITY -->
+      <section id="community">
+        <h2>Community</h2>
+        <p class="muted">
+          Partecipa ai nostri playtest, segnala bug, condividi idee.  
+          Siamo su Discord e YouTube.
+        </p>
+        <div class="cards">
+          <a class="card" href="https://discord.gg/Da7sq3Mwpw" target="_blank">Discord — Entra</a>
+          <a class="card" href="https://www.youtube.com/@HGames_studio" target="_blank">YouTube — Canale</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <strong>ETA Games</strong>
+          <div class="muted">© ETA Games — Tutti i diritti riservati</div>
+        </div>
+        <div class="socials muted">
+          <a href="https://discord.gg/Da7sq3Mwpw" target="_blank">Discord</a>
+          <a href="https://www.youtube.com/@HGames_studio" target="_blank">YouTube</a>
+        </div>
       </div>
-    </footer>
-  </body>
+    </div>
+  </footer>
+</body>
 </html>

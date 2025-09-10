@@ -6,6 +6,96 @@ body {
   color: #f5f5f5;
 }
 
+/* Header */
+header {
+  background: #1a1a1a;
+  border-bottom: 1px solid #333;
+  padding: 10px 0;
+}
+
+.container {
+  width: 90%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+}
+
+.brand-title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.brand img.logo-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.muted {
+  font-size: 12px;
+  color: #aaa;
+}
+
+/* Links di navigazione */
+.nav-links a {
+  color: #f5f5f5;
+  text-decoration: none;
+  margin-left: 20px;
+  font-weight: bold;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: #ff4444;
+}
+
+/* Sezioni */
+.section {
+  text-align: center;
+  padding: 50px 20px;
+}
+
+.section h1 {
+  font-size: 32px;
+  margin-bottom: 20px;
+  color: #ff4444;
+}
+
+.section p {
+  max-width: 700px;
+  margin: 0 auto 40px auto;
+  line-height: 1.6;
+  font-size: 18px;
+  color: #ddd;
+}
+
+/* Quiz centrato */
+iframe {
+  display: block;
+  margin: 0 auto;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.6);
+}
+/* Reset e font */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0d0d0d;
+  color: #f5f5f5;
+}
+
 /* Container */
 .container {
   width: 90%;
@@ -197,7 +287,7 @@ footer {
 }
 :root {
     --bg: #0a0a0a;
-    --card: #1a1a1a;
+    /* --card: #1a1a1a; */
     --accent: #e50914;
     --muted: #b3b3b3;
     --glass: rgba(255,255,255,0.05);
@@ -349,4 +439,14 @@ footer {
 
 .muted {
     color: var(--muted);
+}
+
+
+/* Timer style */
+
+#countdown {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ff4444;
+    margin-bottom: 20px;
 }
