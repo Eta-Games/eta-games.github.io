@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Decoder — ETA Games</title>
+<meta name="description" content="Decoder interattivo - The Valter House" />
+<link rel="stylesheet" href="StyleSheet.css">
+<style>
+/* Stili specifici per la stanza / monitor / decoder */
+.room {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 40px;
+  flex-direction: column;
+}
+
+.scene {
+  width: 900px;
+  max-width: 96%;
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 28px;
+  align-items: start;
+}
+
+/* Monitor box */
+.monitor-wrap {
+  background: linear-gradient(180deg,#0b0b0b,#171717);
+  border: 4px solid rgba(229,9,20,0.9);
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+}
+
+.monitor-frame {
+  width: 100%;
+  max-width: 520px;
+  height: 320px;
+  background: #000;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Canvas covers monitor */
+canvas#staticCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* overlay (for reveal) */
+.reveal-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 20px;
+  text-align: center;
+  padding: 12px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+
+.reveal-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* monitor bezel / stand */
+.monitor-stand {
+  width: 120px;
+  height: 10px;
+  background: #111;
+  margin-top: 12px;
+  border-radius: 4px;
+  box-shadow: inset 0 -6px 12px rgba(0,0,0,0.6);
+}
+
+.monitor-base {
+  width: 180px;
+  height: 10px;
+  background: #0b0b0b;
+  margin-top: 6px;
+  border-radius: 4px;
+}
+
+/* Decoder controls */
+.decoder {
+  background: linear-gradient(180deg,#0f0f0f,#151515);
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,0.04);
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+}
+
+.decoder h3 {
+  margin: 0 0 8px;
+  color: #ff4444;
+}
+
+.decoder p {
+  color: #bdbdbd;
+  font-size: 14px;
+  margin: 0 0 12px;
+}
+
+.decoder .display {
+  background: #060606;
+  border: 2px solid rgba(255,255,255,0.03);
+  color: #f5f5f5;
+  padding: 12px;
+  border-radius: 8px;
+  min-height: 60px;
+  font-family: monospace;
+  font-size: 14px;
+  margin-bottom: 12px;
+  white-space: pre-wrap;
+}
+
+.decoder .controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.decoder input[type="text"] {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: transparent;
+  color: inherit;
+}
+
+.decoder button {
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #ff4444;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.log {
+  margin-top: 12px;
+  max-height: 120px;
+  overflow: auto;
+  font-family: monospace;
+  font-size: 13px;
+  color: #d2d2d2;
+  border-top: 1px dashed rgba(255,255,255,0.03);
+  padding-top: 10px;
+}
+
+.hint {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #cfc;
+}
+
+/* Small screens */
+@media (max-width: 900px) {
+  .scene {
+    grid-template-columns: 1fr;
+  }
+  .monitor-wrap { order: 1; }
+  .decoder { order: 2; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <nav>
+      <div class="brand">
+        <img src="img/channels4_profile.jpg" alt="ETA logo" class="logo-img">
+        <div>
+          <div>ETA Games</div>
+          <div class="muted" style="font-size:12px;margin-top:2px">Studio</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="games.html">Giochi</a>
+        <a href="extra.html" class="active">Extra</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="room">
+  <div class="scene">
+    <!-- Monitor pane -->
+    <div class="monitor-wrap">
+      <div class="monitor-frame" role="img" aria-label="Monitor con statica">
+        <canvas id="staticCanvas" width="640" height="360"></canvas>
+        <div id="reveal" class="reveal-overlay" aria-hidden="true"></div>
+      </div>
+      <div class="monitor-stand"></div>
+      <div class="monitor-base"></div>
+    </div>
+
+    <!-- Decoder pane -->
+    <aside class="decoder" aria-labelledby="decoder-title">
+      <h3 id="decoder-title">DECODER</h3>
+      <p>Inserisci un codice. Alcuni codici sbloccano segreti nello schermo.</p>
+      <div id="display" class="display">READY...</div>
+      <div class="controls">
+        <input id="codeInput" type="text" placeholder="Inserisci codice..." aria-label="Codice">
+        <button id="submitBtn" type="button">INVIA</button>
+      </div>
+      <div class="log" id="log" aria-live="polite"></div>
+      <div class="hint">prova i codici</div>
+    </aside>
+  </div>
+</main>
+
+<footer style="margin-top:30px;">
+  <div class="container footer-grid">
+    <div>
+      <strong>ETA Games</strong>
+      <div class="muted">© ETA Games</div>
+    </div>
+    <div class="socials muted">
+      <a href="#">Discord</a>
+      <a href="#">YouTube</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// -----------------------
+// STATIC NOISE CANVAS
+// -----------------------
+(function(){
+  const canvas = document.getElementById('staticCanvas');
+  const ctx = canvas.getContext('2d');
+  let width = canvas.width;
+  let height = canvas.height;
+  let raf;
+  let running = true;
+
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    const scale = window.devicePixelRatio || 1;
+    canvas.width = Math.max(300, Math.floor(rect.width * scale));
+    canvas.height = Math.max(200, Math.floor(rect.height * scale));
+    width = canvas.width;
+    height = canvas.height;
+  }
+
+  function drawStatic() {
+    const imageData = ctx.createImageData(width, height);
+    const buffer = new Uint32Array(imageData.data.buffer);
+    for (let i = 0; i < buffer.length; i++) {
+      const val = Math.floor(Math.random() * 255);
+      buffer[i] = (255 << 24) | (val << 16) | (val << 8) | val;
+    }
+    ctx.putImageData(imageData, 0, 0);
+  }
+
+  function loop() {
+    if (running) drawStatic();
+    raf = requestAnimationFrame(loop);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  loop();
+
+  window.monitorControl = {
+    stop: () => running = false,
+    start: () => running = true,
+    clearToImage: function(src){
+      const reveal = document.getElementById('reveal');
+      reveal.style.backgroundImage = `url("${src}")`;
+      reveal.style.backgroundSize = 'cover';
+      reveal.style.backgroundPosition = 'center';
+      reveal.classList.add('visible');
+      running = false;
+    },
+    showText: function(text){
+      const reveal = document.getElementById('reveal');
+      reveal.textContent = text;
+      reveal.style.backgroundImage = '';
+      reveal.classList.add('visible');
+      running = false;
+    },
+    reset: function(){
+      const reveal = document.getElementById('reveal');
+      reveal.classList.remove('visible');
+      reveal.style.backgroundImage = '';
+      reveal.textContent = '';
+      running = true;
+    }
+  };
+})();
+
+// -----------------------
+// DECODER LOGIC
+// -----------------------
+(function(){
+  const input = document.getElementById('codeInput');
+  const btn = document.getElementById('submitBtn');
+  const log = document.getElementById('log');
+  const display = document.getElementById('display');
+
+  const codes = {
+    'acces': { type:'text', payload: 'ACCES DENIAL' },
+    '742617000027': { type:'open-link', payload: 'https://www.youtube.com/watch?v=g9ARDbWuGIY' },
+    '515': { type:'open-link', payload: 'https://www.youtube.com/watch?v=2iarZY5HMqwY' },
+    'eva1986': { type:'open-link', payload: 'https://youtu.be/OUL5pXTAaGk?si=2UfCmB0rX-0rvplr' },
+  };
+
+  function appendLog(msg) {
+    const time = new Date().toLocaleTimeString();
+    log.innerHTML = `<div>[${time}] ${escapeHtml(msg)}</div>` + log.innerHTML;
+  }
+
+  function escapeHtml(s){
+    return String(s)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;');
+  }
+
+  function handle(codeRaw){
+    if (!codeRaw) return;
+    const code = codeRaw.trim().toLowerCase();
+    appendLog('Codice inserito: ' + codeRaw);
+    display.textContent = 'DECODING...';
+    setTimeout(() => {
+      if (codes[code]) {
+        const entry = codes[code];
+        if (entry.type === 'text') {
+          display.textContent = entry.payload;
+          window.monitorControl.showText(entry.payload);
+          appendLog('Risultato: ' + entry.payload);
+        } else if (entry.type === 'reveal-img') {
+          display.textContent = 'VISUALIZZAZIONE IMMAGINE...';
+          window.monitorControl.clearToImage(entry.payload);
+          appendLog('Immagine rivelata: ' + entry.payload);
+        } else if (entry.type === 'open-link') {
+          display.textContent = 'APERTURA LINK...';
+          window.open(entry.payload, '_blank', 'noopener,noreferrer');
+          appendLog('Link aperto: ' + entry.payload);
+        } else if (entry.type === 'reset') {
+          display.textContent = 'RESET IN CORSO...';
+          window.monitorControl.reset();
+          appendLog('Monitor resettato.');
+        }
+      } else {
+        display.textContent = 'ERRORE: CODICE NON RICONOSCIUTO';
+        appendLog('Codice non riconosciuto.');
+        flashMonitor();
+      }
+    }, 600);
+  }
+
+  function flashMonitor(){
+    const overlay = document.getElementById('reveal');
+    overlay.classList.add('visible');
+    overlay.style.backgroundColor = 'rgba(229,9,20,0.12)';
+    setTimeout(()=> {
+      overlay.classList.remove('visible');
+      overlay.style.backgroundColor = '';
+    }, 400);
+  }
+
+  btn.addEventListener('click', () => { handle(input.value); input.value=''; input.focus(); });
+  input.addEventListener('keydown', (e)=> { if (e.key === 'Enter') { handle(input.value); input.value=''; } });
+
+  // Preload images
+  ['img/reveal_shatter.jpg','img/reveal_glow.jpg'].forEach(src => { new Image().src = src; });
+})();
+</script>
+</body>
+</html>
