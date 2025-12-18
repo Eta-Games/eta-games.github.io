@@ -9,6 +9,7 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
   <script>
     const firebaseConfig = {
@@ -69,9 +70,20 @@
       <button id="logoutBtn" class="btn" style="margin-top:10px;width:100%;">Logout</button>
     </div>
 
+    <!-- PROFILO IMAGE BLOCK -->
+    <div class="card-tvhouse" id="profileImageBlock" style="margin-bottom:20px;text-align:center">
+      <h2>Immagine profilo</h2>
+      <img id="profilePic" src="img/default_avatar.png" alt="Immagine profilo"
+        style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:2px solid #fff;margin-bottom:10px;">
+      <input type="text" id="profilePicURL" placeholder="Inserisci URL immagine" 
+        style="width:100%;margin-bottom:8px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);color:#fff;background:transparent;">
+      <button id="uploadPicBtn" class="btn" style="width:100%;">Aggiorna immagine</button>
+    </div>
+
     <!-- DATI BASE -->
     <div class="card-tvhouse" id="base" style="margin-bottom:20px">
       <h2>Dati base</h2>
+      <button id="changeUsername" class="btn" style="margin-bottom:6px;width:100%;">Cambia username</button>
       <button id="changeEmail" class="btn" style="margin-bottom:6px;width:100%;">Modifica email</button>
       <button id="changePassword" class="btn" style="width:100%;">Cambia password</button>
     </div>
@@ -101,31 +113,49 @@
 
 <script>
 const auth = firebase.auth();
+const db = firebase.firestore();
 
-// Controlla se l'utente è loggato
-auth.onAuthStateChanged((user) => {
-  if (!user) {
-    window.location.href = "login.html";
-  } else {
+// Controllo login e popolo dati
+auth.onAuthStateChanged(user => {
+  if(!user) window.location.href="login.html";
+  else {
+    const userId = user.uid;
     document.getElementById('username').textContent = user.displayName || "Non impostato";
     document.getElementById('email').textContent = user.email || "Non impostata";
     document.getElementById('created').textContent = user.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : "N/D";
     document.getElementById('lastLogin').textContent = user.metadata?.lastSignInTime ? new Date(user.metadata.lastSignInTime).toLocaleDateString() : "N/D";
+
+    // Prendi immagine dal DB
+    db.collection('users').doc(userId).get().then(doc => {
+      if(doc.exists && doc.data().photoURL){
+        document.getElementById('profilePic').src = doc.data().photoURL;
+      }
+    });
   }
 });
 
 // Logout
 document.getElementById('logoutBtn').addEventListener('click', () => {
-  auth.signOut().then(() => window.location.href = "login.html");
+  auth.signOut().then(() => window.location.href="login.html");
 });
 
-// Apri pagina update per modifiche
-document.getElementById('changeEmail').addEventListener('click', () => {
-  window.location.href = "update.html?action=email";
+// Cambia username
+document.getElementById('changeUsername').addEventListener('click', () => {
+  const newUsername = prompt("Inserisci il nuovo username:");
+  if(newUsername){
+    const user = auth.currentUser;
+    user.updateProfile({ displayName: newUsername })
+      .then(() => {
+        document.getElementById('username').textContent = newUsername;
+        db.collection('users').doc(user.uid).set({ displayName: newUsername }, { merge: true });
+        alert("Username aggiornato!");
+      }).catch(err => alert(err.message));
+  }
 });
-document.getElementById('changePassword').addEventListener('click', () => {
-  window.location.href = "update.html?action=password";
-});
+
+// Apri pagina update per email/password
+document.getElementById('changeEmail').addEventListener('click', () => window.location.href="update.html?action=email");
+document.getElementById('changePassword').addEventListener('click', () => window.location.href="update.html?action=password");
 
 // Verifica email
 document.getElementById('sendVerification').addEventListener('click', () => {
@@ -136,14 +166,30 @@ document.getElementById('sendVerification').addEventListener('click', () => {
 
 // Elimina account
 document.getElementById('deleteAccount').addEventListener('click', () => {
-  if (confirm("Sei sicuro di voler eliminare l'account? Questa azione non può essere annullata.")) {
+  if(confirm("Sei sicuro di voler eliminare l'account? Questa azione non può essere annullata.")){
     auth.currentUser.delete()
-      .then(() => {
-        alert("Account eliminato.");
-        window.location.href = "login.html";
-      })
+      .then(() => { alert("Account eliminato."); window.location.href="login.html"; })
       .catch(err => alert(err.message));
   }
+});
+
+// Aggiorna immagine profilo da URL e mostra anteprima subito
+document.getElementById('uploadPicBtn').addEventListener('click', () => {
+  const user = auth.currentUser;
+  const urlInput = document.getElementById('profilePicURL').value.trim();
+  if(!user) return alert("Utente non loggato.");
+  if(!urlInput) return alert("Inserisci un URL valido.");
+
+  // Mostra subito l'anteprima
+  document.getElementById('profilePic').src = urlInput;
+
+  // Salva URL in Firebase
+  user.updateProfile({ photoURL: urlInput })
+    .then(() => db.collection('users').doc(user.uid).set({ photoURL: urlInput }, { merge: true }))
+    .then(() => {
+      alert("Immagine profilo aggiornata!");
+    })
+    .catch(err => alert(err.message));
 });
 </script>
 

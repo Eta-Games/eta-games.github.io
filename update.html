@@ -48,9 +48,7 @@
 <section class="hero container">
   <div class="card-tvhouse" id="updateCard">
     <h2 id="formTitle">Aggiorna account</h2>
-    <form id="updateForm">
-      <!-- Qui inseriremo dinamicamente i campi -->
-    </form>
+    <form id="updateForm"></form>
     <p id="updateMessage" class="muted" style="margin-top:12px;"></p>
   </div>
 </section>
@@ -99,6 +97,14 @@ if(action === 'email'){
       style="width:100%; margin:8px 0 14px; padding:10px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff;">
     <button type="submit" class="btn" style="width:100%;">Aggiorna password</button>
   `;
+} else if(action === 'username'){
+  formTitle.textContent = "Cambia username";
+  updateForm.innerHTML = `
+    <label class="muted">Nuovo username</label>
+    <input type="text" id="newUsername" placeholder="Inserisci nuovo username" required
+      style="width:100%; margin:8px 0 14px; padding:10px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff;">
+    <button type="submit" class="btn" style="width:100%;">Aggiorna username</button>
+  `;
 } else {
   formTitle.textContent = "Azione non valida";
   updateForm.innerHTML = `<p class="muted">Nessuna azione selezionata.</p>`;
@@ -130,6 +136,16 @@ updateForm.addEventListener('submit', e => {
     user.updatePassword(newPassword)
       .then(() => {
         updateMessage.textContent = "Password aggiornata correttamente!";
+        setTimeout(()=>window.location.href='profilo.html',1000);
+      })
+      .catch(err => updateMessage.textContent = err.message);
+  }
+
+  if(action === 'username'){
+    const newUsername = document.getElementById('newUsername').value;
+    user.updateProfile({ displayName: newUsername })
+      .then(() => {
+        updateMessage.textContent = "Username aggiornato correttamente!";
         setTimeout(()=>window.location.href='profilo.html',1000);
       })
       .catch(err => updateMessage.textContent = err.message);

@@ -49,13 +49,7 @@
 <section class="hero container">
   <div>
     <h1>Registrazione</h1>
-    <p>
-      Registrati per accedere alla beta di  
-      <strong>The Valter House</strong>.
-    </p>
-    <p class="muted">
-      ⚠️ È richiesta un'età minima di 14 anni.
-    </p>
+    <p>Registrati per accedere ai contenuti esclusivi di <strong>ETA Games</strong> e agli update dei giochi.</p>
   </div>
 
   <div class="card-tvhouse">
@@ -76,7 +70,12 @@
         max="2011-12-31"
         style="width:100%;margin:8px 0 16px;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;">
 
-      <button type="submit" class="btn" style="width:100%">Registrati</button>
+      <label class="muted" style="display:flex;align-items:center;margin-bottom:14px;">
+        <input type="checkbox" id="ageConfirm" style="margin-right:6px;" required>
+        Confermo di avere almeno 14 anni
+      </label>
+
+      <button type="submit" class="btn" style="width:100%;margin-top:12px;">Registrati</button>
     </form>
 
     <p id="registerMessage" class="muted" style="margin-top:12px;font-size:13px;text-align:center"></p>
@@ -108,6 +107,7 @@ registerForm.addEventListener('submit', (e) => {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
   const birthdate = new Date(document.getElementById('birthdate').value);
+  const ageConfirmed = document.getElementById('ageConfirm').checked;
 
   // Controllo età ≥ 14
   const today = new Date();
@@ -117,12 +117,11 @@ registerForm.addEventListener('submit', (e) => {
     age--;
   }
 
-  if (age < 14) {
-    registerMessage.textContent = "Devi avere almeno 14 anni per registrarti.";
+  if(age < 14 || !ageConfirmed){
+    registerMessage.textContent = "Devi avere almeno 14 anni e confermare la checkbox per registrarti.";
     return;
   }
 
-  // Registrazione con Firebase e aggiornamento displayName
   auth.createUserWithEmailAndPassword(email, password)
     .then((userCredential) => {
       const user = userCredential.user;
@@ -131,7 +130,6 @@ registerForm.addEventListener('submit', (e) => {
     .then(() => {
       registerMessage.textContent = `Registrazione completata! Benvenuto ${username}`;
       registerForm.reset();
-      // Redirect automatico al profilo
       window.location.href = "profilo.html";
     })
     .catch((error) => {
