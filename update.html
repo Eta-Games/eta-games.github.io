@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Aggiorna account — ETA Games</title>
+  <link rel="stylesheet" href="tvh.css">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
+      authDomain: "etagames-b5d6a.firebaseapp.com",
+      projectId: "etagames-b5d6a",
+      storageBucket: "etagames-b5d6a.firebasestorage.app",
+      messagingSenderId: "809625655346",
+      appId: "1:809625655346:web:3010a62960fde91787842b",
+      measurementId: "G-BG4HGVW7D6"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <nav>
+      <div class="brand">
+        <img src="img/channels4_profile.jpg" class="logo-img">
+        <div>
+          <div>ETA Games</div>
+          <div class="muted" style="font-size:12px">Profilo utente</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="games.html">Giochi</a>
+        <a href="extra.html">Extra</a>
+        <a href="profilo.html">Profilo</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<section class="hero container">
+  <div class="card-tvhouse" id="updateCard">
+    <h2 id="formTitle">Aggiorna account</h2>
+    <form id="updateForm">
+      <!-- Qui inseriremo dinamicamente i campi -->
+    </form>
+    <p id="updateMessage" class="muted" style="margin-top:12px;"></p>
+  </div>
+</section>
+
+<footer>
+  <div class="container footer-grid">
+    <div>
+      <strong>ETA Games</strong>
+      <div class="muted">© ETA Games — Tutti i diritti riservati</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const auth = firebase.auth();
+const updateForm = document.getElementById('updateForm');
+const updateMessage = document.getElementById('updateMessage');
+const formTitle = document.getElementById('formTitle');
+
+// Controlla se l'utente è loggato
+auth.onAuthStateChanged(user => {
+  if (!user) window.location.href = "login.html";
+});
+
+// Leggi l'action dall'URL
+const urlParams = new URLSearchParams(window.location.search);
+const action = urlParams.get('action');
+
+// Mostra i campi giusti
+if(action === 'email'){
+  formTitle.textContent = "Cambia email";
+  updateForm.innerHTML = `
+    <label class="muted">Nuova email</label>
+    <input type="email" id="newEmail" placeholder="Inserisci nuova email" required
+      style="width:100%; margin:8px 0 14px; padding:10px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff;">
+    <button type="submit" class="btn" style="width:100%;">Aggiorna email</button>
+  `;
+} else if(action === 'password'){
+  formTitle.textContent = "Cambia password";
+  updateForm.innerHTML = `
+    <label class="muted">Nuova password</label>
+    <input type="password" id="newPassword" placeholder="Inserisci nuova password" required
+      style="width:100%; margin:8px 0 8px; padding:10px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff;">
+    <label class="muted">Conferma password</label>
+    <input type="password" id="confirmPassword" placeholder="Conferma nuova password" required
+      style="width:100%; margin:8px 0 14px; padding:10px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff;">
+    <button type="submit" class="btn" style="width:100%;">Aggiorna password</button>
+  `;
+} else {
+  formTitle.textContent = "Azione non valida";
+  updateForm.innerHTML = `<p class="muted">Nessuna azione selezionata.</p>`;
+}
+
+// Submit
+updateForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const user = auth.currentUser;
+  if(!user) return;
+
+  if(action === 'email'){
+    const newEmail = document.getElementById('newEmail').value;
+    user.updateEmail(newEmail)
+      .then(() => {
+        updateMessage.textContent = "Email aggiornata correttamente!";
+        setTimeout(()=>window.location.href='profilo.html',1000);
+      })
+      .catch(err => updateMessage.textContent = err.message);
+  }
+
+  if(action === 'password'){
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    if(newPassword !== confirmPassword){
+      updateMessage.textContent = "Le password non coincidono!";
+      return;
+    }
+    user.updatePassword(newPassword)
+      .then(() => {
+        updateMessage.textContent = "Password aggiornata correttamente!";
+        setTimeout(()=>window.location.href='profilo.html',1000);
+      })
+      .catch(err => updateMessage.textContent = err.message);
+  }
+});
+</script>
+
+</body>
+</html>

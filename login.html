@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Login — ETA Games</title>
+  <meta name="description" content="Accesso riservato ETA Games">
+  <link rel="stylesheet" href="tvh.css">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
+  <script>
+    // Config Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
+      authDomain: "etagames-b5d6a.firebaseapp.com",
+      projectId: "etagames-b5d6a",
+      storageBucket: "etagames-b5d6a.firebasestorage.app",
+      messagingSenderId: "809625655346",
+      appId: "1:809625655346:web:3010a62960fde91787842b",
+      measurementId: "G-BG4HGVW7D6"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <img src="img/channels4_profile.jpg" alt="Logo ETA Games" class="logo-img">
+          <div>
+            <div>ETA Games</div>
+            <div class="muted" style="font-size:12px;margin-top:2px">Studio</div>
+          </div>
+        </div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="games.html">Giochi</a>
+          <a href="extra.html">Extra</a>
+          <a href="profilo.html"class="active">Profilo</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO LOGIN -->
+  <section class="hero container">
+    <div>
+      <h1>Accesso riservato</h1>
+      <p>
+        Effettua il login per accedere ai contenuti esclusivi di  
+        <strong>The Valter House</strong> e agli update della beta.
+      </p>
+      <p class="muted">
+        Area dedicata a tester, sviluppatori e collaboratori ETA Games.
+      </p>
+    </div>
+
+    <!-- CARD LOGIN -->
+    <div class="card-tvhouse">
+      <h2>Login</h2>
+
+      <form id="loginForm">
+        <label class="muted">Email</label>
+        <input
+          type="email"
+          id="loginEmail"
+          required
+          placeholder="Inserisci email"
+          style="width:100%; margin:8px 0 14px; padding:10px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff;"
+        >
+
+        <label class="muted">Password</label>
+        <input
+          type="password"
+          id="loginPassword"
+          required
+          placeholder="Inserisci password"
+          style="width:100%; margin:8px 0 18px; padding:10px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff;"
+        >
+
+        <button type="submit" class="btn" style="width:100%;">Accedi</button>
+      </form>
+
+      <p style="text-align:center; margin:10px 0;" class="muted">oppure</p>
+
+      <button id="googleLogin" class="btn" style="width:100%; background:#db4437; color:#fff;">Accedi con Google</button>
+
+      <p id="loginMessage" class="muted" style="margin-top:12px;"></p>
+
+      <div style="margin-top:16px;text-align:center">
+        <div class="muted">Non hai un account?</div>
+        <a href="registra.html" class="badge">Registrati</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <strong>ETA Games</strong>
+          <div class="muted">© ETA Games — Tutti i diritti riservati</div>
+        </div>
+        <div class="socials muted">
+          <a href="https://discord.gg/Da7sq3Mwpw" target="_blank">Discord</a>
+          <a href="https://www.youtube.com/@HGames_studio" target="_blank">YouTube</a>
+          <a href="https://www.instagram.com/eta.games_" target="_blank">Instagram</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JS LOGIN Firebase -->
+  <script>
+    const auth = firebase.auth();
+    const loginForm = document.getElementById('loginForm');
+    const loginMessage = document.getElementById('loginMessage');
+    const googleLogin = document.getElementById('googleLogin');
+
+    // Controlla se l'utente è già loggato
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        window.location.href = "profilo.html";
+      }
+    });
+
+    // Login con email e password
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          loginMessage.textContent = "Accesso riuscito!";
+          window.location.href = "profilo.html";
+        })
+        .catch((error) => {
+          loginMessage.textContent = error.message;
+        });
+    });
+
+    // Login con Google
+    googleLogin.addEventListener('click', () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          loginMessage.textContent = "Accesso Google riuscito!";
+          window.location.href = "profilo.html";
+        })
+        .catch((error) => {
+          loginMessage.textContent = error.message;
+        });
+    });
+  </script>
+
+</body>
+</html>

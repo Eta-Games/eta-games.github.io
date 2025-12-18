@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Account — ETA Games</title>
+  <link rel="stylesheet" href="tvh.css">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
+      authDomain: "etagames-b5d6a.firebaseapp.com",
+      projectId: "etagames-b5d6a",
+      storageBucket: "etagames-b5d6a.firebasestorage.app",
+      messagingSenderId: "809625655346",
+      appId: "1:809625655346:web:3010a62960fde91787842b",
+      measurementId: "G-BG4HGVW7D6"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <nav>
+      <div class="brand">
+        <img src="img/channels4_profile.jpg" class="logo-img">
+        <div>
+          <div>ETA Games</div>
+          <div class="muted" style="font-size:12px">Profilo utente</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="games.html">Giochi</a>
+        <a href="extra.html">Extra</a>
+        <a href="profilo.html" class="active">Profilo</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<section class="container" style="display:flex;gap:20px">
+
+  <!-- SIDEBAR -->
+  <aside class="card" style="width:260px;height:fit-content;position:sticky;top:20px">
+    <h3>Account</h3>
+    <p><a href="#overview" class="badge">Panoramica</a></p>
+    <p><a href="#base" class="badge">Dati base</a></p>
+    <p><a href="#security" class="badge">Sicurezza</a></p>
+    <p><a href="#privacy" class="badge">Privacy</a></p>
+  </aside>
+
+  <!-- CONTENT -->
+  <div style="flex:1">
+
+    <!-- OVERVIEW -->
+    <div class="card-tvhouse" id="overview" style="margin-bottom:20px">
+      <h2>Panoramica profilo</h2>
+      <p><strong>Username:</strong> <span id="username">Caricamento...</span></p>
+      <p><strong>Email:</strong> <span id="email">Caricamento...</span></p>
+      <p><strong>Account creato:</strong> <span id="created">Caricamento...</span></p>
+      <p><strong>Ultimo accesso:</strong> <span id="lastLogin">Caricamento...</span></p>
+      <button id="logoutBtn" class="btn" style="margin-top:10px;width:100%;">Logout</button>
+    </div>
+
+    <!-- DATI BASE -->
+    <div class="card-tvhouse" id="base" style="margin-bottom:20px">
+      <h2>Dati base</h2>
+      <button id="changeEmail" class="btn" style="margin-bottom:6px;width:100%;">Modifica email</button>
+      <button id="changePassword" class="btn" style="width:100%;">Cambia password</button>
+    </div>
+
+    <!-- SICUREZZA -->
+    <div class="card-tvhouse" id="security" style="margin-bottom:20px">
+      <h2>Sicurezza</h2>
+      <button id="sendVerification" class="btn" style="margin-bottom:6px;width:100%;">Verifica email</button>
+    </div>
+
+    <!-- PRIVACY -->
+    <div class="card-tvhouse" id="privacy" style="margin-bottom:20px">
+      <h2>Privacy</h2>
+      <button id="deleteAccount" class="btn" style="width:100%;">Elimina account</button>
+    </div>
+
+</section>
+
+<footer>
+  <div class="container footer-grid">
+    <div>
+      <strong>ETA Games</strong>
+      <div class="muted">© ETA Games — Tutti i diritti riservati</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const auth = firebase.auth();
+
+// Controlla se l'utente è loggato
+auth.onAuthStateChanged((user) => {
+  if (!user) {
+    window.location.href = "login.html";
+  } else {
+    document.getElementById('username').textContent = user.displayName || "Non impostato";
+    document.getElementById('email').textContent = user.email || "Non impostata";
+    document.getElementById('created').textContent = user.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : "N/D";
+    document.getElementById('lastLogin').textContent = user.metadata?.lastSignInTime ? new Date(user.metadata.lastSignInTime).toLocaleDateString() : "N/D";
+  }
+});
+
+// Logout
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  auth.signOut().then(() => window.location.href = "login.html");
+});
+
+// Apri pagina update per modifiche
+document.getElementById('changeEmail').addEventListener('click', () => {
+  window.location.href = "update.html?action=email";
+});
+document.getElementById('changePassword').addEventListener('click', () => {
+  window.location.href = "update.html?action=password";
+});
+
+// Verifica email
+document.getElementById('sendVerification').addEventListener('click', () => {
+  auth.currentUser.sendEmailVerification()
+    .then(() => alert("Email di verifica inviata!"))
+    .catch(err => alert(err.message));
+});
+
+// Elimina account
+document.getElementById('deleteAccount').addEventListener('click', () => {
+  if (confirm("Sei sicuro di voler eliminare l'account? Questa azione non può essere annullata.")) {
+    auth.currentUser.delete()
+      .then(() => {
+        alert("Account eliminato.");
+        window.location.href = "login.html";
+      })
+      .catch(err => alert(err.message));
+  }
+});
+</script>
+
+</body>
+</html>

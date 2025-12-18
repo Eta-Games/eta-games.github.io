@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Registrazione — ETA Games</title>
+  <link rel="stylesheet" href="tvh.css">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
+  <script>
+    // Config Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
+      authDomain: "etagames-b5d6a.firebaseapp.com",
+      projectId: "etagames-b5d6a",
+      storageBucket: "etagames-b5d6a.firebasestorage.app",
+      messagingSenderId: "809625655346",
+      appId: "1:809625655346:web:3010a62960fde91787842b",
+      measurementId: "G-BG4HGVW7D6"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <nav>
+      <div class="brand">
+        <img src="img/channels4_profile.jpg" class="logo-img">
+        <div>
+          <div>ETA Games</div>
+          <div class="muted" style="font-size:12px">Studio</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="games.html">Giochi</a>
+        <a href="extra.html">Extra</a>
+        <a href="login.html" class="active">Profilo</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<section class="hero container">
+  <div>
+    <h1>Registrazione</h1>
+    <p>
+      Registrati per accedere alla beta di  
+      <strong>The Valter House</strong>.
+    </p>
+    <p class="muted">
+      ⚠️ È richiesta un'età minima di 14 anni.
+    </p>
+  </div>
+
+  <div class="card-tvhouse">
+    <h2>Crea account</h2>
+
+    <form id="registerForm">
+      <input type="text" id="username" placeholder="Username" required
+        style="width:100%;margin-bottom:12px;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;">
+
+      <input type="email" id="email" placeholder="Email" required
+        style="width:100%;margin-bottom:12px;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;">
+
+      <input type="password" id="password" placeholder="Password" required
+        style="width:100%;margin-bottom:12px;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;">
+
+      <label class="muted">Data di nascita</label>
+      <input type="date" id="birthdate" required
+        max="2011-12-31"
+        style="width:100%;margin:8px 0 16px;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;">
+
+      <button type="submit" class="btn" style="width:100%">Registrati</button>
+    </form>
+
+    <p id="registerMessage" class="muted" style="margin-top:12px;font-size:13px;text-align:center"></p>
+    <div style="margin-top:16px;text-align:center">
+      <div class="muted">Hai già un account?</div>
+      <a href="login.html" class="badge">Accedi</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container footer-grid">
+    <div>
+      <strong>ETA Games</strong>
+      <div class="muted">© ETA Games — Tutti i diritti riservati</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const auth = firebase.auth();
+const registerForm = document.getElementById('registerForm');
+const registerMessage = document.getElementById('registerMessage');
+
+registerForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const username = document.getElementById('username').value;
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const birthdate = new Date(document.getElementById('birthdate').value);
+
+  // Controllo età ≥ 14
+  const today = new Date();
+  let age = today.getFullYear() - birthdate.getFullYear();
+  const m = today.getMonth() - birthdate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthdate.getDate())) {
+    age--;
+  }
+
+  if (age < 14) {
+    registerMessage.textContent = "Devi avere almeno 14 anni per registrarti.";
+    return;
+  }
+
+  // Registrazione con Firebase e aggiornamento displayName
+  auth.createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      return user.updateProfile({ displayName: username });
+    })
+    .then(() => {
+      registerMessage.textContent = `Registrazione completata! Benvenuto ${username}`;
+      registerForm.reset();
+      // Redirect automatico al profilo
+      window.location.href = "profilo.html";
+    })
+    .catch((error) => {
+      registerMessage.textContent = error.message;
+    });
+});
+</script>
+
+</body>
+</html>
