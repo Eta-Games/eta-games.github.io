@@ -10,20 +10,8 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
-      authDomain: "etagames-b5d6a.firebaseapp.com",
-      projectId: "etagames-b5d6a",
-      storageBucket: "etagames-b5d6a.firebasestorage.app",
-      messagingSenderId: "809625655346",
-      appId: "1:809625655346:web:3010a62960fde91787842b",
-      measurementId: "G-BG4HGVW7D6"
-    };
-    firebase.initializeApp(firebaseConfig);
-  </script>
 </head>
+
 <body>
 
 <header>
@@ -70,28 +58,36 @@
       <button id="logoutBtn" class="btn" style="margin-top:10px;width:100%;">Logout</button>
     </div>
 
-    <!-- PROFILO IMAGE BLOCK -->
-    <div class="card-tvhouse" id="profileImageBlock" style="margin-bottom:20px;text-align:center">
-      <h2>Immagine profilo</h2>
-      <img id="profilePic" src="img/default_avatar.png" alt="Immagine profilo"
-        style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:2px solid #fff;margin-bottom:10px;">
-      <input type="text" id="profilePicURL" placeholder="Inserisci URL immagine" 
-        style="width:100%;margin-bottom:8px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);color:#fff;background:transparent;">
-      <button id="uploadPicBtn" class="btn" style="width:100%;">Aggiorna immagine</button>
-    </div>
-
     <!-- DATI BASE -->
     <div class="card-tvhouse" id="base" style="margin-bottom:20px">
       <h2>Dati base</h2>
-      <button id="changeUsername" class="btn" style="margin-bottom:6px;width:100%;">Cambia username</button>
-      <button id="changeEmail" class="btn" style="margin-bottom:6px;width:100%;">Modifica email</button>
-      <button id="changePassword" class="btn" style="width:100%;">Cambia password</button>
+
+      <!-- Cambia Username -->
+      <div style="margin-bottom:10px">
+        <label for="newUsername">Nuovo username:</label>
+        <input type="text" id="newUsername" placeholder="Inserisci nuovo username" style="width:100%;padding:6px;margin:4px 0">
+        <button id="updateUsernameBtn" class="btn" style="width:100%">Aggiorna Username</button>
+      </div>
+
+      <!-- Cambia Email -->
+      <div style="margin-bottom:10px">
+        <label for="newEmail">Nuova email:</label>
+        <input type="email" id="newEmail" placeholder="Inserisci nuova email" style="width:100%;padding:6px;margin:4px 0">
+        <button id="updateEmailBtn" class="btn" style="width:100%">Aggiorna Email</button>
+      </div>
+
+      <!-- Cambia Password -->
+      <div style="margin-bottom:10px">
+        <label for="newPassword">Nuova password:</label>
+        <input type="password" id="newPassword" placeholder="Inserisci nuova password" style="width:100%;padding:6px;margin:4px 0">
+        <button id="updatePasswordBtn" class="btn" style="width:100%">Aggiorna Password</button>
+      </div>
     </div>
 
     <!-- SICUREZZA -->
     <div class="card-tvhouse" id="security" style="margin-bottom:20px">
       <h2>Sicurezza</h2>
-      <button id="sendVerification" class="btn" style="margin-bottom:6px;width:100%;">Verifica email</button>
+      <button id="sendVerification" class="btn" style="width:100%;">Verifica email</button>
     </div>
 
     <!-- PRIVACY -->
@@ -115,81 +111,96 @@
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Controllo login e popolo dati
+/* ===============================
+   LOGIN + DATI UTENTE
+================================ */
 auth.onAuthStateChanged(user => {
-  if(!user) window.location.href="login.html";
-  else {
-    const userId = user.uid;
-    document.getElementById('username').textContent = user.displayName || "Non impostato";
-    document.getElementById('email').textContent = user.email || "Non impostata";
-    document.getElementById('created').textContent = user.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : "N/D";
-    document.getElementById('lastLogin').textContent = user.metadata?.lastSignInTime ? new Date(user.metadata.lastSignInTime).toLocaleDateString() : "N/D";
+  if (!user) return window.location.href = "login.html";
 
-    // Prendi immagine dal DB
-    db.collection('users').doc(userId).get().then(doc => {
-      if(doc.exists && doc.data().photoURL){
-        document.getElementById('profilePic').src = doc.data().photoURL;
-      }
-    });
+  document.getElementById('username').textContent = user.displayName || "Non impostato";
+  document.getElementById('email').textContent = user.email;
+  document.getElementById('created').textContent =
+    new Date(user.metadata.creationTime).toLocaleDateString();
+  document.getElementById('lastLogin').textContent =
+    new Date(user.metadata.lastSignInTime).toLocaleDateString();
+});
+
+/* ===============================
+   LOGOUT
+================================ */
+document.getElementById("logoutBtn").onclick = () => {
+  auth.signOut().then(() => location.href = "login.html");
+};
+
+/* ===============================
+   AGGIORNA USERNAME
+================================ */
+document.getElementById('updateUsernameBtn').addEventListener('click', async () => {
+  const user = auth.currentUser;
+  const newUsername = document.getElementById('newUsername').value.trim();
+  if (!newUsername) return alert("Inserisci un username valido.");
+
+  try {
+    await user.updateProfile({ displayName: newUsername });
+    await db.collection('users').doc(user.uid).set({ displayName: newUsername }, { merge: true });
+    document.getElementById('username').textContent = newUsername;
+    alert("Username aggiornato!");
+  } catch (err) {
+    alert("Errore: " + err.message);
   }
 });
 
-// Logout
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  auth.signOut().then(() => window.location.href="login.html");
-});
+/* ===============================
+   AGGIORNA EMAIL
+================================ */
+document.getElementById('updateEmailBtn').addEventListener('click', async () => {
+  const user = auth.currentUser;
+  const newEmail = document.getElementById('newEmail').value.trim();
+  if (!newEmail) return alert("Inserisci un'email valida.");
 
-// Cambia username
-document.getElementById('changeUsername').addEventListener('click', () => {
-  const newUsername = prompt("Inserisci il nuovo username:");
-  if(newUsername){
-    const user = auth.currentUser;
-    user.updateProfile({ displayName: newUsername })
-      .then(() => {
-        document.getElementById('username').textContent = newUsername;
-        db.collection('users').doc(user.uid).set({ displayName: newUsername }, { merge: true });
-        alert("Username aggiornato!");
-      }).catch(err => alert(err.message));
+  try {
+    await user.updateEmail(newEmail);
+    document.getElementById('email').textContent = newEmail;
+    alert("Email aggiornata! Verifica se richiesto.");
+  } catch (err) {
+    alert("Errore: " + err.message);
   }
 });
 
-// Apri pagina update per email/password
-document.getElementById('changeEmail').addEventListener('click', () => window.location.href="update.html?action=email");
-document.getElementById('changePassword').addEventListener('click', () => window.location.href="update.html?action=password");
+/* ===============================
+   AGGIORNA PASSWORD
+================================ */
+document.getElementById('updatePasswordBtn').addEventListener('click', async () => {
+  const user = auth.currentUser;
+  const newPassword = document.getElementById('newPassword').value.trim();
+  if (!newPassword) return alert("Inserisci una password valida (min 6 caratteri).");
 
-// Verifica email
+  try {
+    await user.updatePassword(newPassword);
+    alert("Password aggiornata con successo!");
+  } catch (err) {
+    alert("Errore: " + err.message);
+  }
+});
+
+/* ===============================
+   VERIFICA EMAIL
+================================ */
 document.getElementById('sendVerification').addEventListener('click', () => {
   auth.currentUser.sendEmailVerification()
     .then(() => alert("Email di verifica inviata!"))
     .catch(err => alert(err.message));
 });
 
-// Elimina account
+/* ===============================
+   ELIMINA ACCOUNT
+================================ */
 document.getElementById('deleteAccount').addEventListener('click', () => {
-  if(confirm("Sei sicuro di voler eliminare l'account? Questa azione non può essere annullata.")){
+  if (confirm("Sei sicuro di voler eliminare l'account? Questa azione non può essere annullata.")) {
     auth.currentUser.delete()
       .then(() => { alert("Account eliminato."); window.location.href="login.html"; })
       .catch(err => alert(err.message));
   }
-});
-
-// Aggiorna immagine profilo da URL e mostra anteprima subito
-document.getElementById('uploadPicBtn').addEventListener('click', () => {
-  const user = auth.currentUser;
-  const urlInput = document.getElementById('profilePicURL').value.trim();
-  if(!user) return alert("Utente non loggato.");
-  if(!urlInput) return alert("Inserisci un URL valido.");
-
-  // Mostra subito l'anteprima
-  document.getElementById('profilePic').src = urlInput;
-
-  // Salva URL in Firebase
-  user.updateProfile({ photoURL: urlInput })
-    .then(() => db.collection('users').doc(user.uid).set({ photoURL: urlInput }, { merge: true }))
-    .then(() => {
-      alert("Immagine profilo aggiornata!");
-    })
-    .catch(err => alert(err.message));
 });
 </script>
 
