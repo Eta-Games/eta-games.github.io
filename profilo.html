@@ -10,8 +10,20 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-</head>
 
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
+      authDomain: "etagames-b5d6a.firebaseapp.com",
+      projectId: "etagames-b5d6a",
+      storageBucket: "etagames-b5d6a.firebasestorage.app",
+      messagingSenderId: "809625655346",
+      appId: "1:809625655346:web:3010a62960fde91787842b",
+      measurementId: "G-BG4HGVW7D6"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+</head>
 <body>
 
 <header>
@@ -62,32 +74,44 @@
     <div class="card-tvhouse" id="base" style="margin-bottom:20px">
       <h2>Dati base</h2>
 
-      <!-- Cambia Username -->
-      <div style="margin-bottom:10px">
-        <label for="newUsername">Nuovo username:</label>
-        <input type="text" id="newUsername" placeholder="Inserisci nuovo username" style="width:100%;padding:6px;margin:4px 0">
-        <button id="updateUsernameBtn" class="btn" style="width:100%">Aggiorna Username</button>
+      <!-- Cambia username -->
+      <button id="toggleUsername" class="btn" style="margin-bottom:6px;width:100%;">Cambia username</button>
+      <div id="usernameForm" style="display:none;margin-top:8px;">
+        <input id="newUsername" placeholder="Nuovo username" style="width:100%;margin-bottom:6px;padding:8px;border-radius:8px;">
+        <div style="display:flex;gap:8px;">
+          <button id="saveUsername" class="btn" style="flex:1;">Salva</button>
+          <button id="cancelUsername" class="btn" style="flex:1;background:#444;">Annulla</button>
+        </div>
       </div>
 
-      <!-- Cambia Email -->
-      <div style="margin-bottom:10px">
-        <label for="newEmail">Nuova email:</label>
-        <input type="email" id="newEmail" placeholder="Inserisci nuova email" style="width:100%;padding:6px;margin:4px 0">
-        <button id="updateEmailBtn" class="btn" style="width:100%">Aggiorna Email</button>
+      <!-- Cambia email -->
+      <button id="toggleEmail" class="btn" style="margin-top:10px;margin-bottom:6px;width:100%;">Modifica email</button>
+      <div id="emailForm" style="display:none;margin-top:8px;">
+        <input id="newEmail" type="email" placeholder="Nuova email" style="width:100%;margin-bottom:6px;padding:8px;border-radius:8px;">
+        <input id="passwordForEmail" type="password" placeholder="Password attuale (reauth)" style="width:100%;margin-bottom:6px;padding:8px;border-radius:8px;">
+        <div style="display:flex;gap:8px;">
+          <button id="saveEmail" class="btn" style="flex:1;">Salva</button>
+          <button id="cancelEmail" class="btn" style="flex:1;background:#444;">Annulla</button>
+        </div>
       </div>
 
-      <!-- Cambia Password -->
-      <div style="margin-bottom:10px">
-        <label for="newPassword">Nuova password:</label>
-        <input type="password" id="newPassword" placeholder="Inserisci nuova password" style="width:100%;padding:6px;margin:4px 0">
-        <button id="updatePasswordBtn" class="btn" style="width:100%">Aggiorna Password</button>
+      <!-- Cambia password -->
+      <button id="togglePassword" class="btn" style="margin-top:10px;width:100%;">Cambia password</button>
+      <div id="passwordForm" style="display:none;margin-top:8px;">
+        <input id="currentPassword" type="password" placeholder="Password attuale" style="width:100%;margin-bottom:6px;padding:8px;border-radius:8px;">
+        <input id="newPasswordInput" type="password" placeholder="Nuova password" style="width:100%;margin-bottom:6px;padding:8px;border-radius:8px;">
+        <input id="confirmNewPassword" type="password" placeholder="Conferma nuova password" style="width:100%;margin-bottom:6px;padding:8px;border-radius:8px;">
+        <div style="display:flex;gap:8px;">
+          <button id="savePassword" class="btn" style="flex:1;">Salva</button>
+          <button id="cancelPassword" class="btn" style="flex:1;background:#444;">Annulla</button>
+        </div>
       </div>
     </div>
 
     <!-- SICUREZZA -->
     <div class="card-tvhouse" id="security" style="margin-bottom:20px">
       <h2>Sicurezza</h2>
-      <button id="sendVerification" class="btn" style="width:100%;">Verifica email</button>
+      <button id="sendVerification" class="btn" style="margin-bottom:6px;width:100%;">Verifica email</button>
     </div>
 
     <!-- PRIVACY -->
@@ -111,92 +135,104 @@
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* ===============================
-   LOGIN + DATI UTENTE
-================================ */
+// Controllo login e popolo dati
 auth.onAuthStateChanged(user => {
-  if (!user) return window.location.href = "login.html";
-
-  document.getElementById('username').textContent = user.displayName || "Non impostato";
-  document.getElementById('email').textContent = user.email;
-  document.getElementById('created').textContent =
-    new Date(user.metadata.creationTime).toLocaleDateString();
-  document.getElementById('lastLogin').textContent =
-    new Date(user.metadata.lastSignInTime).toLocaleDateString();
+  if(!user) window.location.href="login.html";
+  else {
+    const userId = user.uid;
+    document.getElementById('username').textContent = user.displayName || "Non impostato";
+    document.getElementById('email').textContent = user.email || "Non impostata";
+    document.getElementById('created').textContent = user.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : "N/D";
+    document.getElementById('lastLogin').textContent = user.metadata?.lastSignInTime ? new Date(user.metadata.lastSignInTime).toLocaleDateString() : "N/D";
+  }
 });
 
-/* ===============================
-   LOGOUT
-================================ */
-document.getElementById("logoutBtn").onclick = () => {
-  auth.signOut().then(() => location.href = "login.html");
+// Logout
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  auth.signOut().then(() => window.location.href="login.html");
+});
+
+// Toggles per i form
+const toggle = (btnId, formId) => {
+  document.getElementById(btnId).addEventListener('click', () => {
+    const f = document.getElementById(formId);
+    f.style.display = f.style.display === 'none' ? 'block' : 'none';
+  });
 };
+toggle('toggleUsername','usernameForm');
+toggle('toggleEmail','emailForm');
+toggle('togglePassword','passwordForm');
 
-/* ===============================
-   AGGIORNA USERNAME
-================================ */
-document.getElementById('updateUsernameBtn').addEventListener('click', async () => {
+// Cancel buttons
+document.getElementById('cancelUsername').addEventListener('click', () => document.getElementById('usernameForm').style.display='none');
+document.getElementById('cancelEmail').addEventListener('click', () => document.getElementById('emailForm').style.display='none');
+document.getElementById('cancelPassword').addEventListener('click', () => document.getElementById('passwordForm').style.display='none');
+
+// Reauth helper
+function reauthenticate(password){
   const user = auth.currentUser;
+  const cred = firebase.auth.EmailAuthProvider.credential(user.email, password);
+  return user.reauthenticateWithCredential(cred);
+}
+
+// Salva username
+document.getElementById('saveUsername').addEventListener('click', () => {
   const newUsername = document.getElementById('newUsername').value.trim();
-  if (!newUsername) return alert("Inserisci un username valido.");
-
-  try {
-    await user.updateProfile({ displayName: newUsername });
-    await db.collection('users').doc(user.uid).set({ displayName: newUsername }, { merge: true });
-    document.getElementById('username').textContent = newUsername;
-    alert("Username aggiornato!");
-  } catch (err) {
-    alert("Errore: " + err.message);
-  }
+  if(!newUsername) return alert('Inserisci un username valido.');
+  const user = auth.currentUser;
+  user.updateProfile({ displayName: newUsername })
+    .then(() => {
+      document.getElementById('username').textContent = newUsername;
+      db.collection('users').doc(user.uid).set({ displayName: newUsername }, { merge: true });
+      document.getElementById('usernameForm').style.display='none';
+      alert('Username aggiornato!');
+    }).catch(err => alert(err.message));
 });
 
-/* ===============================
-   AGGIORNA EMAIL
-================================ */
-document.getElementById('updateEmailBtn').addEventListener('click', async () => {
-  const user = auth.currentUser;
+// Salva email (richiede reauth)
+document.getElementById('saveEmail').addEventListener('click', () => {
   const newEmail = document.getElementById('newEmail').value.trim();
-  if (!newEmail) return alert("Inserisci un'email valida.");
-
-  try {
-    await user.updateEmail(newEmail);
-    document.getElementById('email').textContent = newEmail;
-    alert("Email aggiornata! Verifica se richiesto.");
-  } catch (err) {
-    alert("Errore: " + err.message);
-  }
+  const pwd = document.getElementById('passwordForEmail').value;
+  if(!newEmail || !pwd) return alert('Compila tutti i campi.');
+  reauthenticate(pwd)
+    .then(() => auth.currentUser.updateEmail(newEmail))
+    .then(() => {
+      const user = auth.currentUser;
+      document.getElementById('email').textContent = user.email;
+      db.collection('users').doc(user.uid).set({ email: user.email }, { merge: true });
+      document.getElementById('emailForm').style.display='none';
+      alert('Email aggiornata!');
+    })
+    .catch(err => alert(err.message));
 });
 
-/* ===============================
-   AGGIORNA PASSWORD
-================================ */
-document.getElementById('updatePasswordBtn').addEventListener('click', async () => {
-  const user = auth.currentUser;
-  const newPassword = document.getElementById('newPassword').value.trim();
-  if (!newPassword) return alert("Inserisci una password valida (min 6 caratteri).");
-
-  try {
-    await user.updatePassword(newPassword);
-    alert("Password aggiornata con successo!");
-  } catch (err) {
-    alert("Errore: " + err.message);
-  }
+// Salva password (requiere reauth)
+document.getElementById('savePassword').addEventListener('click', () => {
+  const currentPwd = document.getElementById('currentPassword').value;
+  const newPwd = document.getElementById('newPasswordInput').value;
+  const confirmPwd = document.getElementById('confirmNewPassword').value;
+  if(!currentPwd || !newPwd || !confirmPwd) return alert('Compila tutti i campi.');
+  if(newPwd !== confirmPwd) return alert('Le password non corrispondono.');
+  if(newPwd.length < 6) return alert('La password deve essere di almeno 6 caratteri.');
+  reauthenticate(currentPwd)
+    .then(() => auth.currentUser.updatePassword(newPwd))
+    .then(() => {
+      document.getElementById('passwordForm').style.display='none';
+      alert('Password aggiornata!');
+    })
+    .catch(err => alert(err.message));
 });
 
-/* ===============================
-   VERIFICA EMAIL
-================================ */
+// Verifica email
 document.getElementById('sendVerification').addEventListener('click', () => {
   auth.currentUser.sendEmailVerification()
     .then(() => alert("Email di verifica inviata!"))
     .catch(err => alert(err.message));
 });
 
-/* ===============================
-   ELIMINA ACCOUNT
-================================ */
+// Elimina account
 document.getElementById('deleteAccount').addEventListener('click', () => {
-  if (confirm("Sei sicuro di voler eliminare l'account? Questa azione non può essere annullata.")) {
+  if(confirm("Sei sicuro di voler eliminare l'account? Questa azione non può essere annullata.")){
     auth.currentUser.delete()
       .then(() => { alert("Account eliminato."); window.location.href="login.html"; })
       .catch(err => alert(err.message));
