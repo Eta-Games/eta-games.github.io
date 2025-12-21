@@ -9,7 +9,12 @@
   <meta property="og:description" content="Giochi horror psicologici, sogni e storytelling unico.">
   <meta property="og:type" content="website">
   <link rel="stylesheet" href="StyleSheet.css">
+
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 </head>
+
 <body>
   <!-- HEADER -->
   <header>
@@ -32,10 +37,10 @@
     </div>
   </header>
 
-
   <!-- MAIN -->
   <main>
     <div class="container">
+
       <!-- HERO -->
       <section class="hero" id="home">
         <div>
@@ -49,14 +54,16 @@
         <aside>
           <div class="card">
             <h3>Notizie</h3>
-            <div class="muted">Iscriviti per essere aggiornato su build, patch ed eventi playtest.</div>
+            <div class="muted">
+              Iscriviti per essere aggiornato su build, patch ed eventi playtest.
+            </div>
 
             <form class="newsletter">
               <div class="btn-group">
-                <a class="btn" href="login.html">Accedi / Registrati</a>
+                <!-- PULSANTE DINAMICO -->
+                <a class="btn" id="authBtn" href="login.html">Accedi / Registrati</a>
               </div>
             </form>
-
           </div>
         </aside>
       </section>
@@ -65,72 +72,87 @@
       <section id="about">
         <h2>Chi siamo</h2>
         <p class="muted">
-          ETA Games è uno studio indipendente dedicato all’arte di creare e vivere i videogiochi.  
-          Non ci concentriamo solo su generi o tendenze: il nostro obiettivo è raccontare storie, 
-          costruire mondi e creare esperienze che stimolino la curiosità e la creatività dei giocatori.  
-          Ogni progetto è una testimonianza della nostra passione e del nostro impegno 
+          ETA Games è uno studio indipendente dedicato all’arte di creare e vivere i videogiochi.
+          Non ci concentriamo solo su generi o tendenze: il nostro obiettivo è raccontare storie,
+          costruire mondi e creare esperienze che stimolino la curiosità e la creatività dei giocatori.
+          Ogni progetto è una testimonianza della nostra passione e del nostro impegno
           nel portare avanti l’arte del videogioco, oggi e domani.
         </p>
       </section>
-	  
-	  <!-- SEZIONE TEAM -->
-<section id="team" class="container">
-  <h2>Il nostro team</h2>
-  <div class="cards">
-    <!-- Gabry -->
-    <div class="card-tvhouse">
-      <img src="img/gabry_ico.jpeg" alt="Gabry" style="width:100%; border-radius:8px; margin-bottom:12px;">
-      <h3>Gabry</h3>
-      <p class="muted">Il cuore creativo dello studio. Sviluppa la maggior parte dei nostri giochi, dal gameplay alla narrativa, e a volte sperimenta con l’IA per aggiungere quel tocco unico ai nostri progetti.</p>
-      <p class="muted" style="font-style:italic;">"League of Legend è un gioco da obesi senza vita sociale che non toccano l'erba dal 2016."</p>
-    </div>
 
-    <!-- Kappa -->
-    <div class="card-tvhouse">
-      <img src="img/kappa_ico.png" alt="Kappa" style="width:100%; border-radius:8px; margin-bottom:12px;">
-      <h3>Kappa</h3>
-      <p class="muted">Il supporto tecnico e musicale dello studio. Aiuta Gabry nella creazione dei giochi, dalla programmazione al sound design, con precisione e pazienza.</p>
-      <p class="muted" style="font-style:italic;">"ls /usr/bin/ | grep gcc"</p>
-    </div>
+      <!-- TEAM -->
+      <section id="team" class="container">
+        <h2>Il nostro team</h2>
+        <div class="cards">
 
-    <!-- Sportos -->
-    <div class="card-tvhouse">
-      <img src="img/sportos_ico.png" alt="Sportos" style="width:100%; border-radius:8px; margin-bottom:12px;">
-      <h3>Sportos</h3>
-      <p class="muted">Il custode del sito e dell’esperienza online. Al momento supportato da Kappa, si occupa di aggiornamenti, design web e ottimizzazione della nostra presenza digitale.</p>
-      <p class="muted" style="font-style:italic;">ti ho beccato so che ascolti chop suey</p>
-    </div>
-  </div>
-</section>
+          <div class="card-tvhouse">
+            <img src="img/gabry_ico.jpeg" alt="Gabry" style="width:100%; border-radius:8px; margin-bottom:12px;">
+            <h3>Gabry</h3>
+            <p class="muted">
+              Il cuore creativo dello studio. Sviluppa la maggior parte dei nostri giochi.
+            </p>
+            <p class="muted" style="font-style:italic;">
+              "League of Legend è un gioco da obesi senza vita sociale che non toccano l'erba dal 2016."
+            </p>
+          </div>
 
+          <div class="card-tvhouse">
+            <img src="img/kappa_ico.png" alt="Kappa" style="width:100%; border-radius:8px; margin-bottom:12px;">
+            <h3>Kappa</h3>
+            <p class="muted">
+              Supporto tecnico e musicale dello studio.
+            </p>
+            <p class="muted" style="font-style:italic;">
+              "ls /usr/bin/ | grep gcc"
+            </p>
+          </div>
+
+          <div class="card-tvhouse">
+            <img src="img/sportos_ico.png" alt="Sportos" style="width:100%; border-radius:8px; margin-bottom:12px;">
+            <h3>Sportos</h3>
+            <p class="muted">
+              Gestione del sito e presenza online.
+            </p>
+            <p class="muted" style="font-style:italic;">
+              ti ho beccato so che ascolti chop suey
+            </p>
+          </div>
+
+        </div>
+      </section>
 
       <!-- GAMES -->
       <section id="games">
-		<h2>Progetti in sviluppo</h2>
-		<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px">
-			<a href="the valter house.html" target="_blank">
-				<div class="card-tvhouse">
-				<h3>The Valter House</h3>
-				<p class="muted">Un horror psicologico che mescola atmosfere oniriche e inquietanti. Vivi un incubo interattivo dove nulla è come sembra.</p>
-				<div style="margin-top:10px"><span class="badge">In sviluppo</span> <span class="muted" style="margin-left:8px">PC</span></div>
-				</div>
-				</a>
-			</div>
-		</section>
+        <h2>Progetti in sviluppo</h2>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px">
+          <a href="the valter house.html" target="_blank">
+            <div class="card-tvhouse">
+              <h3>The Valter House</h3>
+              <p class="muted">
+                Un horror psicologico che mescola atmosfere oniriche e inquietanti.
+              </p>
+              <div style="margin-top:10px">
+                <span class="badge">In sviluppo</span>
+                <span class="muted" style="margin-left:8px">PC</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
 
       <!-- COMMUNITY -->
       <section id="community">
         <h2>Community</h2>
         <p class="muted">
-          Partecipa ai nostri playtest, segnala bug, condividi idee.  
-          Siamo su Discord e YouTube.
+          Partecipa ai nostri playtest, segnala bug, condividi idee.
         </p>
         <div class="cards">
-          <a class="card" href="https://discord.gg/Da7sq3Mwpw" target="_blank">Discord — Entra</a>
-          <a class="card" href="https://www.youtube.com/@HGames_studio" target="_blank">YouTube — Canale</a>
-		  <a class="card" href="https://www.instagram.com/eta.games_" target="_blank">instagram — profilo</a>
+          <a class="card" href="https://discord.gg/Da7sq3Mwpw" target="_blank">Discord</a>
+          <a class="card" href="https://www.youtube.com/@HGames_studio" target="_blank">YouTube</a>
+          <a class="card" href="https://www.instagram.com/eta.games_" target="_blank">Instagram</a>
         </div>
       </section>
+
     </div>
   </main>
 
@@ -145,10 +167,46 @@
         <div class="socials muted">
           <a href="https://discord.gg/Da7sq3Mwpw" target="_blank">Discord</a>
           <a href="https://www.youtube.com/@HGames_studio" target="_blank">YouTube</a>
-		  <a href="https://www.instagram.com/eta.games_" target="_blank">instagram</a>
+          <a href="https://www.instagram.com/eta.games_" target="_blank">Instagram</a>
         </div>
       </div>
     </div>
   </footer>
+
+  <!-- FIREBASE CONFIG -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
+      authDomain: "etagames-b5d6a.firebaseapp.com",
+      projectId: "etagames-b5d6a",
+      storageBucket: "etagames-b5d6a.firebasestorage.app",
+      messagingSenderId: "809625655346",
+      appId: "1:809625655346:web:3010a62960fde91787842b",
+      measurementId: "G-BG4HGVW7D6"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+  </script>
+
+  <!-- LOGICA PULSANTE NOTIZIE -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const authBtn = document.getElementById("authBtn");
+      if (!authBtn) return;
+
+      firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+          authBtn.textContent = "Profilo";
+          authBtn.href = "profilo.html";
+        } else {
+          authBtn.textContent = "Accedi / Registrati";
+          authBtn.href = "login.html";
+        }
+      });
+    });
+  </script>
+
 </body>
 </html>

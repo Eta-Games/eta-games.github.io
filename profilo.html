@@ -53,8 +53,7 @@
     <h3>Account</h3>
     <p><a href="#overview" class="badge">Panoramica</a></p>
     <p><a href="#base" class="badge">Dati base</a></p>
-    <p><a href="#security" class="badge">Sicurezza</a></p>
-    <p><a href="#privacy" class="badge">Privacy</a></p>
+    <p><a href="#securityPrivacy" class="badge">Sicurezza e Privacy</a></p>
   </aside>
 
   <!-- CONTENT -->
@@ -108,16 +107,20 @@
       </div>
     </div>
 
-    <!-- SICUREZZA -->
-    <div class="card-tvhouse" id="security" style="margin-bottom:20px">
-      <h2>Sicurezza</h2>
-      <button id="sendVerification" class="btn" style="margin-bottom:6px;width:100%;">Verifica email</button>
-    </div>
+    <!-- SICUREZZA E PRIVACY UNIFICATA -->
+    <div class="card-tvhouse" id="securityPrivacy" style="margin-bottom:20px">
+      <h2>Sicurezza e Privacy</h2>
 
-    <!-- PRIVACY -->
-    <div class="card-tvhouse" id="privacy" style="margin-bottom:20px">
-      <h2>Privacy</h2>
+      <!-- Pulsante verifica email -->
+      <button id="sendVerification" class="btn" style="margin-bottom:6px;width:100%;">Verifica email</button>
+
+      <!-- Pulsante collega Google -->
+      <button id="linkGoogle" class="btn" style="margin-bottom:6px;width:100%;">Collega account Google</button>
+
+      <!-- Pulsante elimina account -->
       <button id="deleteAccount" class="btn" style="width:100%;">Elimina account</button>
+
+      <p id="status" style="margin-top:6px;color:#ff5555;"></p>
     </div>
 
 </section>
@@ -228,6 +231,22 @@ document.getElementById('sendVerification').addEventListener('click', () => {
   auth.currentUser.sendEmailVerification()
     .then(() => alert("Email di verifica inviata!"))
     .catch(err => alert(err.message));
+});
+
+// Collega account Google
+document.getElementById('linkGoogle').addEventListener('click', () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.currentUser.linkWithPopup(provider)
+    .then(result => {
+      document.getElementById('status').textContent = `Account Google collegato: ${result.user.email}`;
+    })
+    .catch(err => {
+      if(err.code === 'auth/credential-already-in-use') {
+        document.getElementById('status').textContent = 'Questo account Google è già collegato a un altro utente.';
+      } else {
+        document.getElementById('status').textContent = err.message;
+      }
+    });
 });
 
 // Elimina account
