@@ -8,11 +8,12 @@
   <meta property="og:title" content="ETA Games">
   <meta property="og:description" content="Giochi horror psicologici, sogni e storytelling unico.">
   <meta property="og:type" content="website">
-  <link rel="stylesheet" href="StyleSheet.css">
+  <link rel="stylesheet" href="tvh.css">
 
   <!-- Firebase SDK (compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 
 <body>
@@ -190,23 +191,48 @@
     }
   </script>
 
-  <!-- LOGICA PULSANTE NOTIZIE -->
+  <!-- LOGICA PULSANTE NOTIZIE + CARICAMENTO TEMA -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const authBtn = document.getElementById("authBtn");
       if (!authBtn) return;
 
-      firebase.auth().onAuthStateChanged(user => {
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+
+      auth.onAuthStateChanged(async user => {
         if (user) {
           authBtn.textContent = "Profilo";
           authBtn.href = "profilo.html";
+
+          // Carica il tema dal server
+          const doc = await db.collection('users').doc(user.uid).get();
+          if (doc.exists && doc.data().theme) {
+            const theme = doc.data().theme;
+            applyTheme(theme);
+          }
+
         } else {
           authBtn.textContent = "Accedi / Registrati";
           authBtn.href = "login.html";
         }
       });
     });
+
+    // Funzione per applicare il tema usando le classi già definite in CSS
+    function applyTheme(theme){
+      document.body.classList.remove("day-theme", "night-theme", "matrix-theme", "hight-theme", "inverted-theme");
+      document.body.classList.add(theme + "-theme");
+    }
   </script>
 
+  <!-- STILE TEMI -->
+  <style>
+    body.day-theme {--bg:#fefcf3;--card:#fff8e1;--accent:#ff0000;--muted:#666;--glass:rgba(0,0,0,0.05);--badge-bg:#ff4444;color:#000;}
+    body.night-theme {--bg:#000;--card:#111;--accent:#ff0000;--muted:#666;--glass:rgba(255,0,0,0.05);--badge-bg:#ff4444;color:#fff;}
+    body.matrix-theme {--bg:#000;--card:#222;--accent:#00ff00;--muted:#888;--glass:rgba(0,0,0,0.2);--badge-bg:#00ff00;color:#0f0;}
+    body.hight-theme {--bg:#000;--card:#000;--accent:#ff7f00;--muted:#666;--glass:rgba(255,127,0,0.05);--badge-bg:#ff7f00;color:#fff;}
+    body.inverted-theme {--bg:#fff;--card:#e0ffff;--accent:#00ffff;--muted:#333;--glass:rgba(0,255,255,0.05);--badge-bg:#00ffff;color:#000;}
+  </style>
 </body>
 </html>

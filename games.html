@@ -6,6 +6,12 @@
   <title>ETA Games — Giochi</title>
   <meta name="description" content="Scopri tutti i giochi sviluppati da ETA Games. Clicca su un gioco per maggiori dettagli.">
   <link rel="stylesheet" href="games.css">
+  <link rel="stylesheet" href="tvh.css">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <!-- HEADER -->
@@ -51,7 +57,7 @@
       <!-- Gioco 3 -->
       <div class="game-card" onclick="location.href='#'">
         <img src="img/fakegame.png" alt="Progetto 3">
-        <h3>Progetto segeto 2</h3>
+        <h3>Progetto segreto 2</h3>
         <p>Un titolo misterioso e ancora in sviluppo.</p>
         <span class="badge">Presto</span>
       </div>
@@ -59,7 +65,7 @@
   </main>
 
   <!-- FOOTER -->
-    <footer>
+  <footer>
     <div class="container">
       <div class="footer-grid">
         <div>
@@ -69,10 +75,55 @@
         <div class="socials muted">
           <a href="https://discord.gg/Da7sq3Mwpw" target="_blank">Discord</a>
           <a href="https://www.youtube.com/@HGames_studio" target="_blank">YouTube</a>
-		  <a href="https://www.instagram.com/eta.games_" target="_blank">instagram</a>
+          <a href="https://www.instagram.com/eta.games_" target="_blank">Instagram</a>
         </div>
       </div>
     </div>
   </footer>
+
+  <!-- FIREBASE CONFIG -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
+      authDomain: "etagames-b5d6a.firebaseapp.com",
+      projectId: "etagames-b5d6a",
+      storageBucket: "etagames-b5d6a.firebasestorage.app",
+      messagingSenderId: "809625655346",
+      appId: "1:809625655346:web:3010a62960fde91787842b",
+      measurementId: "G-BG4HGVW7D6"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Applica il tema salvato per l'utente
+    auth.onAuthStateChanged(async user => {
+      if (user) {
+        const doc = await db.collection('users').doc(user.uid).get();
+        if (doc.exists && doc.data().theme) {
+          const theme = doc.data().theme;
+          applyTheme(theme);
+        }
+      }
+    });
+
+    function applyTheme(theme){
+      document.body.classList.remove("day-theme", "night-theme", "matrix-theme", "hight-theme", "inverted-theme");
+      document.body.classList.add(theme + "-theme");
+    }
+  </script>
+
+  <!-- STILE TEMI -->
+  <style>
+    body.day-theme {--bg:#fefcf3;--card:#fff8e1;--accent:#ff0000;--muted:#666;--glass:rgba(0,0,0,0.05);--badge-bg:#ff4444;color:#000;}
+    body.night-theme {--bg:#000;--card:#111;--accent:#ff0000;--muted:#666;--glass:rgba(255,0,0,0.05);--badge-bg:#ff4444;color:#fff;}
+    body.matrix-theme {--bg:#000;--card:#222;--accent:#00ff00;--muted:#888;--glass:rgba(0,0,0,0.2);--badge-bg:#00ff00;color:#0f0;}
+    body.hight-theme {--bg:#000;--card:#000;--accent:#ff7f00;--muted:#666;--glass:rgba(255,127,0,0.05);--badge-bg:#ff7f00;color:#fff;}
+    body.inverted-theme {--bg:#fff;--card:#e0ffff;--accent:#00ffff;--muted:#333;--glass:rgba(0,255,255,0.05);--badge-bg:#00ffff;color:#000;}
+  </style>
 </body>
 </html>

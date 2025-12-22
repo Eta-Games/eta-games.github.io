@@ -1,263 +1,228 @@
 <!doctype html>
 <html lang="it">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Account — ETA Games</title>
-  <link rel="stylesheet" href="tvh.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Account — ETA Games</title>
+<link rel="stylesheet" href="tvh.css">
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
-      authDomain: "etagames-b5d6a.firebaseapp.com",
-      projectId: "etagames-b5d6a",
-      storageBucket: "etagames-b5d6a.firebasestorage.app",
-      messagingSenderId: "809625655346",
-      appId: "1:809625655346:web:3010a62960fde91787842b",
-      measurementId: "G-BG4HGVW7D6"
-    };
-    firebase.initializeApp(firebaseConfig);
-  </script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
+  authDomain: "etagames-b5d6a.firebaseapp.com",
+  projectId: "etagames-b5d6a",
+  messagingSenderId: "809625655346",
+  appId: "1:809625655346:web:3010a62960fde91787842b"
+};
+firebase.initializeApp(firebaseConfig);
+</script>
 </head>
+
 <body>
 
 <header>
-  <div class="container">
-    <nav>
-      <div class="brand">
-        <img src="img/channels4_profile.jpg" class="logo-img">
-        <div>
-          <div>ETA Games</div>
-          <div class="muted" style="font-size:12px">Profilo utente</div>
-        </div>
-      </div>
-      <div class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="games.html">Giochi</a>
-        <a href="extra.html">Extra</a>
-        <a href="profilo.html" class="active">Profilo</a>
-      </div>
-    </nav>
+<div class="container">
+<nav>
+  <div class="brand">
+    <img src="img/channels4_profile.jpg" class="logo-img">
+    <div>
+      <div>ETA Games</div>
+      <div class="muted" style="font-size:12px">Profilo utente</div>
+    </div>
   </div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="games.html">Giochi</a>
+    <a href="extra.html">Extra</a>
+    <a href="profilo.html" class="active">Profilo</a>
+  </div>
+</nav>
+</div>
 </header>
 
 <section class="container" style="display:flex;gap:20px">
 
-  <!-- SIDEBAR -->
-  <aside class="card" style="width:260px;height:fit-content;position:sticky;top:20px">
-    <h3>Account</h3>
-    <p><a href="#overview" class="badge">Panoramica</a></p>
-    <p><a href="#base" class="badge">Dati base</a></p>
-    <p><a href="#securityPrivacy" class="badge">Sicurezza e Privacy</a></p>
-  </aside>
+<aside class="card" style="width:260px;position:sticky;top:20px">
+  <h3>Account</h3>
+  <p><a href="#overview" class="badge">Panoramica</a></p>
+  <p><a href="#base" class="badge">Dati base</a></p>
+  <p><a href="#securityPrivacy" class="badge">Sicurezza e Privacy</a></p>
+  <p><a href="#extraFeatures" class="badge">Funzioni extra</a></p>
+</aside>
 
-  <!-- CONTENT -->
-  <div style="flex:1">
+<div style="flex:1">
 
-    <!-- OVERVIEW -->
-    <div class="card-tvhouse" id="overview" style="margin-bottom:20px">
-      <h2>Panoramica profilo</h2>
-      <p><strong>Username:</strong> <span id="username">Caricamento...</span></p>
-      <p><strong>Email:</strong> <span id="email">Caricamento...</span></p>
-      <p><strong>Account creato:</strong> <span id="created">Caricamento...</span></p>
-      <p><strong>Ultimo accesso:</strong> <span id="lastLogin">Caricamento...</span></p>
-      <button id="logoutBtn" class="btn" style="margin-top:10px;width:100%;">Logout</button>
+<div class="card-tvhouse" id="overview" style="margin-bottom:20px">
+  <h2>Panoramica profilo</h2>
+  <div style="display:flex;align-items:center;gap:15px;margin-bottom:15px;">
+    <img id="profileImg" src="img/default-avatar.png" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);">
+    <div>
+      <input type="file" id="profileUpload" accept="image/*" style="display:none">
+      <button class="btn" onclick="document.getElementById('profileUpload').click()">Cambia immagine profilo</button>
     </div>
+  </div>
+  <p><strong>Username:</strong> <span id="username">Caricamento...</span></p>
+  <p><strong>Email:</strong> <span id="email">Caricamento...</span> <button id="copyEmail" class="btn" style="padding:2px 6px;font-size:12px;">Copia</button></p>
+  <p><strong>Account creato:</strong> <span id="created">Caricamento...</span></p>
+  <p><strong>Ultimo accesso:</strong> <span id="lastLogin">Caricamento...</span></p>
+  <p><strong>Giorni registrato:</strong> <span id="daysRegistered">Calcolo...</span></p>
+  <button id="logoutBtn" class="btn" style="margin-top:10px;width:100%;">Logout</button>
+</div>
 
-    <!-- DATI BASE -->
-    <div class="card-tvhouse" id="base" style="margin-bottom:20px">
-      <h2>Dati base</h2>
+<div class="card-tvhouse" id="base" style="margin-bottom:20px">
+  <h2>Dati base</h2>
+  <button id="toggleUsername" class="btn" style="width:100%;">Cambia username</button>
+  <div id="usernameForm" style="display:none;margin-top:8px;">
+    <input id="newUsername" placeholder="Nuovo username" style="width:100%;padding:8px;">
+    <button id="saveUsername" class="btn" style="width:100%;">Salva</button>
+  </div>
+</div>
 
-      <!-- Cambia username -->
-      <button id="toggleUsername" class="btn" style="margin-bottom:6px;width:100%;">Cambia username</button>
-      <div id="usernameForm" style="display:none;margin-top:8px;">
-        <input id="newUsername" placeholder="Nuovo username" style="width:100%;margin-bottom:6px;padding:8px;border-radius:8px;">
-        <div style="display:flex;gap:8px;">
-          <button id="saveUsername" class="btn" style="flex:1;">Salva</button>
-          <button id="cancelUsername" class="btn" style="flex:1;background:#444;">Annulla</button>
-        </div>
-      </div>
+<div class="card-tvhouse" id="securityPrivacy" style="margin-bottom:20px">
+  <h2>Sicurezza e Privacy</h2>
+  <button id="sendVerification" class="btn" style="width:100%;">Verifica email</button>
+  <button id="deleteAccount" class="btn" style="width:100%;margin-top:8px;">Elimina account</button>
+</div>
 
-      <!-- Cambia email -->
-      <button id="toggleEmail" class="btn" style="margin-top:10px;margin-bottom:6px;width:100%;">Modifica email</button>
-      <div id="emailForm" style="display:none;margin-top:8px;">
-        <input id="newEmail" type="email" placeholder="Nuova email" style="width:100%;margin-bottom:6px;padding:8px;border-radius:8px;">
-        <input id="passwordForEmail" type="password" placeholder="Password attuale (reauth)" style="width:100%;margin-bottom:6px;padding:8px;border-radius:8px;">
-        <div style="display:flex;gap:8px;">
-          <button id="saveEmail" class="btn" style="flex:1;">Salva</button>
-          <button id="cancelEmail" class="btn" style="flex:1;background:#444;">Annulla</button>
-        </div>
-      </div>
+<div class="card-tvhouse" id="extraFeatures">
+  <h2>Funzioni extra</h2>
+  <p><strong>Badge utente:</strong> <span id="userBadge">Calcolo...</span></p>
+  <p><strong>Seleziona tema:</strong></p>
+  <select id="themeSelector" class="btn" style="width:100%;margin-top:5px;">
+    <option value="day">Day</option>
+    <option value="night">Night</option>
+    <option value="matrix">Matrix</option>
+    <option value="hight">Hight</option>
+    <option value="inverted">Inverted</option>
+  </select>
+</div>
 
-      <!-- Cambia password -->
-      <button id="togglePassword" class="btn" style="margin-top:10px;width:100%;">Cambia password</button>
-      <div id="passwordForm" style="display:none;margin-top:8px;">
-        <input id="currentPassword" type="password" placeholder="Password attuale" style="width:100%;margin-bottom:6px;padding:8px;border-radius:8px;">
-        <input id="newPasswordInput" type="password" placeholder="Nuova password" style="width:100%;margin-bottom:6px;padding:8px;border-radius:8px;">
-        <input id="confirmNewPassword" type="password" placeholder="Conferma nuova password" style="width:100%;margin-bottom:6px;padding:8px;border-radius:8px;">
-        <div style="display:flex;gap:8px;">
-          <button id="savePassword" class="btn" style="flex:1;">Salva</button>
-          <button id="cancelPassword" class="btn" style="flex:1;background:#444;">Annulla</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- SICUREZZA E PRIVACY UNIFICATA -->
-    <div class="card-tvhouse" id="securityPrivacy" style="margin-bottom:20px">
-      <h2>Sicurezza e Privacy</h2>
-
-      <!-- Pulsante verifica email -->
-      <button id="sendVerification" class="btn" style="margin-bottom:6px;width:100%;">Verifica email</button>
-
-      <!-- Pulsante collega Google -->
-      <button id="linkGoogle" class="btn" style="margin-bottom:6px;width:100%;">Collega account Google</button>
-
-      <!-- Pulsante elimina account -->
-      <button id="deleteAccount" class="btn" style="width:100%;">Elimina account</button>
-
-      <p id="status" style="margin-top:6px;color:#ff5555;"></p>
-    </div>
-
+</div>
 </section>
 
 <footer>
-  <div class="container footer-grid">
-    <div>
-      <strong>ETA Games</strong>
-      <div class="muted">© ETA Games — Tutti i diritti riservati</div>
-    </div>
-  </div>
+<div class="container">
+  <strong>ETA Games</strong>
+</div>
 </footer>
 
 <script>
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Controllo login e popolo dati
-auth.onAuthStateChanged(user => {
-  if(!user) window.location.href="login.html";
-  else {
-    const userId = user.uid;
-    document.getElementById('username').textContent = user.displayName || "Non impostato";
-    document.getElementById('email').textContent = user.email || "Non impostata";
-    document.getElementById('created').textContent = user.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : "N/D";
-    document.getElementById('lastLogin').textContent = user.metadata?.lastSignInTime ? new Date(user.metadata.lastSignInTime).toLocaleDateString() : "N/D";
-  }
-});
-
-// Logout
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  auth.signOut().then(() => window.location.href="login.html");
-});
-
-// Toggles per i form
-const toggle = (btnId, formId) => {
-  document.getElementById(btnId).addEventListener('click', () => {
-    const f = document.getElementById(formId);
-    f.style.display = f.style.display === 'none' ? 'block' : 'none';
+// Gestione immagine profilo
+function resizeToBase64(file, size = 120) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = e => img.src = e.target.result;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const min = Math.min(img.width, img.height);
+      const sx = (img.width - min)/2;
+      const sy = (img.height - min)/2;
+      ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+      resolve(canvas.toDataURL('image/jpeg',0.8));
+    };
+    reader.readAsDataURL(file);
   });
-};
-toggle('toggleUsername','usernameForm');
-toggle('toggleEmail','emailForm');
-toggle('togglePassword','passwordForm');
-
-// Cancel buttons
-document.getElementById('cancelUsername').addEventListener('click', () => document.getElementById('usernameForm').style.display='none');
-document.getElementById('cancelEmail').addEventListener('click', () => document.getElementById('emailForm').style.display='none');
-document.getElementById('cancelPassword').addEventListener('click', () => document.getElementById('passwordForm').style.display='none');
-
-// Reauth helper
-function reauthenticate(password){
-  const user = auth.currentUser;
-  const cred = firebase.auth.EmailAuthProvider.credential(user.email, password);
-  return user.reauthenticateWithCredential(cred);
 }
 
-// Salva username
-document.getElementById('saveUsername').addEventListener('click', () => {
-  const newUsername = document.getElementById('newUsername').value.trim();
-  if(!newUsername) return alert('Inserisci un username valido.');
-  const user = auth.currentUser;
-  user.updateProfile({ displayName: newUsername })
-    .then(() => {
-      document.getElementById('username').textContent = newUsername;
-      db.collection('users').doc(user.uid).set({ displayName: newUsername }, { merge: true });
-      document.getElementById('usernameForm').style.display='none';
-      alert('Username aggiornato!');
-    }).catch(err => alert(err.message));
-});
+// Caricamento dati utente
+auth.onAuthStateChanged(async user => {
+  if(!user){ window.location.href="login.html"; return; }
 
-// Salva email (richiede reauth)
-document.getElementById('saveEmail').addEventListener('click', () => {
-  const newEmail = document.getElementById('newEmail').value.trim();
-  const pwd = document.getElementById('passwordForEmail').value;
-  if(!newEmail || !pwd) return alert('Compila tutti i campi.');
-  reauthenticate(pwd)
-    .then(() => auth.currentUser.updateEmail(newEmail))
-    .then(() => {
-      const user = auth.currentUser;
-      document.getElementById('email').textContent = user.email;
-      db.collection('users').doc(user.uid).set({ email: user.email }, { merge: true });
-      document.getElementById('emailForm').style.display='none';
-      alert('Email aggiornata!');
-    })
-    .catch(err => alert(err.message));
-});
+  const createdDate = new Date(user.metadata.creationTime);
+  const lastLoginDate = new Date(user.metadata.lastSignInTime);
 
-// Salva password (requiere reauth)
-document.getElementById('savePassword').addEventListener('click', () => {
-  const currentPwd = document.getElementById('currentPassword').value;
-  const newPwd = document.getElementById('newPasswordInput').value;
-  const confirmPwd = document.getElementById('confirmNewPassword').value;
-  if(!currentPwd || !newPwd || !confirmPwd) return alert('Compila tutti i campi.');
-  if(newPwd !== confirmPwd) return alert('Le password non corrispondono.');
-  if(newPwd.length < 6) return alert('La password deve essere di almeno 6 caratteri.');
-  reauthenticate(currentPwd)
-    .then(() => auth.currentUser.updatePassword(newPwd))
-    .then(() => {
-      document.getElementById('passwordForm').style.display='none';
-      alert('Password aggiornata!');
-    })
-    .catch(err => alert(err.message));
-});
+  document.getElementById('username').textContent = user.displayName || "Non impostato";
+  document.getElementById('email').textContent = user.email;
+  document.getElementById('created').textContent = createdDate.toLocaleDateString();
+  document.getElementById('lastLogin').textContent = lastLoginDate.toLocaleDateString();
+  document.getElementById('daysRegistered').textContent = Math.floor((new Date() - createdDate)/(1000*60*60*24));
 
-// Verifica email
-document.getElementById('sendVerification').addEventListener('click', () => {
-  auth.currentUser.sendEmailVerification()
-    .then(() => alert("Email di verifica inviata!"))
-    .catch(err => alert(err.message));
-});
-
-// Collega account Google
-document.getElementById('linkGoogle').addEventListener('click', () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.currentUser.linkWithPopup(provider)
-    .then(result => {
-      document.getElementById('status').textContent = `Account Google collegato: ${result.user.email}`;
-    })
-    .catch(err => {
-      if(err.code === 'auth/credential-already-in-use') {
-        document.getElementById('status').textContent = 'Questo account Google è già collegato a un altro utente.';
-      } else {
-        document.getElementById('status').textContent = err.message;
-      }
-    });
-});
-
-// Elimina account
-document.getElementById('deleteAccount').addEventListener('click', () => {
-  if(confirm("Sei sicuro di voler eliminare l'account? Questa azione non può essere annullata.")){
-    auth.currentUser.delete()
-      .then(() => { alert("Account eliminato."); window.location.href="login.html"; })
-      .catch(err => alert(err.message));
+  const doc = await db.collection('users').doc(user.uid).get();
+  if(doc.exists){
+    if(doc.data().photoBase64) document.getElementById('profileImg').src = doc.data().photoBase64;
+    if(doc.data().theme) applyTheme(doc.data().theme);
   }
+
+  // Calcolo badge
+  const days = Math.floor((new Date() - createdDate)/(1000*60*60*24));
+  let badge="Novellino 🐣";
+  if(days>30) badge="Gamer Esperto 🎮";
+  if(days>180) badge="Veterano 🏆";
+  if(days>365) badge="Leggenda 🔥";
+  if(days>730) badge="Maestro Supremo 👑";
+  document.getElementById('userBadge').textContent = badge;
 });
+
+// Upload immagine profilo
+document.getElementById('profileUpload').addEventListener('change', async e=>{
+  const file=e.target.files[0];
+  if(!file||!file.type.startsWith('image/')){ alert("Carica un'immagine valida"); return; }
+  const user = auth.currentUser;
+  const base64 = await resizeToBase64(file,120);
+  await db.collection('users').doc(user.uid).set({photoBase64:base64},{merge:true});
+  document.getElementById('profileImg').src=base64;
+  alert("Immagine profilo aggiornata");
+});
+
+// Username
+document.getElementById('toggleUsername').onclick = ()=>document.getElementById('usernameForm').style.display='block';
+document.getElementById('saveUsername').onclick = ()=>{
+  const name=document.getElementById('newUsername').value.trim();
+  if(!name) return;
+  auth.currentUser.updateProfile({displayName:name}).then(async ()=>{
+    document.getElementById('username').textContent=name;
+    await db.collection('users').doc(auth.currentUser.uid).set({displayName:name},{merge:true});
+    alert("Username aggiornato");
+  });
+};
+
+// Logout, verifica e cancellazione
+document.getElementById('logoutBtn').onclick = ()=>auth.signOut().then(()=>location.href="login.html");
+document.getElementById('sendVerification').onclick = ()=>auth.currentUser.sendEmailVerification().then(()=>alert("Email inviata"));
+document.getElementById('deleteAccount').onclick = ()=>{
+  if(confirm("Eliminare l'account definitivamente?")){
+    auth.currentUser.delete().then(()=>location.href="login.html");
+  }
+};
+
+// Copia email
+document.getElementById('copyEmail').onclick = ()=>{
+  navigator.clipboard.writeText(document.getElementById('email').textContent).then(()=>alert("Email copiata negli appunti"));
+};
+
+// ======= Tema dinamico =======
+const themeSelector=document.getElementById('themeSelector');
+themeSelector.onchange = async ()=>{
+  const theme=themeSelector.value;
+  applyTheme(theme);
+  await db.collection('users').doc(auth.currentUser.uid).set({theme},{merge:true});
+};
+
+function applyTheme(theme){
+  document.body.className='';
+  document.body.classList.add(theme+'-theme');
+}
 </script>
+
+<style>
+/* Temi con variabili */
+body.day-theme {--bg:#fdf5e6;--card:#fff;--accent:#e50914;--muted:#111;}
+body.night-theme {--bg:#111;--card:#1a1a1a;--accent:#e50914;--muted:#eee;}
+body.matrix-theme {--bg:#000;--card:#111;--accent:#0f0;--muted:#0f0;}
+body.hight-theme {--bg:#000;--card:#000;--accent:#ff6600;--muted:#fff;}
+body.inverted-theme {--bg:#fff;--card:#fff;--accent:#00ffff;--muted:#000;}
+</style>
 
 </body>
 </html>
