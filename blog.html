@@ -1,89 +1,83 @@
 <!doctype html>
 <html lang="it">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Registrazione — ETA Games</title>
-  <link rel="stylesheet" href="tvh.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blog — ETA Games</title>
+<link rel="stylesheet" href="tvh.css">
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
-      authDomain: "etagames-b5d6a.firebaseapp.com",
-      projectId: "etagames-b5d6a",
-      storageBucket: "etagames-b5d6a.firebasestorage.app",
-      messagingSenderId: "809625655346",
-      appId: "1:809625655346:web:3010a62960fde91787842b",
-      measurementId: "G-BG4HGVW7D6"
-    };
-    firebase.initializeApp(firebaseConfig);
-  </script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
+  authDomain: "etagames-b5d6a.firebaseapp.com",
+  projectId: "etagames-b5d6a",
+  messagingSenderId: "809625655346",
+  appId: "1:809625655346:web:3010a62960fde91787842b"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+</script>
+
+<style>
+.card-tvhouse { background:var(--card,#1a1a1a); padding:15px; border-radius:12px; margin-bottom:20px; box-shadow:0 4px 10px rgba(0,0,0,0.5);}
+.btn { background:var(--accent,#ff3c3c); color:#fff; border:none; padding:10px; width:100%; border-radius:6px; cursor:pointer; margin-top:5px;}
+.btn:hover { opacity:0.8;}
+textarea { width:100%; padding:8px; border-radius:6px; margin-bottom:5px; resize:none; background:#222; color:#fff; border:1px solid #444; }
+.post-header { display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+.post-header img { width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--accent);}
+.media-link { color:#4da6ff; word-break:break-word; display:block; margin-top:5px; }
+.delete-btn, .like-btn { background:#aa0000; width:auto; padding:5px 10px; font-size:0.9em; margin-top:5px; cursor:pointer; margin-right:5px; color: white; border: none; border-radius: 4px;}
+.like-btn { background:#4da6ff;} /* Blu per il like */
+.like-btn.liked { background:#555; } /* Grigio se già messo like */
+.sidebar { width:260px; position:sticky; top:20px;}
+</style>
+
 </head>
 <body>
 
 <header>
-  <div class="container">
-    <nav>
-      <div class="brand">
-        <img src="img/channels4_profile.jpg" class="logo-img">
-        <div>
-          <div>ETA Games</div>
-          <div class="muted" style="font-size:12px">Studio</div>
-        </div>
-      </div>
-      <div class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="games.html">Giochi</a>
-        <a href="extra.html">Extra</a>
-        <a href="login.html" class="active">Profilo</a>
-        <a href="blog.html">Blog</a>
-      </div>
-    </nav>
-  </div>
+<div class="container">
+<nav>
+<div class="brand">
+<img src="img/channels4_profile.jpg" class="logo-img">
+<div>
+<div>ETA Games</div>
+<div class="muted" style="font-size:12px">Blog</div>
+</div>
+</div>
+<div class="nav-links">
+<a href="index.html" >Home</a>
+<a href="games.html">Giochi</a>
+<a href="extra.html">Extra</a>
+<a href="login.html">Profilo</a>
+<a href="blog.html" class="active">Blog</a>
+</div>
+</nav>
+</div>
 </header>
 
-<section class="hero container">
-  <div>
-    <h1>Registrazione</h1>
-    <p>Registrati per accedere ai contenuti esclusivi di <strong>ETA Games</strong> e agli update dei giochi.</p>
-  </div>
+<section class="container" style="display:flex; gap:20px">
 
-  <div class="card-tvhouse">
-    <h2>Crea account</h2>
+<aside class="card-tvhouse sidebar">
+<h3>Top Post</h3>
+<div id="topPosts"></div>
+</aside>
 
-    <form id="registerForm">
-      <input type="text" id="username" placeholder="Username" required
-        style="width:100%;margin-bottom:12px;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;">
+<div style="flex:1">
 
-      <input type="email" id="email" placeholder="Email" required
-        style="width:100%;margin-bottom:12px;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;">
+<div class="card-tvhouse">
+<h2>Nuovo Post</h2>
+<div id="postFormContainer"></div>
+</div>
 
-      <input type="password" id="password" placeholder="Password" required
-        style="width:100%;margin-bottom:12px;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;">
+<div id="postsContainer"></div>
 
-      <label class="muted">Data di nascita</label>
-      <input type="date" id="birthdate" required
-        max="2011-12-31"
-        style="width:100%;margin:8px 0 16px;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;">
-
-      <label class="muted" style="display:flex;align-items:center;margin-bottom:14px;">
-        <input type="checkbox" id="ageConfirm" style="margin-right:6px;" required>
-        Confermo di avere almeno 14 anni
-      </label>
-
-      <button type="submit" class="btn" style="width:100%;margin-top:12px;">Registrati</button>
-    </form>
-
-    <p id="registerMessage" class="muted" style="margin-top:12px;font-size:13px;text-align:center"></p>
-    <div style="margin-top:16px;text-align:center">
-      <div class="muted">Hai già un account?</div>
-      <a href="login.html" class="badge">Accedi</a>
-    </div>
-  </div>
+</div>
 </section>
 
   <footer>
@@ -103,61 +97,186 @@
   </footer>
 
 <script>
-const auth = firebase.auth();
-const db = firebase.firestore(); // Inizializzazione database
-const registerForm = document.getElementById('registerForm');
-const registerMessage = document.getElementById('registerMessage');
-
-registerForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-
-  const username = document.getElementById('username').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-  const birthdateValue = document.getElementById('birthdate').value;
-  const birthdate = new Date(birthdateValue);
-  const ageConfirmed = document.getElementById('ageConfirm').checked;
-
-  // Controllo età ≥ 14
-  const today = new Date();
-  let age = today.getFullYear() - birthdate.getFullYear();
-  const m = today.getMonth() - birthdate.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birthdate.getDate())) {
-    age--;
+// 1. GESTIONE LOGIN / LOGOUT UI
+auth.onAuthStateChanged(async user => {
+  const formContainer = document.getElementById('postFormContainer');
+  if (!user) {
+    formContainer.innerHTML = '<p>Accedi o registrati per scrivere post e mettere like.</p>';
+  } else {
+    formContainer.innerHTML = `
+      <textarea id="postText" rows="3" placeholder="Scrivi il tuo post..."></textarea>
+      <input type="text" id="mediaLink" placeholder="Link immagine/video (opzionale)">
+      <button id="createPost" class="btn">Pubblica</button>
+    `;
+    document.getElementById('createPost').onclick = createPost;
   }
-
-  if(age < 14 || !ageConfirmed){
-    registerMessage.textContent = "Devi avere almeno 14 anni e confermare la checkbox per registrarti.";
-    return;
-  }
-
-  // 1. Creazione Utente
-  auth.createUserWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
-      
-      // 2. Aggiorna il profilo Auth (per uso interno)
-      return user.updateProfile({ displayName: username }).then(() => {
-        
-        // 3. SALVA IN FIRESTORE (Fondamentale per il Blog)
-        return db.collection('users').doc(user.uid).set({
-          displayName: username,
-          email: email,
-          birthdate: birthdateValue,
-          photoBase64: "", // Default vuoto
-          created: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      })
-      .then(() => user.sendEmailVerification());
-    })
-    .then(() => {
-      // Successo
-      window.location.href = "verifica.html";
-    })
-    .catch((error) => {
-      registerMessage.textContent = error.message;
-    });
+  // Carica i post in ogni caso
+  loadPosts();
 });
+
+// 2. RECUPERO INFO UTENTE (Con correzione per "Anonimo")
+async function getUserInfo(uid) {
+  try {
+    // Prima cerchiamo nel Database 'users'
+    const doc = await db.collection('users').doc(uid).get();
+    
+    if (doc.exists) {
+      const data = doc.data();
+      return {
+        name: data.displayName || "Utente Senza Nome",
+        photo: data.photoBase64 || "img/default-avatar.png"
+      };
+    }
+    
+    // FALLBACK: Se non troviamo il doc, ma l'utente è quello loggato ora
+    if (auth.currentUser && auth.currentUser.uid === uid && auth.currentUser.displayName) {
+        return {
+            name: auth.currentUser.displayName,
+            photo: "img/default-avatar.png"
+        };
+    }
+
+  } catch (error) {
+    console.error("Errore user info", error);
+  }
+
+  // Default se non troviamo nulla
+  return { name: "Anonimo", photo: "img/default-avatar.png" };
+}
+
+// 3. CARICAMENTO POST
+async function loadPosts() {
+  const container = document.getElementById('postsContainer');
+  const topContainer = document.getElementById('topPosts');
+  container.innerHTML = ''; 
+  topContainer.innerHTML = '';
+
+  const snapshot = await db.collection('posts').orderBy('created', 'desc').get();
+  
+  // Trasformiamo i dati (aggiungendo info utente e like)
+  const postsArray = await Promise.all(snapshot.docs.map(async doc => {
+    const data = doc.data();
+    const likedBy = data.likedBy || []; // Assicuriamoci che sia un array
+    const userInfo = await getUserInfo(data.userId);
+    
+    return { 
+        ...data, 
+        id: doc.id, 
+        likes: likedBy.length, 
+        likedByArray: likedBy,
+        userName: userInfo.name, 
+        userPhoto: userInfo.photo 
+    };
+  }));
+
+  // Renderizziamo i post nella pagina
+  postsArray.forEach(p => {
+    const postDiv = document.createElement('div');
+    postDiv.className = 'card-tvhouse';
+    
+    // Controlliamo se l'utente attuale ha messo like
+    const currentUser = auth.currentUser;
+    const hasLiked = currentUser && p.likedByArray.includes(currentUser.uid);
+
+    postDiv.innerHTML = `
+      <div class="post-header">
+        <img src="${p.userPhoto}">
+        <strong>${p.userName}</strong>
+      </div>
+      <div class="post-content">${p.text}</div>
+      ${p.mediaLink ? `<a href="${p.mediaLink}" target="_blank" class="media-link">Allegato Media</a>` : ''}
+      <div style="margin-top:8px; font-size:0.9em; color:#bbb;">Like: <span>${p.likes}</span></div>
+    `;
+
+    // Bottone Like (Solo se loggato)
+    if (currentUser) {
+      const likeBtn = document.createElement('button');
+      likeBtn.textContent = hasLiked ? 'Togli Like' : 'Mi Piace';
+      likeBtn.className = hasLiked ? 'like-btn liked' : 'like-btn'; // Cambio classe CSS
+      
+      // Quando clicco chiamo toggleLike
+      likeBtn.onclick = () => toggleLike(p.id, hasLiked);
+      postDiv.appendChild(likeBtn);
+    }
+
+    // Bottone Elimina (Solo se è il mio post)
+    if (currentUser && currentUser.uid === p.userId) {
+      const delBtn = document.createElement('button');
+      delBtn.textContent = 'Elimina';
+      delBtn.className = 'delete-btn';
+      delBtn.onclick = () => deletePost(p.id);
+      postDiv.appendChild(delBtn);
+    }
+
+    container.appendChild(postDiv);
+  });
+
+  // Gestione Top Posts (ordinati per like)
+  const sortedPosts = [...postsArray].sort((a, b) => b.likes - a.likes);
+  sortedPosts.slice(0, 5).forEach(p => {
+    const div = document.createElement('div');
+    div.style.marginBottom = '10px';
+    div.style.borderBottom = '1px solid #333';
+    div.style.paddingBottom = '5px';
+    div.innerHTML = `<strong>${p.userName}</strong><br>
+                     <span style="font-size:0.85em; color:#aaa;">${p.text.substring(0, 40)}...</span> 
+                     <br>❤️ ${p.likes}`;
+    topContainer.appendChild(div);
+  });
+}
+
+// 4. CREAZIONE POST
+async function createPost() {
+  const text = document.getElementById('postText').value.trim();
+  const mediaLink = document.getElementById('mediaLink').value.trim();
+  
+  if (!text) return alert("Scrivi qualcosa prima di pubblicare.");
+  
+  const user = auth.currentUser;
+  
+  await db.collection('posts').add({
+    text,
+    mediaLink: mediaLink || '',
+    userId: user.uid,
+    likedBy: [], // Parte con 0 like
+    created: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  
+  document.getElementById('postText').value = '';
+  document.getElementById('mediaLink').value = '';
+  loadPosts();
+}
+
+// 5. ELIMINAZIONE POST
+async function deletePost(postId) {
+  if (confirm("Sei sicuro di voler eliminare questo post?")) {
+    await db.collection('posts').doc(postId).delete();
+    loadPosts();
+  }
+}
+
+// 6. TOGGLE LIKE (Metti / Togli)
+async function toggleLike(postId, hasLiked) {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const postRef = db.collection('posts').doc(postId);
+
+  if (hasLiked) {
+    // Se c'è già il like, lo rimuoviamo
+    await postRef.update({
+      likedBy: firebase.firestore.FieldValue.arrayRemove(user.uid)
+    });
+  } else {
+    // Se non c'è, lo aggiungiamo
+    await postRef.update({
+      likedBy: firebase.firestore.FieldValue.arrayUnion(user.uid)
+    });
+  }
+  
+  // Ricarichiamo i post per vedere il numero aggiornato
+  loadPosts();
+}
 </script>
 
 </body>
