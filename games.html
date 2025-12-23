@@ -4,30 +4,123 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>ETA Games — Giochi</title>
-  <meta name="description" content="Scopri tutti i giochi sviluppati da ETA Games. Clicca su un gioco per maggiori dettagli.">
-  <link rel="stylesheet" href="games.css">
-  <link rel="stylesheet" href="tvh.css">
-
-  <!-- Firebase SDK -->
+  
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
+      authDomain: "etagames-b5d6a.firebaseapp.com",
+      projectId: "etagames-b5d6a",
+      messagingSenderId: "809625655346",
+      appId: "1:809625655346:web:3010a62960fde91787842b"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+
+  <style>
+    /* SISTEMA DI TEMI DINAMICI */
+    body.day-theme { --bg: #f5f5f5; --card: #ffffff; --text: #000; --muted: #555; --accent: #e50914; --shadow: rgba(0,0,0,0.1); }
+    body.night-theme { --bg: #0d0d0d; --card: #1a1a1a; --text: #f5f5f5; --muted: #888; --accent: #ff4444; --shadow: rgba(255,68,68,0.4); }
+    body.matrix-theme { --bg: #000; --card: #0a0a0a; --text: #00ff00; --muted: #004400; --accent: #00ff00; --shadow: rgba(0,255,0,0.5); font-family: 'Courier New', monospace !important; }
+    body.hight-theme { --bg: #000; --card: #000; --text: #ff8800; --muted: #fff; --accent: #ff8800; --shadow: rgba(255,136,0,0.6); }
+    body.inverted-theme { --bg: #fff; --card: #f0f0f0; --text: #000; --muted: #555; --accent: #1af6eb; --shadow: rgba(26,246,235,0.4); }
+
+    /* LAYOUT GENERALE */
+    body { 
+      background: var(--bg) !important; 
+      color: var(--text) !important; 
+      margin: 0; font-family: sans-serif; transition: 0.3s; 
+    }
+    
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+    
+    header { background: var(--card); border-bottom: 1px solid var(--muted); padding: 15px 0; }
+    nav { display: flex; justify-content: space-between; align-items: center; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: bold; }
+    .logo-img { width: 45px; height: 45px; border-radius: 8px; }
+
+    .nav-links a { color: var(--text); text-decoration: none; margin-left: 20px; font-weight: bold; }
+    .nav-links a.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+
+    /* GRID GIOCHI */
+    .games-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      padding: 60px 20px;
+    }
+
+    .game-card {
+      background: var(--card) !important;
+      border: 2px solid var(--accent);
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .game-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 30px var(--shadow);
+    }
+
+    .game-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    .game-card h3 { margin: 10px 0; color: var(--accent); }
+    .game-card p { font-size: 0.95rem; color: var(--text); opacity: 0.8; margin-bottom: 15px; }
+
+    .badge {
+      padding: 5px 15px;
+      border-radius: 20px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    footer { background: var(--card); padding: 30px 0; border-top: 1px solid var(--muted); margin-top: 50px; }
+    .footer-grid { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+    .muted { color: var(--muted) !important; }
+    .socials a { color: var(--muted); margin-left: 15px; text-decoration: none; font-weight: bold; }
+    .socials a:hover { color: var(--accent); }
+
+    @media (max-width: 768px) {
+      nav { flex-direction: column; gap: 15px; }
+      .nav-links { margin-left: 0; }
+    }
+  </style>
 </head>
-<body>
-  <!-- HEADER -->
+<body class="night-theme">
+
   <header>
     <div class="container">
       <nav>
         <div class="brand">
-          <img src="img/channels4_profile.jpg" alt="Logo ETA Games" class="logo-img">
+          <img src="img/channels4_profile.jpg" alt="Logo" class="logo-img">
           <div>
             <div>ETA Games</div>
-            <div class="muted" style="font-size:12px;margin-top:2px">Studio</div>
+            <div class="muted" style="font-size:12px">Studio</div>
           </div>
         </div>
         <div class="nav-links">
           <a href="index.html">Home</a>
-          <a href="games.html" class="active"> Giochi</a>
+          <a href="games.html" class="active">Giochi</a>
           <a href="extra.html">Extra</a>
           <a href="login.html">Profilo</a>
           <a href="blog.html">Blog</a>
@@ -36,10 +129,8 @@
     </div>
   </header>
 
-  <!-- GIOCHI -->
-  <main>
-    <section class="games-container">
-      <!-- Gioco 1 -->
+  <main class="container">
+    <div class="games-container">
       <div class="game-card" onclick="location.href='the valter house.html'">
         <img src="img/the valter house banner.png" alt="The Valter House">
         <h3>The Valter House</h3>
@@ -47,25 +138,22 @@
         <span class="badge">In sviluppo</span>
       </div>
 
-      <!-- Gioco 2 -->
-      <div class="game-card" onclick="location.href='#'">
-        <img src="img/fakegame.png" alt="Progetto 2">
+      <div class="game-card">
+        <img src="img/fakegame.png" alt="Progetto segreto 1">
         <h3>Progetto segreto 1</h3>
-        <p>Un titolo misterioso e ancora in sviluppo.</p>
-        <span class="badge">Presto</span>
+        <p>Un titolo misterioso ancora avvolto nell'ombra. Novità in arrivo.</p>
+        <span class="badge">Coming Soon</span>
       </div>
 
-      <!-- Gioco 3 -->
-      <div class="game-card" onclick="location.href='#'">
-        <img src="img/fakegame.png" alt="Progetto 3">
+      <div class="game-card">
+        <img src="img/fakegame.png" alt="Progetto segreto 2">
         <h3>Progetto segreto 2</h3>
-        <p>Un titolo misterioso e ancora in sviluppo.</p>
-        <span class="badge">Presto</span>
+        <p>Nuove meccaniche e una narrazione profonda. Resta sintonizzato.</p>
+        <span class="badge">Coming Soon</span>
       </div>
-    </section>
+    </div>
   </main>
 
-  <!-- FOOTER -->
   <footer>
     <div class="container">
       <div class="footer-grid">
@@ -73,7 +161,7 @@
           <strong>ETA Games</strong>
           <div class="muted">© ETA Games — Tutti i diritti riservati</div>
         </div>
-        <div class="socials muted">
+        <div class="socials">
           <a href="https://discord.gg/Da7sq3Mwpw" target="_blank">Discord</a>
           <a href="https://www.youtube.com/@HGames_studio" target="_blank">YouTube</a>
           <a href="https://www.instagram.com/eta.games_" target="_blank">Instagram</a>
@@ -82,49 +170,16 @@
     </div>
   </footer>
 
-  <!-- FIREBASE CONFIG -->
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
-      authDomain: "etagames-b5d6a.firebaseapp.com",
-      projectId: "etagames-b5d6a",
-      storageBucket: "etagames-b5d6a.firebasestorage.app",
-      messagingSenderId: "809625655346",
-      appId: "1:809625655346:web:3010a62960fde91787842b",
-      measurementId: "G-BG4HGVW7D6"
-    };
-
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    // Applica il tema salvato per l'utente
+    // GESTIONE TEMA DA FIREBASE
     auth.onAuthStateChanged(async user => {
       if (user) {
         const doc = await db.collection('users').doc(user.uid).get();
         if (doc.exists && doc.data().theme) {
-          const theme = doc.data().theme;
-          applyTheme(theme);
+          document.body.className = doc.data().theme + '-theme';
         }
       }
     });
-
-    function applyTheme(theme){
-      document.body.classList.remove("day-theme", "night-theme", "matrix-theme", "hight-theme", "inverted-theme");
-      document.body.classList.add(theme + "-theme");
-    }
   </script>
-
-  <!-- STILE TEMI -->
-  <style>
-    body.day-theme {--bg:#fefcf3;--card:#fff8e1;--accent:#ff0000;--muted:#666;--glass:rgba(0,0,0,0.05);--badge-bg:#ff4444;color:#000;}
-    body.night-theme {--bg:#000;--card:#111;--accent:#ff0000;--muted:#666;--glass:rgba(255,0,0,0.05);--badge-bg:#ff4444;color:#fff;}
-    body.matrix-theme {--bg:#000;--card:#222;--accent:#00ff00;--muted:#888;--glass:rgba(0,0,0,0.2);--badge-bg:#00ff00;color:#0f0;}
-    body.hight-theme {--bg:#000;--card:#000;--accent:#ff7f00;--muted:#666;--glass:rgba(255,127,0,0.05);--badge-bg:#ff7f00;color:#fff;}
-    body.inverted-theme {--bg:#fff;--card:#e0ffff;--accent:#00ffff;--muted:#333;--glass:rgba(0,255,255,0.05);--badge-bg:#00ffff;color:#000;}
-  </style>
 </body>
 </html>

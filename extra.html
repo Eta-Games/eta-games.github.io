@@ -3,20 +3,86 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>ETA Games — The Valter House Quiz</title>
-  <meta name="description" content="Scopri The Valter House - Shattered Memories e partecipa al nostro quiz.">
-  <link rel="stylesheet" href="extra.css">
+  <title>Extra — ETA Games</title>
+  
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
+      authDomain: "etagames-b5d6a.firebaseapp.com",
+      projectId: "etagames-b5d6a",
+      messagingSenderId: "809625655346",
+      appId: "1:809625655346:web:3010a62960fde91787842b"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+
+  <style>
+    /* SISTEMA DI TEMI */
+    body.day-theme { --bg: #f5f5f5; --card: #ffffff; --text: #000; --muted: #555; --accent: #e50914; }
+    body.night-theme { --bg: #0d0d0d; --card: #1a1a1a; --text: #f5f5f5; --muted: #aaa; --accent: #ff4444; }
+    body.matrix-theme { --bg: #000; --card: #0a0a0a; --text: #00ff00; --muted: #004400; --accent: #00ff00; font-family: 'Courier New', monospace !important; }
+    body.hight-theme { --bg: #000; --card: #000; --text: #ff8800; --muted: #ffffff; --accent: #ff8800; }
+    body.inverted-theme { --bg: #fff; --card: #f0f0f0; --text: #000; --muted: #555; --accent: #1af6eb; }
+
+    body { background: var(--bg) !important; color: var(--text) !important; margin: 0; font-family: sans-serif; transition: 0.3s; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+    
+    header { background: var(--card); border-bottom: 1px solid var(--muted); padding: 10px 0; }
+    nav { display: flex; justify-content: space-between; align-items: center; }
+    .logo-img { width: 45px; height: 45px; border-radius: 50%; }
+    .nav-links a { color: var(--text); text-decoration: none; margin-left: 20px; font-weight: bold; }
+    .nav-links a.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+
+    .section { text-align: center; padding: 60px 20px; }
+    .section h1 { color: var(--accent); font-size: 2.5rem; margin-bottom: 20px; }
+    .section p { max-width: 800px; margin: 0 auto 10px; line-height: 1.6; font-size: 1.1rem; }
+
+    /* Counter stilizzato */
+    #countdown { 
+      font-size: 1.2rem; font-weight: bold; color: var(--accent); 
+      margin-top: 10px; margin-bottom: 40px; display: block;
+    }
+
+    /* Box attesa eventi */
+    .waiting-box {
+      margin-top: 40px;
+      padding: 40px;
+      border: 1px dashed var(--muted);
+      border-radius: 12px;
+      display: inline-block;
+      width: 100%;
+      max-width: 600px;
+    }
+    .waiting-text {
+      font-size: 1.4rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    footer { background: var(--card); padding: 30px 0; border-top: 1px solid var(--muted); margin-top: 50px; }
+    .footer-grid { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+    .muted { color: var(--muted) !important; }
+    .socials a { color: var(--muted); margin-left: 15px; text-decoration: none; }
+  </style>
 </head>
-<body>
-  <!-- HEADER -->
-    <header>
+<body class="night-theme">
+
+  <header>
     <div class="container">
       <nav>
-        <div class="brand">
-          <img src="img/channels4_profile.jpg" alt="Logo ETA Games" class="logo-img">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <img src="img/channels4_profile.jpg" alt="Logo" class="logo-img">
           <div>
-            <div>ETA Games</div>
-            <div class="muted" style="font-size:12px;margin-top:2px">Studio</div>
+            <div style="font-weight:bold">ETA Games</div>
+            <div class="muted" style="font-size:12px">Studio</div>
           </div>
         </div>
         <div class="nav-links">
@@ -30,52 +96,25 @@
     </div>
   </header>
 
+  <div class="container">
+    <div class="section">
+      <h1>THE VALTER HOUSE - SHATTERED MEMORIES</h1>
+      <p>
+        Scopri il nuovo segreto di <strong>The Valter House</strong> ed esplora la sua lore. 
+        Un horror psicologico che indaga ricordi e misteri in un luogo oscuro. 
+        Affronta gli enigmi e vivi l'esperienza... ma fai attenzione al vecchio.
+      </p>
 
-  <!-- SEZIONE CONTENUTO -->
-  <div class="section">
-    <h1>THE VALTER HOUSE - SHATTERED MEMORIES</h1>
-    <p>
-      Scopri il nuovo segreto di <strong>The Valter House</strong> ed esplora la sua lore.  
-      Un horror psicologico che indaga ricordi e misteri in un luogo oscuro, 
-      con un gameplay immersivo e atmosfere uniche.  
-      Esplora la cantina, affronta enigmi e vivi un'esperienza incredibile...  
-      ma fai attenzione al vecchio.
-    </p>
+      <div id="countdown">Inizializzazione...</div>
 
-    <!-- TIMER -->
-    <div id="countdown"></div>
-
-    <!-- QUIZ -->
-    <iframe src="<p>void</p>" 
-      width="640" height="568" frameborder="0" marginheight="0" marginwidth="0">
-      Caricamento…
-    </iframe>
+      <div class="waiting-box">
+        <div class="waiting-text">In attesa di nuovi eventi</div>
+        <p class="muted" style="font-size: 0.9rem; margin-top: 10px;">Resta sintonizzato sui nostri social per non perdere i prossimi aggiornamenti.</p>
+      </div>
+    </div>
   </div>
 
-  <script>
-    // Imposta la data di fine countdown
-    const countDownDate = new Date("Sep 16, 2025 23:59:59").getTime();
-    const countdownEl = document.getElementById("countdown");
-
-    const timer = setInterval(function() {
-      const now = new Date().getTime();
-      const distance = countDownDate - now;
-
-      if (distance > 0) {
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000*60*60));
-        const minutes = Math.floor((distance % (1000*60*60)) / (1000*60));
-        const seconds = Math.floor((distance % (1000*60)) / 1000);
-        countdownEl.innerHTML = `Tempo rimanente: ${days}d ${hours}h ${minutes}m ${seconds}s`;
-      } else {
-        clearInterval(timer);
-        countdownEl.innerHTML = "Il voto è terminato!";
-      }
-    }, 1000);
-  </script>
-    
-	<!-- FOOTER -->
-    <footer>
+  <footer>
     <div class="container">
       <div class="footer-grid">
         <div>
@@ -85,11 +124,40 @@
         <div class="socials muted">
           <a href="https://discord.gg/Da7sq3Mwpw" target="_blank">Discord</a>
           <a href="https://www.youtube.com/@HGames_studio" target="_blank">YouTube</a>
-		  <a href="https://www.instagram.com/eta.games_" target="_blank">instagram</a>
-		  <a href="cmd.html" target="_blank">101-001-101</a>
+          <a href="https://www.instagram.com/eta.games_" target="_blank">Instagram</a>
         </div>
       </div>
     </div>
   </footer>
+
+  <script>
+    // TEMA FIREBASE
+    auth.onAuthStateChanged(async user => {
+      if (user) {
+        const doc = await db.collection('users').doc(user.uid).get();
+        if (doc.exists && doc.data().theme) {
+          document.body.className = doc.data().theme + '-theme';
+        }
+      }
+    });
+
+    // TIMER
+    const countDownDate = new Date("Sep 16, 2025 23:59:59").getTime();
+    const countdownEl = document.getElementById("countdown");
+
+    setInterval(function() {
+      const now = new Date().getTime();
+      const distance = countDownDate - now;
+      if (distance > 0) {
+        const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((distance % (1000 * 60)) / 1000);
+        countdownEl.innerHTML = `Tempo all'evento: ${d}g ${h}o ${m}m ${s}s`;
+      } else {
+        countdownEl.innerHTML = "Evento terminato!";
+      }
+    }, 1000);
+  </script>
 </body>
 </html>

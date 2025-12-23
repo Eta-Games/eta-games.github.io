@@ -8,17 +8,101 @@
   <meta property="og:title" content="ETA Games">
   <meta property="og:description" content="Giochi horror psicologici, sogni e storytelling unico.">
   <meta property="og:type" content="website">
-  <link rel="stylesheet" href="StyleSheet.css">
+  <link rel="stylesheet" href="tvh.css">
 
-  <!-- Firebase SDK (compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+  <style>
+    /* Definizione variabili per ogni tema */
+    body.day-theme {
+      --bg: #f5f5f5;
+      --card: #ffffff;
+      --text: #000000;
+      --muted: #555555;
+      --accent: #e50914;
+      --input-bg: #fff;
+    }
+
+    body.night-theme {
+      --bg: #111111;
+      --card: #1a1a1a;
+      --text: #ffffff;
+      --muted: #858585;
+      --accent: #e50914;
+      --input-bg: #000;
+    }
+
+    body.matrix-theme {
+      --bg: #000000;
+      --card: #0a0a0a;
+      --text: #00ff00;
+      --muted: #004400;
+      --accent: #00ff00;
+      --input-bg: #001100;
+      font-family: 'Courier New', monospace !important;
+    }
+
+    body.hight-theme {
+      --bg: #000000;
+      --card: #000000;
+      --text: #ff8800;
+      --muted: #ffffff;
+      --accent: #ff8800;
+      --input-bg: #000;
+      border: 1px solid #ff8800;
+      font-family: Trebuchet MS, sans-serif;
+    }
+
+    body.inverted-theme {
+      --bg: #ffffff;
+      --card: #f0f0f0;
+      --text: #000000;
+      --muted: #555;
+      --accent: #1af6eb;
+      --input-bg: #fff;
+    }
+
+    /* Applicazione universale delle variabili */
+    body {
+      background-color: var(--bg) !important;
+      color: var(--text) !important;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .card, .card-tvhouse, aside .card {
+      background-color: var(--card) !important;
+      color: var(--text) !important;
+      border: 1px solid var(--muted) !important;
+    }
+
+    h1, h2, h3, .brand, a {
+      color: var(--text);
+    }
+
+    .muted {
+      color: var(--muted) !important;
+    }
+
+    .btn {
+      background-color: var(--accent) !important;
+      color: #fff !important;
+      border: none;
+    }
+
+    .nav-links a {
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .nav-links a.active {
+      border-bottom: 2px solid var(--accent);
+    }
+  </style>
 </head>
 
-<body>
-  <!-- HEADER -->
-  <header>
+<body class="night-theme"> <header>
     <div class="container">
       <nav>
         <div class="brand">
@@ -32,18 +116,16 @@
           <a href="index.html" class="active">Home</a>
           <a href="games.html">Giochi</a>
           <a href="extra.html">Extra</a>
-          <a href="login.html">Profilo</a>
+          <a href="login.html" id="navProfileLink">Profilo</a>
           <a href="blog.html">Blog</a>
         </div>
       </nav>
     </div>
   </header>
 
-  <!-- MAIN -->
   <main>
     <div class="container">
 
-      <!-- HERO -->
       <section class="hero" id="home">
         <div>
           <h1>Benvenuto in ETA Games</h1>
@@ -62,7 +144,6 @@
 
             <form class="newsletter">
               <div class="btn-group">
-                <!-- PULSANTE DINAMICO -->
                 <a class="btn" id="authBtn" href="login.html">Accedi / Registrati</a>
               </div>
             </form>
@@ -70,19 +151,15 @@
         </aside>
       </section>
 
-      <!-- ABOUT -->
       <section id="about">
         <h2>Chi siamo</h2>
         <p class="muted">
           ETA Games è uno studio indipendente dedicato all’arte di creare e vivere i videogiochi.
           Non ci concentriamo solo su generi o tendenze: il nostro obiettivo è raccontare storie,
           costruire mondi e creare esperienze che stimolino la curiosità e la creatività dei giocatori.
-          Ogni progetto è una testimonianza della nostra passione e del nostro impegno
-          nel portare avanti l’arte del videogioco, oggi e domani.
         </p>
       </section>
 
-      <!-- TEAM -->
       <section id="team" class="container">
         <h2>Il nostro team</h2>
         <div class="cards">
@@ -90,51 +167,33 @@
           <div class="card-tvhouse">
             <img src="img/gabry_ico.jpeg" alt="Gabry" style="width:100%; border-radius:8px; margin-bottom:12px;">
             <h3>Gabry</h3>
-            <p class="muted">
-              Il cuore creativo dello studio. Sviluppa la maggior parte dei nostri giochi.
-            </p>
-            <p class="muted" style="font-style:italic;">
-              "League of Legend è un gioco da obesi senza vita sociale che non toccano l'erba dal 2016."
-            </p>
+            <p class="muted">Il cuore creativo dello studio. Sviluppa la maggior parte dei nostri giochi.</p>
           </div>
 
           <div class="card-tvhouse">
             <img src="img/kappa_ico.png" alt="Kappa" style="width:100%; border-radius:8px; margin-bottom:12px;">
             <h3>Kappa</h3>
-            <p class="muted">
-              Supporto tecnico e musicale dello studio.
-            </p>
-            <p class="muted" style="font-style:italic;">
-              "ls /usr/bin/ | grep gcc"
-            </p>
+            <p class="muted">Supporto tecnico e musicale dello studio.</p>
           </div>
 
           <div class="card-tvhouse">
             <img src="img/sportos_ico.png" alt="Sportos" style="width:100%; border-radius:8px; margin-bottom:12px;">
             <h3>Sportos</h3>
-            <p class="muted">
-              Gestione del sito e presenza online.
-            </p>
-            <p class="muted" style="font-style:italic;">
-              ti ho beccato so che ascolti chop suey
-            </p>
+            <p class="muted">Gestione del sito e presenza online.</p>
           </div>
 
         </div>
       </section>
 
-      <!-- GAMES -->
       <section id="games">
         <h2>Progetti in sviluppo</h2>
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px">
-          <a href="the valter house.html" target="_blank">
+          <a href="the valter house.html" style="text-decoration:none">
             <div class="card-tvhouse">
               <h3>The Valter House</h3>
-              <p class="muted">
-                Un horror psicologico che mescola atmosfere oniriche e inquietanti.
-              </p>
+              <p class="muted">Un horror psicologico che mescola atmosfere oniriche e inquietanti.</p>
               <div style="margin-top:10px">
-                <span class="badge">In sviluppo</span>
+                <span style="background:var(--accent); color:#fff; padding:2px 8px; border-radius:4px; font-size:12px;">In sviluppo</span>
                 <span class="muted" style="margin-left:8px">PC</span>
               </div>
             </div>
@@ -142,23 +201,18 @@
         </div>
       </section>
 
-      <!-- COMMUNITY -->
       <section id="community">
         <h2>Community</h2>
-        <p class="muted">
-          Partecipa ai nostri playtest, segnala bug, condividi idee.
-        </p>
         <div class="cards">
-          <a class="card" href="https://discord.gg/Da7sq3Mwpw" target="_blank">Discord</a>
-          <a class="card" href="https://www.youtube.com/@HGames_studio" target="_blank">YouTube</a>
-          <a class="card" href="https://www.instagram.com/eta.games_" target="_blank">Instagram</a>
+          <a class="card" href="https://discord.gg/Da7sq3Mwpw" target="_blank" style="text-decoration:none; padding:20px; text-align:center;">Discord</a>
+          <a class="card" href="https://www.youtube.com/@HGames_studio" target="_blank" style="text-decoration:none; padding:20px; text-align:center;">YouTube</a>
+          <a class="card" href="https://www.instagram.com/eta.games_" target="_blank" style="text-decoration:none; padding:20px; text-align:center;">Instagram</a>
         </div>
       </section>
 
     </div>
   </main>
 
-  <!-- FOOTER -->
   <footer>
     <div class="container">
       <div class="footer-grid">
@@ -174,8 +228,6 @@
       </div>
     </div>
   </footer>
-
-  <!-- FIREBASE CONFIG -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
@@ -190,50 +242,39 @@
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
-  </script>
 
-  <!-- LOGICA PULSANTE NOTIZIE + CARICAMENTO TEMA -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Caricamento Tema e Stato Auth
+    auth.onAuthStateChanged(async user => {
       const authBtn = document.getElementById("authBtn");
-      if (!authBtn) return;
+      const navProfileLink = document.getElementById("navProfileLink");
 
-      const auth = firebase.auth();
-      const db = firebase.firestore();
+      if (user) {
+        // Aggiorna UI pulsanti
+        if(authBtn) { authBtn.textContent = "Vai al Profilo"; authBtn.href = "profilo.html"; }
+        if(navProfileLink) { navProfileLink.href = "profilo.html"; navProfileLink.textContent = "Profilo"; }
 
-      auth.onAuthStateChanged(async user => {
-        if (user) {
-          authBtn.textContent = "Profilo";
-          authBtn.href = "profilo.html";
-
-          // Carica il tema dal server
+        // Recupera tema dal database
+        try {
           const doc = await db.collection('users').doc(user.uid).get();
           if (doc.exists && doc.data().theme) {
-            const theme = doc.data().theme;
-            applyTheme(theme);
+            applyTheme(doc.data().theme);
           }
-
-        } else {
-          authBtn.textContent = "Accedi / Registrati";
-          authBtn.href = "login.html";
+        } catch (error) {
+          console.error("Errore caricamento tema:", error);
         }
-      });
+      } else {
+        if(authBtn) { authBtn.textContent = "Accedi / Registrati"; authBtn.href = "login.html"; }
+        if(navProfileLink) { navProfileLink.href = "login.html"; }
+      }
     });
 
-    // Funzione per applicare il tema usando le classi già definite in CSS
-    function applyTheme(theme){
-      document.body.classList.remove("day-theme", "night-theme", "matrix-theme", "hight-theme", "inverted-theme");
-      document.body.classList.add(theme + "-theme");
+    function applyTheme(theme) {
+      // Rimuove classi vecchie e applica la nuova
+      document.body.className = theme + '-theme';
     }
   </script>
-
-  <!-- STILE TEMI -->
-  <style>
-    body.day-theme {--bg:#fefcf3;--card:#fff8e1;--accent:#ff0000;--muted:#666;--glass:rgba(0,0,0,0.05);--badge-bg:#ff4444;color:#000;}
-    body.night-theme {--bg:#000;--card:#111;--accent:#ff0000;--muted:#666;--glass:rgba(255,0,0,0.05);--badge-bg:#ff4444;color:#fff;}
-    body.matrix-theme {--bg:#000;--card:#222;--accent:#00ff00;--muted:#888;--glass:rgba(0,0,0,0.2);--badge-bg:#00ff00;color:#0f0;}
-    body.hight-theme {--bg:#000;--card:#000;--accent:#ff7f00;--muted:#666;--glass:rgba(255,127,0,0.05);--badge-bg:#ff7f00;color:#fff;}
-    body.inverted-theme {--bg:#fff;--card:#e0ffff;--accent:#00ffff;--muted:#333;--glass:rgba(0,255,255,0.05);--badge-bg:#00ffff;color:#000;}
-  </style>
 </body>
 </html>

@@ -22,7 +22,7 @@ firebase.initializeApp(firebaseConfig);
 </script>
 </head>
 
-<body>
+<body class="night-theme">
 
 <header>
 <div class="container">
@@ -31,7 +31,7 @@ firebase.initializeApp(firebaseConfig);
     <img src="img/channels4_profile.jpg" class="logo-img">
     <div>
       <div>ETA Games</div>
-      <div class="muted" style="font-size:12px">Profilo utente</div>
+      <div class="muted" style="font-size:12px; color:var(--muted)">Profilo utente</div>
     </div>
   </div>
   <div class="nav-links">
@@ -50,7 +50,8 @@ firebase.initializeApp(firebaseConfig);
 <aside class="card" style="width:260px;position:sticky;top:20px">
   <h3>Account</h3>
   <p><a href="#overview" class="badge">Panoramica</a></p>
-  <p><a href="#base" class="badge">Dati base</a></p>
+  <p><a href="#appearance" class="badge">Aspetto Grafico</a></p>
+  <p><a href="#profileSettings" class="badge">Impostazioni Profilo</a></p>
   <p><a href="#securityPrivacy" class="badge">Sicurezza e Privacy</a></p>
   <p><a href="#extraFeatures" class="badge">Funzioni extra</a></p>
 </aside>
@@ -60,75 +61,150 @@ firebase.initializeApp(firebaseConfig);
 <div class="card-tvhouse" id="overview" style="margin-bottom:20px">
   <h2>Panoramica profilo</h2>
   <div style="display:flex;align-items:center;gap:15px;margin-bottom:15px;">
-    <img id="profileImg" src="img/default-avatar.png" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);">
+    <img id="overviewImg" src="img/default-avatar.png" style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);">
     <div>
-      <input type="file" id="profileUpload" accept="image/*" style="display:none">
-      <button class="btn" onclick="document.getElementById('profileUpload').click()">Cambia immagine profilo</button>
+      <p style="margin:0"><strong>Username:</strong> <span id="username">Caricamento...</span></p>
+      <p style="margin:0"><strong>Email:</strong> <span id="email">Caricamento...</span> <button id="copyEmail" class="btn" style="padding:2px 6px;font-size:12px;">Copia</button></p>
     </div>
   </div>
-  <p><strong>Username:</strong> <span id="username">Caricamento...</span></p>
-  <p><strong>Email:</strong> <span id="email">Caricamento...</span> <button id="copyEmail" class="btn" style="padding:2px 6px;font-size:12px;">Copia</button></p>
   <p><strong>Account creato:</strong> <span id="created">Caricamento...</span></p>
   <p><strong>Ultimo accesso:</strong> <span id="lastLogin">Caricamento...</span></p>
   <p><strong>Giorni registrato:</strong> <span id="daysRegistered">Calcolo...</span></p>
   <button id="logoutBtn" class="btn" style="margin-top:10px;width:100%;">Logout</button>
 </div>
 
-<div class="card-tvhouse" id="base" style="margin-bottom:20px">
-  <h2>Dati base</h2>
-  <button id="toggleUsername" class="btn" style="width:100%;">Cambia username</button>
-  <div id="usernameForm" style="display:none;margin-top:8px;">
-    <input id="newUsername" placeholder="Nuovo username" style="width:100%;padding:8px;">
-    <button id="saveUsername" class="btn" style="width:100%;">Salva</button>
+<div class="card-tvhouse" id="appearance" style="margin-bottom:20px">
+  <h2>Aspetto Grafico</h2>
+  
+  <label><strong>Immagine Profilo</strong></label>
+  <div style="display:flex;align-items:center;gap:15px;margin:10px 0;">
+    <img id="profileImg" src="img/default-avatar.png" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);">
+    <div>
+      <input type="file" id="profileUpload" accept="image/*" style="display:none">
+      <button class="btn" onclick="document.getElementById('profileUpload').click()">Carica nuova foto</button>
+    </div>
   </div>
+
+  <hr class="themed-hr">
+
+  <label><strong>Banner profilo (480p)</strong></label>
+  <img id="bannerImg" src="img/default-banner.jpg" style="width:100%;max-height:240px;object-fit:cover;border-radius:12px;margin:8px 0; border:1px solid var(--muted);">
+  <input type="file" id="bannerUpload" accept="image/*" style="width:100%">
+</div>
+
+<div class="card-tvhouse" id="profileSettings" style="margin-bottom:20px">
+  <h2>Impostazioni Profilo</h2>
+  
+  <div style="margin-bottom:15px;">
+      <label><strong>Username Pubblico</strong></label>
+      <div style="display:flex; gap:5px; margin-top:5px;">
+        <input id="newUsername" placeholder="Nuovo username" class="themed-input">
+        <button id="saveUsername" class="btn">Salva</button>
+      </div>
+  </div>
+
+  <hr class="themed-hr">
+  
+  <label><strong>Bio</strong></label>
+  <textarea id="bio" placeholder="Scrivi qualcosa su di te..." class="themed-input" style="height:100px; margin-top:5px;"></textarea>
+  <button id="saveBio" class="btn" style="width:100%; margin-top:5px;">Aggiorna Bio</button>
+
+  <hr class="themed-hr">
+
+  <label><strong>Paese</strong></label>
+  <select id="country" class="themed-input" style="margin-top:5px;">
+    <option value="">Seleziona paese</option>
+    <option value="IT">🇮🇹 Italia</option>
+    <option value="US">🇺🇸 USA</option>
+    <option value="DE">🇩🇪 Germania</option>
+    <option value="FR">🇫🇷 Francia</option>
+    <option value="ES">🇪🇸 Spagna</option>
+  </select>
 </div>
 
 <div class="card-tvhouse" id="securityPrivacy" style="margin-bottom:20px">
   <h2>Sicurezza e Privacy</h2>
-  <button id="sendVerification" class="btn" style="width:100%;">Verifica email</button>
-  <button id="deleteAccount" class="btn" style="width:100%;margin-top:8px;">Elimina account</button>
+  
+  <button id="linkGoogle" class="btn" style="width:100%; margin-bottom:8px; background:#ff7300; border:none; color:white;">Collega account Google</button>
+
+  <div style="margin-top:15px; border-top:1px solid var(--muted); padding-top:10px;">
+    <label style="font-size:12px; color:var(--muted)">Cambio Email</label>
+    <input id="newEmail" placeholder="Nuova email" class="themed-input">
+    <button id="changeEmailBtn" class="btn" style="width:100%; margin-top:4px;">Aggiorna Email</button>
+  </div>
+
+  <div style="margin-top:15px; border-top:1px solid var(--muted); padding-top:10px;">
+    <label style="font-size:12px; color:var(--muted)">Cambio Password</label>
+    <input id="newPassword" type="password" placeholder="Nuova password" class="themed-input">
+    <button id="changePasswordBtn" class="btn" style="width:100%; margin-top:4px;">Aggiorna Password</button>
+  </div>
+  
+  <div style="margin-top:20px;">
+    <button id="deleteAccount" class="btn" style="width:100%; background:darkred; border:1px solid red; color:white;">Elimina account</button>
+  </div>
 </div>
 
 <div class="card-tvhouse" id="extraFeatures">
   <h2>Funzioni extra</h2>
   <p><strong>Badge utente:</strong> <span id="userBadge">Calcolo...</span></p>
+  
+  <div style="margin-top:15px; border-top:1px solid var(--muted); padding-top:15px;">
+    <label for="themeSelector">Tema Interfaccia:</label>
+    <select id="themeSelector" class="themed-input" style="cursor:pointer;">
+      <option value="night">Notte (Default)</option>
+      <option value="day">Giorno</option>
+      <option value="matrix">Matrix</option>
+      <option value="hight">Alto Contrasto</option>
+      <option value="inverted">Invertito</option>
+    </select>
+  </div>
 </div>
 
 </div>
 </section>
 
-<footer>
-<div class="container">
-  <strong>ETA Games</strong>
-</div>
-</footer>
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <strong>ETA Games</strong>
+          <div class="muted">© ETA Games — Tutti i diritti riservati</div>
+        </div>
+        <div class="socials muted">
+          <a href="https://discord.gg/Da7sq3Mwpw" target="_blank">Discord</a>
+          <a href="https://www.youtube.com/@HGames_studio" target="_blank">YouTube</a>
+          <a href="https://www.instagram.com/eta.games_" target="_blank">Instagram</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
 <script>
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Gestione immagine profilo
-function resizeToBase64(file, size = 120) {
+function resizeImage(file, maxWidth, maxHeight) {
   return new Promise(resolve => {
     const img = new Image();
     const reader = new FileReader();
     reader.onload = e => img.src = e.target.result;
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      canvas.width = size;
-      canvas.height = size;
+      let width = img.width, height = img.height;
+      if (width > height) {
+        if (width > maxWidth) { height *= maxWidth/width; width = maxWidth; }
+      } else {
+        if (height > maxHeight) { width *= maxHeight/height; height = maxHeight; }
+      }
+      canvas.width = width; canvas.height = height;
       const ctx = canvas.getContext('2d');
-      const min = Math.min(img.width, img.height);
-      const sx = (img.width - min)/2;
-      const sy = (img.height - min)/2;
-      ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
-      resolve(canvas.toDataURL('image/jpeg',0.8));
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', 0.8));
     };
     reader.readAsDataURL(file);
   });
 }
 
-// Caricamento dati utente
 auth.onAuthStateChanged(async user => {
   if(!user){ window.location.href="login.html"; return; }
 
@@ -136,40 +212,53 @@ auth.onAuthStateChanged(async user => {
   const lastLoginDate = new Date(user.metadata.lastSignInTime);
 
   document.getElementById('username').textContent = user.displayName || "Non impostato";
+  document.getElementById('newUsername').value = user.displayName || "";
   document.getElementById('email').textContent = user.email;
   document.getElementById('created').textContent = createdDate.toLocaleDateString();
   document.getElementById('lastLogin').textContent = lastLoginDate.toLocaleDateString();
-  document.getElementById('daysRegistered').textContent = Math.floor((new Date() - createdDate)/(1000*60*60*24));
-
-  const doc = await db.collection('users').doc(user.uid).get();
-  if(doc.exists){
-    if(doc.data().photoBase64) document.getElementById('profileImg').src = doc.data().photoBase64;
-    if(doc.data().theme) applyTheme(doc.data().theme);
-  }
-
-  // Calcolo badge
+  
   const days = Math.floor((new Date() - createdDate)/(1000*60*60*24));
+  document.getElementById('daysRegistered').textContent = days;
+
   let badge="Novellino 🐣";
   if(days>30) badge="Gamer Esperto 🎮";
   if(days>180) badge="Veterano 🏆";
   if(days>365) badge="Leggenda 🔥";
   if(days>730) badge="Maestro Supremo 👑";
   document.getElementById('userBadge').textContent = badge;
+
+  const doc = await db.collection('users').doc(user.uid).get();
+  if(doc.exists){
+    const data = doc.data();
+    if(data.photoBase64) {
+        document.getElementById('profileImg').src = data.photoBase64;
+        document.getElementById('overviewImg').src = data.photoBase64;
+    }
+    if(data.theme) {
+      applyTheme(data.theme);
+      document.getElementById('themeSelector').value = data.theme;
+    }
+    if(data.bio) document.getElementById('bio').value = data.bio;
+    if(data.country) document.getElementById('country').value = data.country;
+    if(data.banner) document.getElementById('bannerImg').src = data.banner;
+  }
 });
 
-// Upload immagine profilo
 document.getElementById('profileUpload').addEventListener('change', async e=>{
-  const file=e.target.files[0];
-  if(!file||!file.type.startsWith('image/')){ alert("Carica un'immagine valida"); return; }
-  const user = auth.currentUser;
-  const base64 = await resizeToBase64(file,120);
-  await db.collection('users').doc(user.uid).set({photoBase64:base64},{merge:true});
+  if(!e.target.files[0]) return;
+  const base64 = await resizeImage(e.target.files[0], 120, 120); 
+  await db.collection('users').doc(auth.currentUser.uid).set({photoBase64:base64},{merge:true});
   document.getElementById('profileImg').src=base64;
-  alert("Immagine profilo aggiornata");
+  document.getElementById('overviewImg').src=base64;
 });
 
-// Username
-document.getElementById('toggleUsername').onclick = ()=>document.getElementById('usernameForm').style.display='block';
+document.getElementById('bannerUpload').addEventListener('change', async e=>{
+  if(!e.target.files[0]) return;
+  const base64 = await resizeImage(e.target.files[0], 854, 480);
+  document.getElementById('bannerImg').src = base64;
+  await db.collection('users').doc(auth.currentUser.uid).set({banner:base64},{merge:true});
+});
+
 document.getElementById('saveUsername').onclick = ()=>{
   const name=document.getElementById('newUsername').value.trim();
   if(!name) return;
@@ -180,42 +269,148 @@ document.getElementById('saveUsername').onclick = ()=>{
   });
 };
 
-// Logout, verifica e cancellazione
+document.getElementById('saveBio').onclick = () => {
+  db.collection("users").doc(auth.currentUser.uid).set({bio: document.getElementById('bio').value}, {merge:true})
+    .then(() => alert("Bio salvata"));
+};
+
+document.getElementById('country').onchange = () => {
+  db.collection("users").doc(auth.currentUser.uid).set({country: document.getElementById('country').value}, {merge:true});
+};
+
+document.getElementById('linkGoogle').onclick = () => {
+  auth.currentUser.linkWithPopup(new firebase.auth.GoogleAuthProvider()).then(() => alert("Google collegato!"));
+};
+
+document.getElementById('changeEmailBtn').onclick = () => {
+  const v = document.getElementById('newEmail').value;
+  if(v) auth.currentUser.updateEmail(v).then(() => alert("Email aggiornata")).catch(e => alert(e.message));
+};
+
+document.getElementById('changePasswordBtn').onclick = () => {
+  const v = document.getElementById('newPassword').value;
+  if(v) auth.currentUser.updatePassword(v).then(() => alert("Password aggiornata")).catch(e => alert(e.message));
+};
+
 document.getElementById('logoutBtn').onclick = ()=>auth.signOut().then(()=>location.href="login.html");
-document.getElementById('sendVerification').onclick = ()=>auth.currentUser.sendEmailVerification().then(()=>alert("Email inviata"));
 document.getElementById('deleteAccount').onclick = ()=>{
-  if(confirm("Eliminare l'account definitivamente?")){
-    auth.currentUser.delete().then(()=>location.href="login.html");
-  }
+  if(confirm("Eliminare account?")) auth.currentUser.delete().then(()=>location.href="login.html");
 };
-
-// Copia email
 document.getElementById('copyEmail').onclick = ()=>{
-  navigator.clipboard.writeText(document.getElementById('email').textContent).then(()=>alert("Email copiata negli appunti"));
+  navigator.clipboard.writeText(document.getElementById('email').textContent).then(()=>alert("Copiato!"));
 };
 
-// ======= Tema dinamico =======
 const themeSelector=document.getElementById('themeSelector');
-themeSelector.onchange = async ()=>{
-  const theme=themeSelector.value;
-  applyTheme(theme);
-  await db.collection('users').doc(auth.currentUser.uid).set({theme},{merge:true});
-};
+if(themeSelector){
+  themeSelector.onchange = async ()=>{
+    const theme=themeSelector.value;
+    applyTheme(theme);
+    if(auth.currentUser){
+      await db.collection('users').doc(auth.currentUser.uid).set({theme},{merge:true});
+    }
+  };
+}
 
 function applyTheme(theme){
-  document.body.className='';
-  document.body.classList.add(theme+'-theme');
+  document.body.className = theme + '-theme';
 }
 </script>
-
 <style>
-/* Temi con variabili */
-body.day-theme {--bg:#fdf5e6;--card:#fff;--accent:#e50914;--muted:#111;}
-body.night-theme {--bg:#111;--card:#1a1a1a;--accent:#e50914;--muted:#eee;}
-body.matrix-theme {--bg:#000;--card:#111;--accent:#0f0;--muted:#0f0;}
-body.hight-theme {--bg:#000;--card:#000;--accent:#ff6600;--muted:#fff;}
-body.inverted-theme {--bg:#fff;--card:#fff;--accent:#00ffff;--muted:#000;}
+/* =========================================
+   SISTEMA DI TEMI AVANZATO (CSS Variables)
+   ========================================= */
+
+/* 1. Definizioni Variabili per ogni Tema */
+body.day-theme {
+  --bg: #f5f5f5;
+  --card: #ffffff;
+  --text: #000000;
+  --muted: #2e2e2e;
+  --accent: #e50914;
+  --input-bg: #fff;
+}
+
+body.night-theme {
+  --bg: #111111;
+  --card: #1a1a1a;
+  --text: #ffffff;
+  --muted: #858585;
+  --accent: #e50914;
+  --input-bg: #000;
+}
+
+body.matrix-theme {
+  --bg: #000000;
+  --card: #0a0a0a;
+  --text: #00ff00;
+  --muted: #004400;
+  --accent: #00ff00;
+  --input-bg: #001100;
+  font-family: 'Courier New', monospace;
+}
+
+body.hight-theme { /* Alto Contrasto */
+  --bg: #000000;
+  --card: #000000;
+  --text: #ff8800;
+  --muted: #ffffff;
+  --accent: #ff8800;
+  --input-bg: #000;
+  border: 1px solid #ff8800;
+  font-family: Trebuchet MS, sans-serif;
+}
+
+body.inverted-theme {
+  --bg: #ffffff;
+  --card: #f0f0f0;
+  --text: #000000;
+  --muted: #555;
+  --accent: #1af6eb;
+  --input-bg: #fff;
+}
+
+/* 2. Applicazione Variabili agli Elementi */
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  transition: all 0.3s ease; /* Animazione cambio tema */
+}
+
+.card, .card-tvhouse, aside {
+  background-color: var(--card) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--muted);
+}
+
+/* Stili specifici per Input, Select e Textarea per adattarsi al tema */
+.themed-input, input, select, textarea {
+  width: 100%;
+  padding: 8px;
+  background-color: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--muted);
+  border-radius: 4px;
+}
+
+/* Correzione per i link e testi muted */
+a { color: var(--accent); }
+.muted { color: var(--muted) !important; }
+h1, h2, h3, h4, h5, h6 { color: var(--text); }
+hr.themed-hr { margin: 15px 0; border: 0; border-top: 1px solid var(--muted); }
+
+/* Override per le opzioni delle select (che spesso restano bianche) */
+select option {
+  background-color: var(--card);
+  color: var(--text);
+}
+
+/* Scrollbar stilizzata per adattarsi (opzionale, funziona su Chrome/Edge) */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 </style>
+
 
 </body>
 </html>
