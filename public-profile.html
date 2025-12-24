@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Profilo utente — ETA Games</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
+  authDomain: "etagames-b5d6a.firebaseapp.com",
+  projectId: "etagames-b5d6a",
+  messagingSenderId: "809625655346",
+  appId: "1:809625655346:web:3010a62960fde91787842b"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+</script>
+
+<style>
+.profile-header{position:relative}
+.profile-banner{
+  width:100%;
+  height:240px;
+  object-fit:cover;
+  border-radius:14px;
+}
+.profile-avatar{
+  width:130px;
+  height:130px;
+  border-radius:50%;
+  border:4px solid var(--bg);
+  position:absolute;
+  bottom:-65px;
+  left:25px;
+  background:#000;
+}
+.profile-box{margin-top:80px}
+.private-box{
+  text-align:center;
+  padding:40px;
+  opacity:.85;
+}
+.profile-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:10px;
+}
+.profile-meta span{
+  background:rgba(255,255,255,0.05);
+  padding:6px 10px;
+  border-radius:8px;
+  font-size:13px;
+}
+</style>
+<link rel="stylesheet" href="tvh.css">
+</head>
+
+<body class="night-theme">
+
+<header>
+  <div class="container">
+    <nav>
+      <div class="brand">
+        <img src="img/channels4_profile.jpg" class="logo-img">
+        <div>
+          <div>ETA Games</div>
+          <div class="muted" style="font-size:12px">Profilo pubblico</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="games.html">Giochi</a>
+        <a href="extra.html">Extra</a>
+        <a href="profilo.html">Profilo</a>
+        <a href="blog.html">Blog</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<section class="container" style="max-width:900px">
+
+<!-- HEADER -->
+<div class="card-tvhouse profile-header">
+  <img id="banner" class="profile-banner" src="img/default-banner.jpg">
+  <img id="avatar" class="profile-avatar" src="img/default-avatar.png">
+</div>
+
+<!-- PROFILO -->
+<div class="card-tvhouse profile-box">
+
+  <h2 id="username">Caricamento…</h2>
+  <p id="bio" class="muted"></p>
+
+  <div class="profile-meta">
+    <span id="country"></span>
+    <span id="joined"></span>
+    <span id="status"></span>
+  </div>
+
+  <div id="privateMsg" class="private-box" style="display:none">
+    🔒 <strong>Questo profilo è privato</strong><br>
+    <span class="muted">Solo il nome e l'immagine profilo sono visibili</span>
+  </div>
+
+</div>
+
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <strong>ETA Games</strong>
+        <div class="muted">© ETA Games — Tutti i diritti riservati</div>
+      </div>
+      <div class="socials muted">
+        <a href="https://discord.gg/Da7sq3Mwpw" target="_blank">Discord</a>
+        <a href="https://www.youtube.com/@HGames_studio" target="_blank">YouTube</a>
+        <a href="https://www.instagram.com/eta.games_" target="_blank">Instagram</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// UID dalla query (?uid=...)
+const params = new URLSearchParams(window.location.search);
+const uid = params.get("uid");
+
+if(!uid){
+  document.body.innerHTML = "<p style='text-align:center'>Profilo non valido</p>";
+  throw "";
+}
+
+db.collection("users").doc(uid).get().then(doc=>{
+  if(!doc.exists){
+    document.body.innerHTML = "<p style='text-align:center'>Utente non trovato</p>";
+    return;
+  }
+
+  const d = doc.data();
+
+  /* SEMPRE VISIBILI */
+  document.getElementById("username").textContent =
+    d.displayName || "Utente";
+
+  if(d.photoBase64)
+    document.getElementById("avatar").src = d.photoBase64;
+
+  /* PROFILO PRIVATO */
+  if(d.profilePublic !== true){
+    document.getElementById("banner").style.display = "none";
+    document.getElementById("bio").style.display = "none";
+    document.getElementById("country").style.display = "none";
+    document.getElementById("joined").style.display = "none";
+    document.getElementById("status").style.display = "none";
+    document.getElementById("privateMsg").style.display = "block";
+    return;
+  }
+
+  /* DATI PUBBLICI */
+  if(d.banner)
+    document.getElementById("banner").src = d.banner;
+
+  if(d.bio)
+    document.getElementById("bio").textContent = d.bio;
+
+  if(d.country)
+    document.getElementById("country").textContent = "🌍 " + d.country;
+
+  if(d.createdAt){
+    const date = d.createdAt.toDate ? d.createdAt.toDate() : new Date(d.createdAt);
+    document.getElementById("joined").textContent =
+      "📅 Iscritto il " + date.toLocaleDateString();
+  }
+
+  document.getElementById("status").textContent =
+    d.profilePublic ? "🌐 Profilo pubblico" : "🔒 Privato";
+});
+
+// Tema se loggato
+auth.onAuthStateChanged(async user=>{
+  if(user){
+    const doc = await db.collection('users').doc(user.uid).get();
+    if(doc.exists && doc.data().theme){
+      document.body.className = doc.data().theme + "-theme";
+    }
+  }
+});
+</script>
+
+</body>
+</html>

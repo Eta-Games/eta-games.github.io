@@ -124,7 +124,7 @@ textarea { width:100%; padding:8px; border-radius:6px; margin-bottom:5px; resize
   </style>
 
 </head>
-<body>
+<body class="night-theme">
 
 <header>
 <div class="container">
@@ -265,10 +265,13 @@ async function loadPosts() {
     const hasLiked = currentUser && p.likedByArray.includes(currentUser.uid);
 
     postDiv.innerHTML = `
-      <div class="post-header">
-        <img src="${p.userPhoto}">
-        <strong>${p.userName}</strong>
-      </div>
+<div class="post-header">
+  <a href="public-profile.html?uid=${p.userId}" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+    <img src="${p.userPhoto}">
+    <strong>${p.userName}</strong>
+  </a>
+</div>
+
       <div class="post-content">${p.text}</div>
       ${p.mediaLink ? `<a href="${p.mediaLink}" target="_blank" class="media-link">Allegato Media</a>` : ''}
       <div style="margin-top:8px; font-size:0.9em; color:#bbb;">Like: <span>${p.likes}</span></div>
