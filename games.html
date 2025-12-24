@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>ETA Games — Giochi</title>
+  <link rel="stylesheet" href="tvh.css">
+
   
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
@@ -23,30 +25,6 @@
   </script>
 
   <style>
-    /* SISTEMA DI TEMI DINAMICI */
-    body.day-theme { --bg: #f5f5f5; --card: #ffffff; --text: #000; --muted: #555; --accent: #e50914; --shadow: rgba(0,0,0,0.1); }
-    body.night-theme { --bg: #0d0d0d; --card: #1a1a1a; --text: #f5f5f5; --muted: #888; --accent: #ff4444; --shadow: rgba(255,68,68,0.4); }
-    body.matrix-theme { --bg: #000; --card: #0a0a0a; --text: #00ff00; --muted: #004400; --accent: #00ff00; --shadow: rgba(0,255,0,0.5); font-family: 'Courier New', monospace !important; }
-    body.hight-theme { --bg: #000; --card: #000; --text: #ff8800; --muted: #fff; --accent: #ff8800; --shadow: rgba(255,136,0,0.6); }
-    body.inverted-theme { --bg: #fff; --card: #f0f0f0; --text: #000; --muted: #555; --accent: #1af6eb; --shadow: rgba(26,246,235,0.4); }
-
-    /* LAYOUT GENERALE */
-    body { 
-      background: var(--bg) !important; 
-      color: var(--text) !important; 
-      margin: 0; font-family: sans-serif; transition: 0.3s; 
-    }
-    
-    .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-    
-    header { background: var(--card); border-bottom: 1px solid var(--muted); padding: 15px 0; }
-    nav { display: flex; justify-content: space-between; align-items: center; }
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: bold; }
-    .logo-img { width: 45px; height: 45px; border-radius: 8px; }
-
-    .nav-links a { color: var(--text); text-decoration: none; margin-left: 20px; font-weight: bold; }
-    .nav-links a.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
-
     /* GRID GIOCHI */
     .games-container {
       display: grid;

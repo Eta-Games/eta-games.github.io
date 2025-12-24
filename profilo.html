@@ -20,6 +20,41 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 </script>
+<style>
+.switch{
+  position:relative;
+  display:inline-block;
+  width:46px;
+  height:24px;
+}
+.switch input{display:none}
+.slider{
+  position:absolute;
+  inset:0;
+  background:#555;
+  border-radius:24px;
+  transition:.3s;
+  cursor:pointer;
+}
+.slider:before{
+  content:"";
+  position:absolute;
+  width:18px;
+  height:18px;
+  left:3px;
+  bottom:3px;
+  background:#fff;
+  border-radius:50%;
+  transition:.3s;
+}
+input:checked + .slider{
+  background:var(--accent);
+}
+input:checked + .slider:before{
+  transform:translateX(22px);
+}
+</style>
+
 </head>
 
 <body class="night-theme">
@@ -124,6 +159,19 @@ firebase.initializeApp(firebaseConfig);
 
 <div class="card-tvhouse" id="securityPrivacy" style="margin-bottom:20px">
   <h2>Sicurezza e Privacy</h2>
+  <div style="margin-bottom:15px;">
+  <label><strong>Profilo pubblico</strong></label>
+  <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+    <label class="switch">
+      <input type="checkbox" id="publicProfile">
+      <span class="slider"></span>
+    </label>
+    <span id="publicProfileText" class="muted">Privato</span>
+  </div>
+</div>
+
+<hr class="themed-hr">
+
   
   <button id="linkGoogle" class="btn" style="width:100%; margin-bottom:8px; background:#ff7300; border:none; color:white;">Collega account Google</button>
 
@@ -156,6 +204,7 @@ firebase.initializeApp(firebaseConfig);
       <option value="matrix">Matrix</option>
       <option value="hight">Alto Contrasto</option>
       <option value="inverted">Invertito</option>
+      <option value="TVH">The Valter House</option>
     </select>
   </div>
 </div>
@@ -206,41 +255,70 @@ function resizeImage(file, maxWidth, maxHeight) {
 }
 
 auth.onAuthStateChanged(async user => {
-  if(!user){ window.location.href="login.html"; return; }
+  if(!user){
+    window.location.href = "login.html";
+    return;
+  }
 
   const createdDate = new Date(user.metadata.creationTime);
   const lastLoginDate = new Date(user.metadata.lastSignInTime);
 
-  document.getElementById('username').textContent = user.displayName || "Non impostato";
-  document.getElementById('newUsername').value = user.displayName || "";
+  document.getElementById('username').textContent =
+    user.displayName || "Non impostato";
+  document.getElementById('newUsername').value =
+    user.displayName || "";
   document.getElementById('email').textContent = user.email;
-  document.getElementById('created').textContent = createdDate.toLocaleDateString();
-  document.getElementById('lastLogin').textContent = lastLoginDate.toLocaleDateString();
-  
-  const days = Math.floor((new Date() - createdDate)/(1000*60*60*24));
+  document.getElementById('created').textContent =
+    createdDate.toLocaleDateString();
+  document.getElementById('lastLogin').textContent =
+    lastLoginDate.toLocaleDateString();
+
+  const days = Math.floor(
+    (new Date() - createdDate) / (1000 * 60 * 60 * 24)
+  );
   document.getElementById('daysRegistered').textContent = days;
 
-  let badge="Novellino 🐣";
-  if(days>30) badge="Gamer Esperto 🎮";
-  if(days>180) badge="Veterano 🏆";
-  if(days>365) badge="Leggenda 🔥";
-  if(days>730) badge="Maestro Supremo 👑";
+  let badge = "Novellino 🐣";
+  if(days > 30) badge = "Gamer Esperto 🎮";
+  if(days > 180) badge = "Veterano 🏆";
+  if(days > 365) badge = "Leggenda 🔥";
+  if(days > 730) badge = "Maestro Supremo 👑";
   document.getElementById('userBadge').textContent = badge;
 
+  /* 🔹 CARICAMENTO DATI FIRESTORE */
   const doc = await db.collection('users').doc(user.uid).get();
   if(doc.exists){
     const data = doc.data();
-    if(data.photoBase64) {
-        document.getElementById('profileImg').src = data.photoBase64;
-        document.getElementById('overviewImg').src = data.photoBase64;
+
+    if(data.photoBase64){
+      document.getElementById('profileImg').src = data.photoBase64;
+      document.getElementById('overviewImg').src = data.photoBase64;
     }
-    if(data.theme) {
+
+    if(data.banner){
+      document.getElementById('bannerImg').src = data.banner;
+    }
+
+    if(data.bio){
+      document.getElementById('bio').value = data.bio;
+    }
+
+    if(data.country){
+      document.getElementById('country').value = data.country;
+    }
+
+    if(data.theme){
       applyTheme(data.theme);
       document.getElementById('themeSelector').value = data.theme;
     }
-    if(data.bio) document.getElementById('bio').value = data.bio;
-    if(data.country) document.getElementById('country').value = data.country;
-    if(data.banner) document.getElementById('bannerImg').src = data.banner;
+
+    /* 🔹 PROFILO PUBBLICO */
+    if(typeof data.profilePublic === "boolean"){
+      document.getElementById('publicProfile').checked =
+        data.profilePublic;
+      document.getElementById('publicProfileText').textContent =
+        data.profilePublic ? "Pubblico" : "Privato";
+    }
   }
 });
 
@@ -314,102 +392,19 @@ if(themeSelector){
 function applyTheme(theme){
   document.body.className = theme + '-theme';
 }
+document.getElementById('publicProfile').addEventListener('change', async e=>{
+  const value = e.target.checked;
+
+  document.getElementById('publicProfileText').textContent =
+    value ? "Pubblico" : "Privato";
+
+  if(auth.currentUser){
+    await db.collection('users')
+      .doc(auth.currentUser.uid)
+      .set({ profilePublic:value }, { merge:true });
+  }
+});
 </script>
-<style>
-/* =========================================
-   SISTEMA DI TEMI AVANZATO (CSS Variables)
-   ========================================= */
-
-/* 1. Definizioni Variabili per ogni Tema */
-body.day-theme {
-  --bg: #f5f5f5;
-  --card: #ffffff;
-  --text: #000000;
-  --muted: #2e2e2e;
-  --accent: #e50914;
-  --input-bg: #fff;
-}
-
-body.night-theme {
-  --bg: #111111;
-  --card: #1a1a1a;
-  --text: #ffffff;
-  --muted: #858585;
-  --accent: #e50914;
-  --input-bg: #000;
-}
-
-body.matrix-theme {
-  --bg: #000000;
-  --card: #0a0a0a;
-  --text: #00ff00;
-  --muted: #004400;
-  --accent: #00ff00;
-  --input-bg: #001100;
-  font-family: 'Courier New', monospace;
-}
-
-body.hight-theme { /* Alto Contrasto */
-  --bg: #000000;
-  --card: #000000;
-  --text: #ff8800;
-  --muted: #ffffff;
-  --accent: #ff8800;
-  --input-bg: #000;
-  border: 1px solid #ff8800;
-  font-family: Trebuchet MS, sans-serif;
-}
-
-body.inverted-theme {
-  --bg: #ffffff;
-  --card: #f0f0f0;
-  --text: #000000;
-  --muted: #555;
-  --accent: #1af6eb;
-  --input-bg: #fff;
-}
-
-/* 2. Applicazione Variabili agli Elementi */
-body {
-  background-color: var(--bg);
-  color: var(--text);
-  transition: all 0.3s ease; /* Animazione cambio tema */
-}
-
-.card, .card-tvhouse, aside {
-  background-color: var(--card) !important;
-  color: var(--text) !important;
-  border: 1px solid var(--muted);
-}
-
-/* Stili specifici per Input, Select e Textarea per adattarsi al tema */
-.themed-input, input, select, textarea {
-  width: 100%;
-  padding: 8px;
-  background-color: var(--input-bg);
-  color: var(--text);
-  border: 1px solid var(--muted);
-  border-radius: 4px;
-}
-
-/* Correzione per i link e testi muted */
-a { color: var(--accent); }
-.muted { color: var(--muted) !important; }
-h1, h2, h3, h4, h5, h6 { color: var(--text); }
-hr.themed-hr { margin: 15px 0; border: 0; border-top: 1px solid var(--muted); }
-
-/* Override per le opzioni delle select (che spesso restano bianche) */
-select option {
-  background-color: var(--card);
-  color: var(--text);
-}
-
-/* Scrollbar stilizzata per adattarsi (opzionale, funziona su Chrome/Edge) */
-::-webkit-scrollbar { width: 10px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 5px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-</style>
 
 
 </body>
