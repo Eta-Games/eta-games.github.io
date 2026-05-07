@@ -7,8 +7,6 @@
   <link rel="stylesheet" href="tvh.css">
   <link rel="icon" type="image/jpeg" href="img/channels4_profile.jpg">
 
-
-  
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
@@ -27,29 +25,28 @@
   </script>
 
   <style>
-
-    /* Counter stilizzato */
-    #countdown { 
-      font-size: 1.2rem; font-weight: bold; color: var(--accent); 
-      margin-top: 10px; margin-bottom: 40px; display: block;
-    }
-
-    /* Box attesa eventi */
-    .waiting-box {
-      margin-top: 40px;
-      padding: 40px;
-      border: 1px dashed var(--muted);
-      border-radius: 12px;
-      display: inline-block;
-      width: 100%;
-      max-width: 600px;
-    }
-    .waiting-text {
-      font-size: 1.4rem;
+    #countdown {
+      font-size: 1.2rem;
       font-weight: bold;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      opacity: 0.7;
+      color: var(--accent);
+      margin-top: 10px;
+      margin-bottom: 30px;
+      display: block;
+    }
+
+    .form-wrapper {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto 60px auto;
+      border: 1px solid var(--muted);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .form-wrapper iframe {
+      display: block;
+      width: 100%;
+      border: none;
     }
 
     footer { background: var(--card); padding: 30px 0; border-top: 1px solid var(--muted); margin-top: 50px; }
@@ -83,18 +80,23 @@
 
   <div class="container">
     <div class="section">
-      <h1>THE VALTER HOUSE - SHATTERED MEMORIES</h1>
+      <h1>THE VALTER HOUSE — SKIN STEALER</h1>
       <p>
-        Scopri il nuovo segreto di <strong>The Valter House</strong> ed esplora la sua lore. 
-        Un horror psicologico che indaga ricordi e misteri in un luogo oscuro. 
-        Affronta gli enigmi e vivi l'esperienza... ma fai attenzione al vecchio.
+        Un nuovo nemico si aggira tra le stanze di <strong>The Valter House</strong>.
+        Lo <strong>Skin Stealer</strong> è reale — e vuoi sapere come dovrebbe essere?
+        Dimmelo tu. Compila il sondaggio e lascia il tuo contributo alla lore.
+        Ma fai attenzione... il vecchio potrebbe sentirti.
       </p>
 
       <div id="countdown">Inizializzazione...</div>
 
-      <div class="waiting-box">
-        <div class="waiting-text">In attesa di nuovi eventi</div>
-        <p class="muted" style="font-size: 0.9rem; margin-top: 10px;">Resta sintonizzato sui nostri social per non perdere i prossimi aggiornamenti.</p>
+      <div class="form-wrapper">
+        <iframe
+          src="https://docs.google.com/forms/d/e/1FAIpQLSeidfxTRxeqycwb3Rdr4ryvvE2zNIqWvTsEW2OxaZrAIcCCbA/viewform?embedded=true"
+          height="1615"
+          marginheight="0"
+          marginwidth="0"
+        >Caricamento…</iframe>
       </div>
     </div>
   </div>
@@ -126,23 +128,27 @@
       }
     });
 
-    // TIMER
-    const countDownDate = new Date("Sep 16, 2025 23:59:59").getTime();
+    // COUNTDOWN — scade 18 maggio 2026 23:59:59
+    const countDownDate = new Date("May 18, 2026 23:59:59").getTime();
     const countdownEl = document.getElementById("countdown");
 
-    setInterval(function() {
+    function updateCountdown() {
       const now = new Date().getTime();
       const distance = countDownDate - now;
+
       if (distance > 0) {
         const d = Math.floor(distance / (1000 * 60 * 60 * 24));
         const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
         const s = Math.floor((distance % (1000 * 60)) / 1000);
-        countdownEl.innerHTML = `Tempo all'evento: ${d}g ${h}o ${m}m ${s}s`;
+        countdownEl.innerHTML = `⏳ Sondaggio aperto — chiude tra: ${d}g ${h}h ${m}m ${s}s`;
       } else {
-        countdownEl.innerHTML = "Evento terminato!";
+        countdownEl.innerHTML = "🔒 Sondaggio chiuso. Grazie per aver partecipato!";
       }
-    }, 1000);
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
   </script>
 </body>
 </html>
