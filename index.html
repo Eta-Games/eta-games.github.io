@@ -160,36 +160,22 @@
 
     const auth = firebase.auth();
     const db = firebase.firestore();
-
-    // Caricamento Tema e Stato Auth
+  </script>
+  <script src="theme-loader.js"></script>
+  <script>
+    // Aggiornamento UI pulsanti auth
     auth.onAuthStateChanged(async user => {
       const authBtn = document.getElementById("authBtn");
       const navProfileLink = document.getElementById("navProfileLink");
 
       if (user) {
-        // Aggiorna UI pulsanti
         if(authBtn) { authBtn.textContent = "Vai al Profilo"; authBtn.href = "profilo.html"; }
         if(navProfileLink) { navProfileLink.href = "profilo.html"; navProfileLink.textContent = "Profilo"; }
-
-        // Recupera tema dal database
-        try {
-          const doc = await db.collection('users').doc(user.uid).get();
-          if (doc.exists && doc.data().theme) {
-            applyTheme(doc.data().theme);
-          }
-        } catch (error) {
-          console.error("Errore caricamento tema:", error);
-        }
       } else {
         if(authBtn) { authBtn.textContent = "Accedi / Registrati"; authBtn.href = "login.html"; }
         if(navProfileLink) { navProfileLink.href = "login.html"; }
       }
     });
-
-    function applyTheme(theme) {
-      // Rimuove classi vecchie e applica la nuova
-      document.body.className = theme + '-theme';
-    }
   </script>
 </body>
 </html>

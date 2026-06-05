@@ -9,6 +9,7 @@
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
 <style>
 /* Centra tutto usando il body e card esistente */
@@ -99,6 +100,11 @@ const firebaseConfig = {
   measurementId: "G-BG4HGVW7D6"
 };
 firebase.initializeApp(firebaseConfig);
+
+// Carica tema utente
+const _thLoaderScript = document.createElement('script');
+_thLoaderScript.src = 'theme-loader.js';
+document.head.appendChild(_thLoaderScript);
 
 const auth = firebase.auth();
 

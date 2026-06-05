@@ -23,6 +23,7 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
   </script>
+  <script src="theme-loader.js"></script>
 
   <style>
     #countdown {
@@ -118,6 +119,10 @@
   </footer>
 
   <script>
+<<<<<<< HEAD
+    // TIMER
+    const countDownDate = new Date("Sep 16, 2025 23:59:59").getTime();
+=======
     // TEMA FIREBASE
     auth.onAuthStateChanged(async user => {
       if (user) {
@@ -130,6 +135,7 @@
 
     // COUNTDOWN — scade 18 maggio 2026 23:59:59
     const countDownDate = new Date("May 18, 2026 23:59:59").getTime();
+>>>>>>> 1d331bbda085bf0b87580c8090b9a5193b5493d7
     const countdownEl = document.getElementById("countdown");
 
     function updateCountdown() {

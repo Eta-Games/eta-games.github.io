@@ -25,7 +25,7 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
   </script>
-
+  <script src="theme-loader.js"></script>
   <style>
     /* GRID GIOCHI */
     .games-container {
@@ -118,11 +118,11 @@
         <span class="badge">In sviluppo</span>
       </div>
 
-      <div class="game-card">
-        <img src="img/fakegame.png" alt="Progetto segreto 1">
-        <h3>Progetto segreto 1</h3>
-        <p>Un titolo misterioso ancora avvolto nell'ombra. Novità in arrivo.</p>
-        <span class="badge">Coming Soon</span>
+      <div class="game-card" onclick="location.href='dantes_revenge.html'">
+        <img src="img/TITLEPIC.png" alt="Dante's Revenge">
+        <h3>Dante's Revenge</h3>
+        <p>Dante arriva in Paradiso, Beatrice non gli parla. Riscende tutto l'Inferno e torna su ad ammazzare Dio. Una WAD di Doom basata sulla Divina Commedia.</p>
+        <span class="badge">Beta 1.0</span>
       </div>
 
       <div class="game-card">
@@ -150,16 +150,5 @@
     </div>
   </footer>
 
-  <script>
-    // GESTIONE TEMA DA FIREBASE
-    auth.onAuthStateChanged(async user => {
-      if (user) {
-        const doc = await db.collection('users').doc(user.uid).get();
-        if (doc.exists && doc.data().theme) {
-          document.body.className = doc.data().theme + '-theme';
-        }
-      }
-    });
-  </script>
 </body>
 </html>

@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dante's Revenge — ETA Games</title>
+  <meta name="description" content="Dante's Revenge: una WAD di Doom. Dante è arrivato in Paradiso, ma Beatrice non vuole parlargli. Rifà tutto il giro e torna su ad ammazzare Dio.">
+  <link rel="stylesheet" href="tvh.css">
+  <link rel="icon" type="image/jpeg" href="img/channels4_profile.jpg">
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey:"AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
+      authDomain:"etagames-b5d6a.firebaseapp.com",
+      projectId:"etagames-b5d6a",
+      messagingSenderId:"809625655346",
+      appId:"1:809625655346:web:3010a62960fde91787842b"
+    };
+    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    try {
+      const doc = await db.collection('users').doc(user.uid).get();
+      if (doc.exists && doc.data().theme) {
+        const t = doc.data().theme;
+        document.body.className = t.endsWith('-theme') ? t : t + '-theme';
+      } else {
+        document.body.className = 'night-theme';
+      }
+    } catch (error) {
+      console.error("Errore nel recupero del tema utente:", error);
+      document.body.className = 'night-theme';
+    }
+  } else {
+    document.body.className = 'night-theme';
+  }
+});
+
+setTimeout(() => {
+  if (!document.body.className) document.body.className = 'night-theme';
+}, 800);
+  </script>
+  <style>
+:root { --arcColor: #c5a46d; }
+
+/* Arc Terminal */
+.arc-terminal {
+  margin-top: 100px; padding: 40px; bacsikground: #050505;
+  border-radius: 15px; position: relative; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.arc-terminal::before {
+  content: ""; position: absolute; inset: 0;
+  background: repeating-linear-gradient(to bottom,rgba(255,255,255,0.03),rgba(255,255,255,0.03) 2px,transparent 2px,transparent 4px);
+  pointer-events: none; animation: lcdMove 6s linear infinite;
+}
+@keyframes lcdMove { from{transform:translateY(0)} to{transform:translateY(6px)} }
+
+.arc-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:40px; }
+.arc-logo-wrapper { position:relative; width:90px; height:90px; }
+.arc-logo { width:90px; height:90px; border-radius:50%; border:3px solid var(--arcColor); animation:pulseLogo 2s infinite; background-size:cover; background-position:center; background-repeat:no-repeat; }
+.arc-logo-ring { position:absolute; inset:-8px; border-radius:50%; border:1px solid var(--arcColor); animation:rotateLogo 8s linear infinite; }
+@keyframes rotateLogo { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+@keyframes pulseLogo { 0%,100%{box-shadow:0 0 10px var(--arcColor)} 50%{box-shadow:0 0 25px var(--arcColor)} }
+.arc-chapter-info h2 { color:var(--arcColor); letter-spacing:4px; }
+.arc-nav button { background:none; border:1px solid var(--arcColor); color:var(--arcColor); padding:10px 15px; margin:0 5px; cursor:pointer; transition:0.3s; }
+.arc-nav button:hover { background:var(--arcColor); color:black; }
+
+.arc-levels-grid { display:grid; gap:20px; }
+.arc-level { display:flex; gap:20px; align-items:center; border:1px solid rgba(255,255,255,0.08); padding:15px; border-radius:10px; background:rgba(255,255,255,0.02); cursor:pointer; transition:0.4s; }
+.arc-level:hover { border-color:var(--arcColor); box-shadow:0 0 20px var(--arcColor); }
+.arc-level-emoji { width:100px; height:100px; display:flex; align-items:center; justify-content:center; font-size:56px; flex-shrink:0; background:rgba(0,0,0,0.3); border-radius:6px; }
+.arc-level img { width:120px; height:80px; object-fit:cover; border-radius:6px; flex-shrink:0; }
+.arc-level-text { flex:1; }
+.arc-level-text h4 { margin:0; color:var(--arcColor); }
+.arc-level-text p { margin-top:5px; font-size:14px; color:#ccc; }
+
+/* Boss Cards */
+.arc-bosses-section { margin-top:36px; }
+.arc-bosses-section > h3 { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:rgba(255,255,255,0.25); margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05); }
+.arc-boss-card { background:#0a0a0a; border:1px solid rgba(255,255,255,0.08); border-radius:14px; overflow:hidden; transition:border-color 0.3s, box-shadow 0.3s; position:relative; }
+.arc-boss-card::after { content:""; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--arcColor),transparent); }
+.arc-boss-header { display:flex; align-items:center; gap:16px; padding:16px 20px; cursor:pointer; user-select:none; transition:background 0.25s; }
+.arc-boss-header:hover { background:rgba(255,255,255,0.02); }
+.arc-boss-image { width:72px; height:72px; object-fit:cover; border-radius:50%; border:2px solid var(--arcColor); box-shadow:0 0 12px var(--arcColor); flex-shrink:0; transition:box-shadow 0.3s; }
+.arc-boss-card.open .arc-boss-image { box-shadow:0 0 22px var(--arcColor); }
+.arc-boss-header-text { flex:1; }
+.arc-boss-name { font-size:17px; font-weight:bold; color:var(--arcColor); margin:0 0 3px; letter-spacing:1px; font-family:'Courier New',monospace; }
+.arc-boss-class { font-size:10px; color:rgba(255,255,255,0.3); letter-spacing:3px; text-transform:uppercase; margin:0; }
+.arc-boss-chevron { font-size:12px; color:var(--arcColor); transition:transform 0.3s; margin-left:auto; flex-shrink:0; }
+.arc-boss-card.open .arc-boss-chevron { transform:rotate(180deg); }
+.arc-boss-body { max-height:0; overflow:hidden; transition:max-height 0.45s ease, opacity 0.3s; opacity:0; }
+.arc-boss-card.open .arc-boss-body { max-height:800px; opacity:1; }
+.arc-boss-description { padding:0 20px 16px; font-size:13px; color:#999; line-height:1.65; border-bottom:1px solid rgba(255,255,255,0.05); margin:0; }
+.arc-boss-stats { display:grid; grid-template-columns:repeat(3,1fr); border-bottom:1px solid rgba(255,255,255,0.05); }
+.arc-stat { padding:13px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.05); border-bottom:1px solid rgba(255,255,255,0.05); }
+.arc-stat:nth-child(3n) { border-right:none; }
+.arc-stat:nth-last-child(-n+3) { border-bottom:none; }
+.arc-stat-label { display:block; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.25); margin-bottom:6px; }
+.arc-stat-value { display:block; font-size:15px; font-weight:bold; color:var(--arcColor); font-family:'Courier New',monospace; line-height:1.2; }
+.arc-boss-threat { padding:13px 20px 10px; border-bottom:1px solid rgba(255,255,255,0.05); }
+.arc-threat-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:7px; }
+.arc-threat-tag { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.25); }
+.arc-threat-level-text { font-size:11px; font-weight:bold; letter-spacing:1px; }
+.arc-threat-bar-bg { height:3px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; }
+.arc-threat-bar-fill { height:100%; border-radius:3px; animation:threatPulse 2.2s ease-in-out infinite; }
+@keyframes threatPulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
+.arc-boss-weakness { padding:11px 20px 17px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.arc-weakness-label { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.2); }
+.arc-weakness-tag { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); border-radius:4px; padding:3px 8px; font-size:11px; color:#bbb; }
+
+/* Expanded */
+.arc-expanded-section { display:none; margin-top:40px; background:#0a0a0a; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:24px 28px; }
+.arc-expanded-section.active { display:block; }
+.arc-close-expanded { position:absolute; top:12px; right:12px; background:none; border:none; color:rgba(255,255,255,0.4); cursor:pointer; font-size:18px; transition:0.2s; }
+.arc-close-expanded:hover { color:var(--arcColor); }
+
+/* Download / Libreria */
+.download-block { margin:50px 0; background:#0a0a0a; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:36px 40px; position:relative; overflow:hidden; text-align:center; }
+.download-block::before { content:""; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,#c5a46d,transparent); }
+.download-block h2 { font-size:1.4rem; margin-bottom:8px; }
+.download-block p { color:rgba(255,255,255,0.45); font-size:14px; margin-bottom:24px; max-width:500px; margin-left:auto; margin-right:auto; }
+.download-meta { display:flex; justify-content:center; gap:32px; flex-wrap:wrap; margin-bottom:28px; }
+.dl-meta-item .val { font-size:17px; font-weight:bold; color:#eee; font-family:'Courier New',monospace; }
+.dl-meta-item .lbl { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-top:3px; }
+#libAddBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 34px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.25s;
+  border: none;
+  letter-spacing: 0.4px;
+  min-width: 280px;
+}
+#libAddBtn.locked {
+  background: #111;
+  color: rgba(255,255,255,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  cursor: not-allowed;
+}
+#libAddBtn.unlocked {
+  background: #c5a46d;
+  color: #0a0a0a;
+  box-shadow: 0 0 24px rgba(197,164,109,0.35);
+}
+#libAddBtn.unlocked:hover {
+  background: #d9bc87;
+  box-shadow: 0 0 40px rgba(197,164,109,0.6);
+}
+#libAddBtn.in-library {
+  background: transparent;
+  color: #c5a46d;
+  border: 2px solid #c5a46d;
+}
+#libAddBtn.in-library:hover {
+  background: rgba(197,164,109,0.1);
+}
+#authStatusLine { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-top:14px; }
+#authStatusLine.ok { color:rgba(100,210,120,0.75); }
+
+/* Soundtrack */
+.soundtrack-list { display:grid; gap:10px; margin-top:20px; }
+.track-row { display:flex; align-items:center; gap:16px; background:#0a0a0a; border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:14px 18px; transition:border-color 0.25s; }
+.track-row:hover { border-color:rgba(197,164,109,0.4); }
+.track-num { font-family:'Courier New',monospace; font-size:12px; color:rgba(255,255,255,0.2); width:20px; text-align:center; flex-shrink:0; }
+.track-info { flex:1; }
+.track-title { font-weight:700; font-size:14px; color:#eee; margin-bottom:2px; }
+.track-artist { font-size:12px; color:rgba(255,255,255,0.4); }
+.track-map { font-family:'Courier New',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#c5a46d; background:rgba(197,164,109,0.08); border:1px solid rgba(197,164,109,0.2); padding:3px 9px; border-radius:4px; flex-shrink:0; }
+
+/* Enemies */
+.enemies-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; margin-top:20px; }
+.enemy-card { background:#0a0a0a; border:1px solid rgba(255,255,255,0.07); border-radius:12px; overflow:hidden; text-align:center; transition:border-color 0.25s, box-shadow 0.25s; }
+.enemy-card:hover { border-color:rgba(197,164,109,0.4); box-shadow:0 0 18px rgba(197,164,109,0.1); }
+.enemy-card img { width:100%; height:140px; object-fit:contain; background:#060606; padding:10px; image-rendering:pixelated; }
+.enemy-card-body { padding:12px 14px; }
+.enemy-dante-name { font-weight:700; font-size:14px; color:#c5a46d; font-family:'Courier New',monospace; margin:0; }
+
+/* Difficulty */
+.diff-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(185px,1fr)); gap:12px; margin-top:20px; }
+.diff-card { background:#0a0a0a; border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:16px 18px; transition:border-color 0.25s; }
+.diff-card.is-default { border-color:rgba(197,164,109,0.3); }
+.diff-key { display:inline-block; width:26px; height:26px; border-radius:5px; border:1px solid rgba(197,164,109,0.3); background:rgba(197,164,109,0.07); text-align:center; line-height:26px; font-family:'Courier New',monospace; font-size:13px; color:#c5a46d; font-weight:bold; margin-bottom:9px; }
+.diff-name { font-size:13px; font-weight:700; color:#ddd; margin-bottom:3px; }
+.diff-desc { font-size:12px; color:rgba(255,255,255,0.35); line-height:1.5; }
+.diff-default-tag { display:inline-block; margin-top:7px; font-size:9px; letter-spacing:2px; text-transform:uppercase; padding:2px 8px; border-radius:3px; background:rgba(197,164,109,0.1); color:#c5a46d; border:1px solid rgba(197,164,109,0.25); }
+
+/* Hero */
+.hero-titlepic { width:100%; border-radius:12px; border:1px solid rgba(255,255,255,0.08); box-shadow:0 0 40px rgba(0,0,0,0.6); }
+.arc-expanded-gallery { display:none; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ HEADER (identico al sito) ═══════════════════════════════ -->
+<header>
+  <div class="container">
+    <nav>
+      <div class="brand">
+        <img src="img/channels4_profile.jpg" alt="Logo ETA Games" class="logo-img">
+        <div>
+          <div>ETA Games</div>
+          <div class="muted" style="font-size:12px;margin-top:2px">Studio</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="games.html" class="active">Giochi</a>
+          <a href="extra.html">Extra</a>
+        <a href="login.html" id="navProfileLink">Profilo</a>
+        <a href="blog.html">Blog</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
+<section class="hero container">
+  <div>
+    <h1>Dante's Revenge</h1>
+    <p>
+      Dante arriva finalmente in Paradiso. Ce l'ha fatta. Cerca Beatrice — ma lei non vuole parlargli.
+      Rifiutato davanti alle porte del Cielo, Dante prende l'unica decisione logica: riscende tutto l'Inferno,
+      rifà i gironi, e risale per ammazzare Dio. Una WAD di Doom costruita sulla Divina Commedia.
+    </p>
+    <p><strong>Beta 1.0 disponibile — MAP01 · MAP02 · MAP04. Richiede GZDoom.</strong></p>
+    <div class="btn-group">
+      <a href="#download" class="btn">Scarica la Beta</a>
+      <a href="#levels" class="btn">Esplora le Mappe</a>
+    </div>
+  </div>
+  <div class="card-tvhouse">
+    <h2>Dettagli</h2>
+    <p><strong>Genere:</strong> WAD / Mod</p>
+    <p><strong>Engine:</strong> GZDoom (UDMF)</p>
+    <p><strong>Mappe:</strong> 3 (Beta 1.0)</p>
+    <p><strong>Dimensione:</strong> ~17,7 MB</p>
+    <div class="tags">
+      <span class="badge">Doom WAD</span>
+      <span class="badge">Dante</span>
+      <span class="badge">UDMF</span>
+      <span class="badge">Inferno</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ TITLEPIC ═══════════════════════════════ -->
+<section class="container" style="margin-top:10px">
+  <img src="img/TITLEPIC.png" alt="Dante's Revenge — artwork ufficiale" class="hero-titlepic">
+</section>
+
+<!-- ═══════════════════════════════ CARATTERISTICHE ═══════════════════════════════ -->
+<section class="container">
+  <h2>Caratteristiche principali</h2>
+  <div class="cards">
+    <div class="feature">
+      <h3>🔥 Lore originale</h3>
+      <p class="muted">Dante arriva in Paradiso, Beatrice non vuole parlargli, lui riscende tutto l'Inferno e torna su ad ammazzare Dio. Una trama seria.</p>
+    </div>
+    <div class="feature">
+      <h3>🎵 Soundtrack metal</h3>
+      <p class="muted">Tre brani originali — Five Finger Death Punch, Avenged Sevenfold, Marilyn Manson — uno per mappa, più la boss track originale.</p>
+    </div>
+    <div class="feature">
+      <h3>💀 Nemici danteschi</h3>
+      <p class="muted">Ignavi, Minosse, Caronte, Cerbero, Lucifero. I classici di Doom II rinominati con i personaggi della Commedia.</p>
+    </div>
+    <div class="feature">
+      <h3>🗣 Dialetto totale</h3>
+      <p class="muted">Tutto il testo del gioco — menu, messaggi di morte, difficoltà — è tradotto in dialetto umbro-toscano. "Gnamo, muoviti, corbellone."</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ TESTO INTRODUTTIVO ═══════════════════════════════ -->
+<section class="container">
+  <h2>L'inizio</h2>
+  <div style="background:#080808;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:28px 32px;font-family:'Courier New',monospace;font-size:14px;color:rgba(255,215,100,0.85);line-height:2;max-width:680px;">
+<p style="margin:0">
+  Nel mezzo del cammin del Paradiso pieno di luce e di rotture di sfere arcane divine, Dante Alighieri si ritrovò salito fino in cima con l’idea che ormai fosse fatta, pace eterna, gloria e magari pure 10 minuti di gloria con la sua amata Beatrice.<br>
+  <br>
+  Ma per errore del cielo o per disordine di gloria, venne decreto improvviso che lo rimandò giù, come cosa non ancora compiuta.<br>
+  <br>
+  E Dante, che pur fu uomo di senno e di lettere, quando si trovò in tal frangente d’ingiustizia celeste, venne colto da ira funesta, e imbracciato il ferro ricominciò la strada del ritorno, non più pellegrino ma furioso viandante del destino, deciso a rifare il viaggio dall’inizio fino al punto donde tutto era cominciato.<br>
+  <br>
+  <strong style="color:rgba(255,215,100,1)">Gnamo… si risale tutto, e stavolta senza pratiche divine in sospeso.</strong>
+</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ SOUNDTRACK ═══════════════════════════════ -->
+<section class="container">
+  <h2>Soundtrack</h2>
+  <div class="soundtrack-list">
+    <div class="track-row">
+      <span class="track-num">01</span>
+      <div class="track-info">
+        <div class="track-title">The House of the Rising Sun</div>
+        <div class="track-artist">Five Finger Death Punch</div>
+      </div>
+      <span class="track-map">MAP01</span>
+    </div>
+    <div class="track-row">
+      <span class="track-num">02</span>
+      <div class="track-info">
+        <div class="track-title">Afterlife</div>
+        <div class="track-artist">Avenged Sevenfold</div>
+      </div>
+      <span class="track-map">MAP02</span>
+    </div>
+    <div class="track-row">
+      <span class="track-num">03</span>
+      <div class="track-info">
+        <div class="track-title">The Beautiful People</div>
+        <div class="track-artist">Marilyn Manson</div>
+      </div>
+      <span class="track-map">BOSS</span>
+    </div>
+    <div class="track-row">
+      <span class="track-num">04</span>
+      <div class="track-info">
+        <div class="track-title">Boss Theme (Originale)</div>
+        <div class="track-artist">ETA Games</div>
+      </div>
+      <span class="track-map">MAP04</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ NEMICI ═══════════════════════════════ -->
+<section class="container" id="enemies">
+  <h2>I Dannati dell'Inferno</h2>
+  <p class="muted" style="margin-bottom:4px">I nemici classici di Doom II rinominati secondo la Commedia. Gli sprite sono quelli originali del gioco.</p>
+  <div class="enemies-grid">
+
+    <div class="enemy-card">
+      <img src="img/doom tile/Ignavo.png" alt="Ignavi" loading="lazy" style="image-rendering:pixelated">
+      <div class="enemy-card-body">
+        <div class="enemy-dante-name">Ignavi</div>
+      </div>
+    </div>
+
+    <div class="enemy-card">
+      <img src="img/doom tile/Ignavo grosso.png" alt="Ignavo Grosso" loading="lazy" style="image-rendering:pixelated">
+      <div class="enemy-card-body">
+        <div class="enemy-dante-name">Ignavo Grosso</div>
+      </div>
+    </div>
+
+    <div class="enemy-card">
+      <img src="img/doom tile/Minosse.png" alt="Minosse" loading="lazy" style="image-rendering:pixelated">
+      <div class="enemy-card-body">
+        <div class="enemy-dante-name">Minosse</div>
+      </div>
+    </div>
+
+    <div class="enemy-card">
+      <img src="img/doom tile/Avaro.png" alt="Avaro" loading="lazy" style="image-rendering:pixelated">
+      <div class="enemy-card-body">
+        <div class="enemy-dante-name">Avaro</div>
+      </div>
+    </div>
+
+    <div class="enemy-card">
+      <img src="img/doom tile/Fiera.png" alt="Fiera" loading="lazy" style="image-rendering:pixelated">
+      <div class="enemy-card-body">
+        <div class="enemy-dante-name">Fiera</div>
+      </div>
+    </div>
+
+    <div class="enemy-card">
+      <img src="img/doom tile/Lussurioso.png" alt="Lussurioso" loading="lazy" style="image-rendering:pixelated">
+      <div class="enemy-card-body">
+        <div class="enemy-dante-name">Lussurioso</div>
+      </div>
+    </div>
+
+    <div class="enemy-card">
+      <img src="img/doom tile/Caronte.png" alt="Caronte" loading="lazy" style="image-rendering:pixelated">
+      <div class="enemy-card-body">
+        <div class="enemy-dante-name">Caronte</div>
+      </div>
+    </div>
+
+    <div class="enemy-card">
+      <img src="img/doom tile/Cerbero.png" alt="Cerbero" loading="lazy" style="image-rendering:pixelated">
+      <div class="enemy-card-body">
+        <div class="enemy-dante-name">Cerbero</div>
+      </div>
+    </div>
+
+    <div class="enemy-card">
+      <img src="img/doom tile/Bellera_dell_limbo.png" alt="Bellera dell limbo" loading="lazy" style="image-rendering:pixelated">
+      <div class="enemy-card-body">
+        <div class="enemy-dante-name">Bellera dell limbo</div>
+      </div>
+    </div>
+
+    <div class="enemy-card">
+      <img src="img/doom tile/Goloso.png" alt="Goloso" loading="lazy" style="image-rendering:pixelated">
+      <div class="enemy-card-body">
+        <div class="enemy-dante-name">Goloso</div>
+      </div>
+    </div>
+
+    <div class="enemy-card">
+      <img src="img/doom tile/Lucifero.png" alt="Lucifero" loading="lazy" style="image-rendering:pixelated">
+      <div class="enemy-card-body">
+        <div class="enemy-dante-name">Lucifero</div>
+        <div class="enemy-doom-name">Cyberdemon</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ DIFFICOLTA' ═══════════════════════════════ -->
+<section class="container">
+  <h2>Difficoltà</h2>
+  <div class="diff-grid">
+    <div class="diff-card">
+      <div class="diff-key">S</div>
+      <div class="diff-name">Troppo bischero</div>
+      <div class="diff-desc">Ammo x2, danno ×0.5, uso automatico della salute</div>
+    </div>
+    <div class="diff-card">
+      <div class="diff-key">O</div>
+      <div class="diff-name">Si scherza un po' troppo</div>
+      <div class="diff-desc">Facile — per chi vuole godersi la lore senza stress</div>
+    </div>
+    <div class="diff-card is-default">
+      <div class="diff-key">C</div>
+      <div class="diff-name">Famme male boion</div>
+      <div class="diff-desc">Normale — la difficoltà pensata per il gioco</div>
+      <span class="diff-default-tag">★ Default</span>
+    </div>
+    <div class="diff-card">
+      <div class="diff-key">G</div>
+      <div class="diff-name">Sei duro o tu resti per terra</div>
+      <div class="diff-desc">Difficile — nemici più aggressivi, meno perdono</div>
+    </div>
+    <div class="diff-card">
+      <div class="diff-key">V</div>
+      <div class="diff-name">L'inferno vero</div>
+      <div class="diff-desc">Nightmare — mostri veloci e che rispawnano. Conferma richiesta: "Sei sicuro, corbellone?"</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ MAPPE / ARC TERMINAL ═══════════════════════════════ -->
+<section class="container arc-terminal" id="levels">
+  <div class="arc-top">
+    <div class="arc-logo-wrapper">
+      <div class="arc-logo" id="arcLogoIcon"></div>
+      <div class="arc-logo-ring"></div>
+    </div>
+    <div class="arc-chapter-info">
+      <h2 id="arc-chapter-name">MAP01</h2>
+      <p id="arc-chapter-sub">Le Porte dell'Inferno</p>
+    </div>
+    <div class="arc-nav">
+      <button id="prevChapter">&#9664;</button>
+      <button id="nextChapter">&#9654;</button>
+    </div>
+  </div>
+
+  <div class="arc-levels-grid" id="arcLevels"></div>
+
+  <div class="arc-expanded-section" id="arcExpanded">
+    <button class="arc-close-expanded" id="arcCloseExpanded">&#10005; Chiudi</button>
+    <div class="arc-expanded-header">
+      <div class="arc-expanded-title">
+        <h2 id="expTitle"></h2>
+        <p id="expDesc"></p>
+      </div>
+    </div>
+    <div class="arc-expanded-content">
+      <div class="arc-content-main"><p id="expContent"></p></div>
+      <div class="arc-objectives">
+        <h3>Obiettivi</h3>
+        <ul id="expObjectives"></ul>
+      </div>
+    </div>
+    <div class="arc-bosses-section" id="arcBossesSection">
+      <h3>&#9888; Guardiani Classificati &mdash; Dossier Infernale</h3>
+      <div class="arc-bosses-grid" id="arcBossesGrid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ LIBRERIA ═══════════════════════════════ -->
+<section class="container" id="download">
+  <h2>Download</h2>
+  <div class="download-block">
+    <h2>Dante's Revenge — Beta 1.0</h2>
+    <p>Aggiungi il gioco alla tua libreria personale.<br>Da lì potrai scaricarlo in qualsiasi momento.</p>
+    <div class="download-meta">
+      <div class="dl-meta-item"><div class="val">SELV01.zip</div><div class="lbl">File</div></div>
+      <div class="dl-meta-item"><div class="val">~17,7 MB</div><div class="lbl">Dimensione</div></div>
+      <div class="dl-meta-item"><div class="val">PWAD</div><div class="lbl">Formato</div></div>
+      <div class="dl-meta-item"><div class="val">GZDoom</div><div class="lbl">Engine</div></div>
+    </div>
+    <button id="libAddBtn" onclick="handleLibraryAdd()">
+      ⏳ Caricamento...
+    </button>
+    <p id="authStatusLine">⬤ Verifica autenticazione...</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ FOOTER (identico al sito) ═══════════════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <strong>ETA Games</strong>
+        <div class="muted">© ETA Games — Tutti i diritti riservati</div>
+      </div>
+      <div class="socials muted">
+        <a href="https://discord.gg/Da7sq3Mwpw" target="_blank">Discord</a>
+        <a href="https://www.youtube.com/@HGames_studio" target="_blank">YouTube</a>
+        <a href="https://www.instagram.com/eta.games_" target="_blank">instagram</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════ SCRIPT ═══════════════════════════════ -->
+<script>
+
+/* ── LIBRERIA ── */
+const GAME_ID   = 'dantes_revenge';
+let _libUser    = null;
+let _inLibrary  = false;
+
+auth.onAuthStateChanged(async user => {
+  _libUser = user;
+  const btn    = document.getElementById('libAddBtn');
+  const status = document.getElementById('authStatusLine');
+  if (!btn) return;
+
+  if (user) {
+    status.textContent = '⬤ Loggato come ' + (user.displayName || user.email);
+    status.className = 'ok';
+    // Controlla se già in libreria
+    try {
+      const doc = await db.collection('users').doc(user.uid).get();
+      const lib = (doc.exists && Array.isArray(doc.data().library)) ? doc.data().library : [];
+      _inLibrary = lib.includes(GAME_ID);
+    } catch(e) { _inLibrary = false; }
+    updateLibBtn(btn);
+  } else {
+    btn.textContent  = '🔒 Accedi per aggiungere alla libreria';
+    btn.className    = 'locked';
+    status.textContent = '⬤ Non loggato';
+    status.className = '';
+  }
+});
+
+function updateLibBtn(btn) {
+  btn.disabled = false;
+  if (_inLibrary) {
+    btn.textContent  = '✓ In libreria — vai a scaricare';
+    btn.className    = 'in-library';
+    btn.onclick      = () => window.location.href = 'libreria.html';
+  } else {
+    btn.textContent  = '+ Aggiungi alla Libreria';
+    btn.className    = 'unlocked';
+    btn.onclick      = handleLibraryAdd;
+  }
+}
+
+async function handleLibraryAdd() {
+  if (!_libUser) {
+    window.location.href = 'login.html';
+    return;
+  }
+  if (_inLibrary) {
+    window.location.href = 'libreria.html';
+    return;
+  }
+  const btn = document.getElementById('libAddBtn');
+  btn.disabled = true;
+  btn.textContent = '...';
+  try {
+    const docRef = db.collection('users').doc(_libUser.uid);
+    const doc    = await docRef.get();
+    const lib    = (doc.exists && Array.isArray(doc.data().library)) ? [...doc.data().library] : [];
+    if (!lib.includes(GAME_ID)) lib.push(GAME_ID);
+    await docRef.set({ library: lib }, { merge: true });
+    _inLibrary = true;
+    updateLibBtn(btn);
+  } catch(e) {
+    console.error('[libreria]', e);
+    btn.disabled = false;
+    updateLibBtn(btn);
+  }
+}
+
+/* ── MAPPE DATA ── */
+const chapters = [
+  {
+    id:"MAP01", icon:"🚪", bossIcon:"img/doom tile/Caronte.png",
+    name:"MAP01", sub:"Le Porte dell'Inferno",
+    levels:[{
+      title:"Le Porte dell'Inferno",
+      desc:"La prima discesa. Un testo introduce la storia, poi si parte. Musica: The House of the Rising Sun — Five Finger Death Punch.",
+      img:"img/TITLEPIC.png",
+      content:"Dante arriva alle porte dell'Inferno per la seconda volta — ma stavolta ci entra armato. La mappa introduce i controlli, i nemici base (Ignavi, Angeli caduti).",
+      objectives:["Attraversare le porte","Abbattere gli Ignavi di guardia","Trovare il passaggio verso i Gironi"],
+      hasBosses:true,
+      bosses:[{
+        name:"Caronte", class:"GUARDIANO — HELL KNIGHT",
+        image:"img/doom tile/Caronte.png",
+        description:"Caronte custodisce il passaggio al secondo cerchio. Resistente, colpi pesanti.",
+        stats:{hp:"500 HP",velocita:"8 u/s",danno:"40–80",altezza:"1.99 m",peso:"—",percezione:"7/10"},
+        threat:"ALTO", weaknesses:["Super Shotgun ravvicinato","Rocket Launcher","BFG"]
+      }]
+    }]
+  },
+  {
+    id:"MAP02", icon:"🌀", bossIcon:"img/doom tile/Cerbero.png",
+    name:"MAP02", sub:"I Gironi degli Incontinenti",
+    levels:[{
+      title:"I Gironi degli Incontinenti",
+      desc:"Il cerchio più affollato. Minosse e la sua minigun pattugliano le stanze.",
+      img:"INTERPIC.png",
+      content:"MAP02 è la mappa più grande della beta. Ambienti aperti, nemici in numero: Lussuriosi (Lost Souls), Fiere (Demons), Angeli caduti (Imps). Minosse è presente in forze: se lo senti sparare, mettiti al riparo subito. La sua minigun è letale a media distanza.",
+      objectives:["Sopravvivere ai gironi","Abbattere Cerbero","Trovare la chiave per la Caina"],
+      hasBosses:true,
+      bosses:[
+        {
+          name:"Minosse", class:"CHAINGUNNER — GIUDICE",
+          image:"img/doom tile/Minosse.png",
+          description:"Presente in una delle stanze più grandi. La minigun crivella tutto a media distanza — usa la copertura e avvicinati con il Super Shotgun.",
+          stats:{hp:"70 HP",velocita:"8 u/s",danno:"5–15/proiettile",altezza:"1.86 m",peso:"—",percezione:"8/10"},
+          threat:"ALTO", weaknesses:["Copertura","SSG ravvicinato","Rocket splash"]
+        },
+        {
+          name:"Cerbero", class:"MANCUBUS — BOSS DEL CERCHIO",
+          image:"img/doom tile/Cerbero.png",
+          description:"Enormi raffiche di palle di fuoco in doppia coppia. Richiede spazio per schivare — in corridoio è una trappola. Mira alla testa",
+          stats:{hp:"600 HP",velocita:"4 u/s",danno:"8×8/raffica",altezza:"1.79 m",peso:"—",percezione:"6/10"},
+          threat:"CRITICO", weaknesses:["Rocket Launcher","Plasma Gun","BFG"]
+        }
+      ]
+    }]
+  },
+
+  {
+    id:"MAP04", icon:"❄", bossIcon:"img/doom tile/Lucifero.png",
+    name:"MAP04", sub:"La Caina — Boss Finale",
+    levels:[{
+      title:"La Caina",
+      desc:"Il fondo dell'Inferno. Lucifero aspetta. Buona fortuna, corbellone.",
+      img:"INTERPIC.png",
+      content:"MAP04 è l'atto finale della beta. La Caina — il nono cerchio, riservato ai traditori — ospita Lucifero in persona (il Cyberdemon). Lucifero spara razzi a cadenza fissa. Non fermarti mai. Schiva lateralmente. Due colpi di BFG centrati chiudono il conto. In corridoio è la morte istantanea.Buona fortuna, corbellone.",
+      objectives:["Raggiungere il centro della Caina","Abbattere Lucifero","Sopravvivere"],
+      hasBosses:true,
+      bosses:[{
+        name:"Lucifero", class:"CYBERDEMON — SIGNORE DELL'INFERNO",
+        image:"img/doom tile/Lucifero.png",
+        description:"Lucifero. Razzo diretto = morte. Schiva in cerchio, non stare fermo. Due colpi di BFG ben centrati lo mettono a terra. L'arena della Caina è abbastanza aperta — usala.",
+        stats:{hp:"4000 HP",velocita:"8 u/s",danno:"128+ (razzo diretto)",altezza:"3.15 m",peso:"—",percezione:"10/10"},
+        threat:"ESTREMO", weaknesses:["BFG9000","Rocket Launcher in movimento","Non fermarsi MAI"]
+      }]
+    }]
+  }
+];
+
+let currentChapter = 0;
+
+function getThreatConfig(t){
+  return ({
+    "MODERATO":{color:"#f0c040",width:"35%"},
+    "ALTO":{color:"#ff8800",width:"65%"},
+    "CRITICO":{color:"#c5a46d",width:"85%"},
+    "ESTREMO":{color:"#ff3333",width:"100%"}
+  })[t]||{color:"#888",width:"30%"};
+}
+
+function buildBossCard(boss){
+  const t=getThreatConfig(boss.threat);
+  const s=boss.stats;
+  const id="boss-"+Math.random().toString(36).slice(2,8);
+  const wk=boss.weaknesses.map(w=>`<span class="arc-weakness-tag">${w}</span>`).join("");
+  return `<div class="arc-boss-card" id="${id}">
+    <div class="arc-boss-header" onclick="toggleBoss('${id}')">
+      <img src="${boss.image}" alt="${boss.name}" class="arc-boss-image" style="image-rendering:pixelated">
+      <div class="arc-boss-header-text">
+        <p class="arc-boss-name">${boss.name}</p>
+        <p class="arc-boss-class">${boss.class}</p>
+      </div>
+      <span class="arc-boss-chevron">▼</span>
+    </div>
+    <div class="arc-boss-body">
+      <p class="arc-boss-description">${boss.description}</p>
+      <div class="arc-boss-stats">
+        <div class="arc-stat"><span class="arc-stat-label">Vita</span><span class="arc-stat-value" style="font-size:12px">${s.hp}</span></div>
+        <div class="arc-stat"><span class="arc-stat-label">Velocità</span><span class="arc-stat-value" style="font-size:12px">${s.velocita}</span></div>
+        <div class="arc-stat"><span class="arc-stat-label">Danno</span><span class="arc-stat-value" style="font-size:11px">${s.danno}</span></div>
+        <div class="arc-stat"><span class="arc-stat-label">Altezza</span><span class="arc-stat-value" style="font-size:12px">${s.altezza}</span></div>
+        <div class="arc-stat"><span class="arc-stat-label">Peso</span><span class="arc-stat-value">${s.peso}</span></div>
+        <div class="arc-stat"><span class="arc-stat-label">Percezione</span><span class="arc-stat-value" style="font-size:12px">${s.percezione}</span></div>
+      </div>
+      <div class="arc-boss-threat">
+        <div class="arc-threat-row">
+          <span class="arc-threat-tag">Livello Minaccia</span>
+          <span class="arc-threat-level-text" style="color:${t.color}">${boss.threat}</span>
+        </div>
+        <div class="arc-threat-bar-bg"><div class="arc-threat-bar-fill" style="width:${t.width};background:${t.color}"></div></div>
+      </div>
+      <div class="arc-boss-weakness"><span class="arc-weakness-label">Debolezze</span>${wk}</div>
+    </div>
+  </div>`;
+}
+
+function toggleBoss(id){
+  const c=document.getElementById(id);
+  if(c) c.classList.toggle("open");
+}
+
+function expandLevel(level){
+  document.getElementById("expTitle").textContent=level.title;
+  document.getElementById("expDesc").textContent=level.desc;
+  document.getElementById("expContent").textContent=level.content;
+  const ol=document.getElementById("expObjectives");
+  ol.innerHTML="";
+  level.objectives.forEach(o=>{const li=document.createElement("li");li.textContent=o;ol.appendChild(li);});
+  const bs=document.getElementById("arcBossesSection");
+  const bg=document.getElementById("arcBossesGrid");
+  bg.innerHTML="";
+  if(level.hasBosses&&level.bosses.length>0){
+    bs.style.display="block";
+    level.bosses.forEach(b=>{bg.innerHTML+=buildBossCard(b);});
+  } else {
+    bs.style.display="none";
+  }
+  const exp=document.getElementById("arcExpanded");
+  exp.classList.add("active");
+  exp.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function closeExpanded(){document.getElementById("arcExpanded").classList.remove("active");}
+
+function renderLevels(){
+  const container=document.getElementById("arcLevels");
+  container.innerHTML="";
+  const ch=chapters[currentChapter];
+  document.getElementById("arc-chapter-name").textContent=ch.name;
+  document.getElementById("arc-chapter-sub").textContent=ch.sub;
+  const logoEl = document.getElementById("arcLogoIcon");
+  logoEl.style.backgroundImage = `url('${ch.bossIcon}')`;
+  logoEl.textContent = "";
+  ch.levels.forEach(lvl=>{
+    const el=document.createElement("div");
+    el.className="arc-level";
+    el.innerHTML=`<div class="arc-level-emoji">${ch.icon}</div>
+      <div class="arc-level-text"><h4>${lvl.title}</h4><p>${lvl.desc}</p></div>`;
+    el.addEventListener("click",()=>expandLevel(lvl));
+    container.appendChild(el);
+  });
+  closeExpanded();
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  renderLevels();
+  document.getElementById("nextChapter").addEventListener("click",()=>{
+    currentChapter=(currentChapter+1)%chapters.length; renderLevels();
+  });
+  document.getElementById("prevChapter").addEventListener("click",()=>{
+    currentChapter=(currentChapter-1+chapters.length)%chapters.length; renderLevels();
+  });
+  document.getElementById("arcCloseExpanded").addEventListener("click",closeExpanded);
+});
+</script>
+</body>
+</html>

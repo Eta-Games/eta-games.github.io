@@ -22,6 +22,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 </script>
+<script src="theme-loader.js"></script>
 <style>
 .switch{
   position:relative;
@@ -74,7 +75,7 @@ input:checked + .slider:before{
   <div class="nav-links">
     <a href="index.html">Home</a>
     <a href="games.html">Giochi</a>
-    <a href="extra.html">Extra</a>
+          <a href="extra.html">Extra</a>
     <a href="profilo.html" class="active">Profilo</a>
     <a href="blog.html">Blog</a>
   </div>
@@ -91,6 +92,7 @@ input:checked + .slider:before{
   <p><a href="#profileSettings" class="badge">Impostazioni Profilo</a></p>
   <p><a href="#securityPrivacy" class="badge">Sicurezza e Privacy</a></p>
   <p><a href="#extraFeatures" class="badge">Funzioni extra</a></p>
+  <p><a href="#myLibrary" class="badge">La mia Libreria</a></p>
 </aside>
 
 <div style="flex:1">
@@ -194,7 +196,7 @@ input:checked + .slider:before{
   </div>
 </div>
 
-<div class="card-tvhouse" id="extraFeatures">
+<div class="card-tvhouse" id="extraFeatures" style="margin-bottom:20px">
   <h2>Funzioni extra</h2>
   <p><strong>Badge utente:</strong> <span id="userBadge">Calcolo...</span></p>
   
@@ -208,6 +210,18 @@ input:checked + .slider:before{
       <option value="inverted">Invertito</option>
       <option value="TVH">The Valter House</option>
     </select>
+  </div>
+</div>
+
+<!-- ── LIBRERIA ── -->
+<div class="card-tvhouse" id="myLibrary" style="margin-bottom:20px">
+  <h2>La mia Libreria</h2>
+  <p class="muted" style="margin-bottom:16px">Giochi salvati. Scaricali dalla libreria.</p>
+  <div id="libraryList">
+    <p class="muted" style="font-style:italic">Caricamento...</p>
+  </div>
+  <div style="margin-top:16px;border-top:1px solid var(--muted);padding-top:14px">
+    <a href="libreria.html" class="btn" style="display:inline-block;text-decoration:none">Apri Libreria</a>
   </div>
 </div>
 
@@ -391,9 +405,7 @@ if(themeSelector){
   };
 }
 
-function applyTheme(theme){
-  document.body.className = theme + '-theme';
-}
+// applyTheme è definita globalmente da theme-loader.js
 document.getElementById('publicProfile').addEventListener('change', async e=>{
   const value = e.target.checked;
 
@@ -405,6 +417,57 @@ document.getElementById('publicProfile').addEventListener('change', async e=>{
       .doc(auth.currentUser.uid)
       .set({ profilePublic:value }, { merge:true });
   }
+});
+
+// ── LIBRERIA NEL PROFILO ──
+const GAME_CATALOG = {
+  dantes_revenge: {
+    title: "Dante's Revenge",
+    img: "img/TITLEPIC.png",
+    badge: "Beta 1.0",
+    url: "dantes_revenge.html"
+  }
+  // Aggiungi altri giochi qui quando disponibili
+};
+
+async function loadLibrarySection(uid) {
+  const listEl = document.getElementById('libraryList');
+  if (!listEl) return;
+  try {
+    const doc = await db.collection('users').doc(uid).get();
+    const library = (doc.exists && Array.isArray(doc.data().library))
+      ? doc.data().library : [];
+
+    if (library.length === 0) {
+      listEl.innerHTML = '<p class="muted" style="font-style:italic">Non hai ancora aggiunto giochi alla libreria.</p>';
+      return;
+    }
+
+    listEl.innerHTML = library.map(id => {
+      const g = GAME_CATALOG[id];
+      if (!g) return '';
+      return `
+        <div style="display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--muted)">
+          <img src="${g.img}" alt="${g.title}"
+               style="width:64px;height:48px;object-fit:cover;border-radius:8px;border:1px solid var(--accent)">
+          <div style="flex:1">
+            <strong>${g.title}</strong>
+            <div style="margin-top:2px">
+              <span style="background:var(--accent);color:#fff;padding:2px 8px;border-radius:4px;font-size:11px">${g.badge}</span>
+            </div>
+          </div>
+          <a href="${g.url}" class="btn" style="text-decoration:none;padding:6px 14px;font-size:13px">Gioca</a>
+        </div>`;
+    }).join('');
+  } catch(e) {
+    listEl.innerHTML = '<p class="muted">Errore nel caricamento della libreria.</p>';
+  }
+}
+
+// Chiama loadLibrarySection dopo che l'utente è stato caricato
+// Usiamo un secondo onAuthStateChanged dedicato per non interferire con quello principale
+auth.onAuthStateChanged(user => {
+  if (user) loadLibrarySection(user.uid);
 });
 </script>
 

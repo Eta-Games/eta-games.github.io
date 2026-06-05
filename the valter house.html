@@ -10,22 +10,574 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
   <link rel="icon" type="image/jpeg" href="img/channels4_profile.jpg">
+  <style>
+:root { --arcColor: #c5a46d; }
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
-    authDomain: "etagames-b5d6a.firebaseapp.com",
-    projectId: "etagames-b5d6a",
-    messagingSenderId: "809625655346",
-    appId: "1:809625655346:web:3010a62960fde91787842b"
-  };
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-</script>
+.arc-terminal {
+  margin-top: 100px; padding: 40px; background: #050505;
+  border-radius: 15px; position: relative; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.arc-terminal::before {
+  content: ""; position: absolute; inset: 0;
+  background: repeating-linear-gradient(to bottom,rgba(255,255,255,0.03),rgba(255,255,255,0.03) 2px,transparent 2px,transparent 4px);
+  pointer-events: none; animation: lcdMove 6s linear infinite;
+}
+@keyframes lcdMove { from{transform:translateY(0)} to{transform:translateY(6px)} }
+
+.arc-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:40px; }
+.arc-logo-wrapper { position:relative; width:90px; height:90px; }
+.arc-logo { width:90px; height:90px; border-radius:50%; border:3px solid var(--arcColor); animation:pulseLogo 2s infinite; }
+.arc-logo-ring { position:absolute; inset:-8px; border-radius:50%; border:1px solid var(--arcColor); animation:rotateLogo 8s linear infinite; }
+@keyframes rotateLogo { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+@keyframes pulseLogo { 0%,100%{box-shadow:0 0 10px var(--arcColor)} 50%{box-shadow:0 0 25px var(--arcColor)} }
+.arc-chapter-info h2 { color:var(--arcColor); letter-spacing:4px; }
+.arc-nav button { background:none; border:1px solid var(--arcColor); color:var(--arcColor); padding:10px 15px; margin:0 5px; cursor:pointer; transition:0.3s; }
+.arc-nav button:hover { background:var(--arcColor); color:black; }
+
+.arc-levels-grid { display:grid; gap:20px; }
+.arc-level { display:flex; gap:20px; border:1px solid rgba(255,255,255,0.08); padding:15px; border-radius:10px; background:rgba(255,255,255,0.02); cursor:pointer; transition:0.4s; }
+.arc-level:hover { border-color:var(--arcColor); box-shadow:0 0 20px var(--arcColor); }
+.arc-level img { width:120px; height:80px; object-fit:cover; border-radius:6px; }
+.arc-level-text h4 { margin:0; color:var(--arcColor); }
+.arc-level-text p { margin-top:5px; font-size:14px; color:#ccc; }
+
+/* =============================================
+   BOSS CARD — collassabile, cuori, velocità %
+   ============================================= */
+.arc-bosses-section { margin-top:36px; }
+.arc-bosses-section > h3 {
+  font-size:10px; letter-spacing:3px; text-transform:uppercase;
+  color:rgba(255,255,255,0.25); margin-bottom:16px;
+  padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05);
+}
+
+.arc-boss-card {
+  background:#0a0a0a;
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:14px; overflow:hidden;
+  transition:border-color 0.3s, box-shadow 0.3s;
+  position:relative;
+}
+.arc-boss-card::after {
+  content:""; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,transparent,var(--arcColor),transparent);
+}
+
+/* ---- HEADER (sempre visibile, cliccabile) ---- */
+.arc-boss-header {
+  display:flex; align-items:center; gap:16px;
+  padding:16px 20px; cursor:pointer;
+  user-select:none;
+  transition:background 0.25s;
+}
+.arc-boss-header:hover { background:rgba(255,255,255,0.02); }
+
+.arc-boss-image {
+  width:72px; height:72px; object-fit:cover;
+  border-radius:50%; border:2px solid var(--arcColor);
+  box-shadow:0 0 12px var(--arcColor); flex-shrink:0;
+  transition:box-shadow 0.3s;
+}
+.arc-boss-card.open .arc-boss-image { box-shadow:0 0 22px var(--arcColor); }
+
+.arc-boss-header-text { flex:1; }
+.arc-boss-name {
+  font-size:17px; font-weight:bold; color:var(--arcColor);
+  margin:0 0 3px; letter-spacing:1px; font-family:'Courier New',monospace;
+}
+.arc-boss-class {
+  font-size:10px; color:rgba(255,255,255,0.3);
+  letter-spacing:3px; text-transform:uppercase; margin:0;
+}
+
+/* chevron */
+.arc-boss-chevron {
+  font-size:12px; color:var(--arcColor);
+  transition:transform 0.3s; margin-left:auto; flex-shrink:0;
+}
+.arc-boss-card.open .arc-boss-chevron { transform:rotate(180deg); }
+
+/* ---- BODY (collassabile) ---- */
+.arc-boss-body {
+  max-height:0; overflow:hidden;
+  transition:max-height 0.45s ease, opacity 0.3s;
+  opacity:0;
+}
+.arc-boss-card.open .arc-boss-body {
+  max-height:800px; opacity:1;
+}
+
+.arc-boss-description {
+  padding:0 20px 16px; font-size:13px; color:#999;
+  line-height:1.65; border-bottom:1px solid rgba(255,255,255,0.05); margin:0;
+}
+
+/* ---- STATS GRID ---- */
+.arc-boss-stats {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.arc-stat {
+  padding:13px 10px; text-align:center;
+  border-right:1px solid rgba(255,255,255,0.05);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.arc-stat:nth-child(3n) { border-right:none; }
+.arc-stat:nth-last-child(-n+3) { border-bottom:none; }
+.arc-stat-label {
+  display:block; font-size:9px; letter-spacing:2px;
+  text-transform:uppercase; color:rgba(255,255,255,0.25); margin-bottom:6px;
+}
+.arc-stat-value {
+  display:block; font-size:15px; font-weight:bold;
+  color:var(--arcColor); font-family:'Courier New',monospace; line-height:1.2;
+}
+.arc-stat-unit { display:block; font-size:9px; color:rgba(255,255,255,0.2); margin-top:2px; }
+
+/* ---- CUORI (HP) ---- */
+.arc-hp-hearts { font-size:18px; letter-spacing:1px; line-height:1; }
+.arc-hp-label  { font-size:9px; color:rgba(255,255,255,0.3); margin-top:3px; letter-spacing:1px; }
+
+/* ---- VELOCITÀ % ---- */
+.arc-speed-main { font-size:14px; font-weight:bold; color:var(--arcColor); font-family:'Courier New',monospace; }
+.arc-speed-pct  { font-size:11px; color:rgba(255,255,255,0.4); }
+
+/* ---- THREAT BAR ---- */
+.arc-boss-threat { padding:13px 20px 10px; border-bottom:1px solid rgba(255,255,255,0.05); }
+.arc-threat-row  { display:flex; justify-content:space-between; align-items:center; margin-bottom:7px; }
+.arc-threat-tag  { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.25); }
+.arc-threat-level-text { font-size:11px; font-weight:bold; letter-spacing:1px; }
+.arc-threat-bar-bg   { height:3px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; }
+.arc-threat-bar-fill { height:100%; border-radius:3px; animation:threatPulse 2.2s ease-in-out infinite; }
+@keyframes threatPulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
+
+/* ---- DEBOLEZZE ---- */
+.arc-boss-weakness { padding:11px 20px 17px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.arc-weakness-label { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.2); }
+.arc-weakness-tag   { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); border-radius:4px; padding:3px 8px; font-size:11px; color:#bbb; }
+
+/* =============================================
+   PERSONAGGI — DOSSIER A.R.C.
+   ============================================= */
+.arc-char-header { margin-bottom:28px; }
+.arc-char-header-tag {
+  display:inline-block; font-size:9px; letter-spacing:3px; text-transform:uppercase;
+  color:rgba(255,255,255,0.25); border:1px solid rgba(255,255,255,0.08);
+  padding:4px 10px; border-radius:4px; margin-bottom:10px;
+}
+.arc-char-header-section h2 { margin:0; }
+
+.arc-char-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:18px;
+}
+
+.arc-char-card {
+  background:#0a0a0a; border:1px solid rgba(255,255,255,0.07);
+  border-radius:14px; overflow:hidden; position:relative;
+  transition:border-color 0.3s, box-shadow 0.3s;
+}
+.arc-char-card::after {
+  content:""; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,transparent,var(--charColor,#c5a46d),transparent);
+}
+.arc-char-card:hover {
+  border-color:var(--charColor,#c5a46d);
+  box-shadow:0 0 28px rgba(0,0,0,0.5), 0 0 14px var(--charColor,#c5a46d);
+}
+
+.arc-char-header-row {
+  display:flex; align-items:center; gap:15px; padding:16px 18px;
+  cursor:pointer; user-select:none; transition:background 0.2s;
+}
+.arc-char-header-row:hover { background:rgba(255,255,255,0.02); }
+
+.arc-char-portrait-wrap { position:relative; flex-shrink:0; }
+.arc-char-portrait {
+  width:66px; height:66px; object-fit:cover; border-radius:50%;
+  border:2px solid var(--charColor,#c5a46d);
+  box-shadow:0 0 10px var(--charColor,#c5a46d);
+  display:block; transition:box-shadow 0.3s;
+}
+.arc-char-card.open .arc-char-portrait { box-shadow:0 0 22px var(--charColor,#c5a46d); }
+
+.arc-char-status-dot {
+  position:absolute; bottom:2px; right:2px;
+  width:11px; height:11px; border-radius:50%;
+  border:2px solid #0a0a0a;
+}
+
+.arc-char-meta { flex:1; min-width:0; }
+.arc-char-name {
+  font-size:15px; font-weight:bold; color:var(--charColor,#c5a46d);
+  margin:0 0 3px; letter-spacing:0.8px; font-family:'Courier New',monospace;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.arc-char-role {
+  font-size:10px; color:rgba(255,255,255,0.28);
+  letter-spacing:2.5px; text-transform:uppercase; margin:0 0 6px;
+}
+.arc-char-status-badge {
+  display:inline-block; font-size:9px; letter-spacing:1.5px;
+  text-transform:uppercase; padding:2px 7px; border-radius:3px; font-weight:bold;
+}
+
+.arc-char-chevron {
+  font-size:11px; color:var(--charColor,#c5a46d);
+  transition:transform 0.3s; flex-shrink:0;
+}
+.arc-char-card.open .arc-char-chevron { transform:rotate(180deg); }
+
+.arc-char-body {
+  max-height:0; overflow:hidden;
+  transition:max-height 0.45s ease, opacity 0.3s; opacity:0;
+}
+.arc-char-card.open .arc-char-body { max-height:900px; opacity:1; }
+
+.arc-char-id-row {
+  padding:0 18px 12px; font-size:10px; letter-spacing:2px;
+  text-transform:uppercase; color:rgba(255,255,255,0.18);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.arc-char-desc {
+  padding:14px 18px; font-size:13px; color:#999;
+  line-height:1.65; border-bottom:1px solid rgba(255,255,255,0.05); margin:0;
+}
+.arc-char-stats {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.arc-char-stat {
+  padding:12px 8px; text-align:center;
+  border-right:1px solid rgba(255,255,255,0.05);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.arc-char-stat:nth-child(3n) { border-right:none; }
+.arc-char-stat:nth-last-child(-n+3) { border-bottom:none; }
+.arc-char-stat .arc-stat-label { color:rgba(255,255,255,0.22); }
+.arc-char-stat .arc-stat-value { color:var(--charColor,#c5a46d); font-size:14px; }
+
+.arc-char-threat { padding:12px 18px 10px; border-bottom:1px solid rgba(255,255,255,0.05); }
+
+.arc-char-tags {
+  padding:11px 18px 16px; display:flex; align-items:center; gap:7px; flex-wrap:wrap;
+}
+.arc-char-tag-label {
+  font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.2);
+}
+.arc-char-tag {
+  background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);
+  border-radius:4px; padding:3px 8px; font-size:11px; color:#bbb;
+}
+
+/* =============================================
+   BESTIARIO — FOGLIO STRACCIATO / DOSSIER
+   ============================================= */
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
+
+#bestiario {
+  margin-top: 60px;
+}
+
+.bst-header-tag {
+  display: inline-block;
+  font-family: 'Special Elite', 'Courier New', monospace;
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: rgba(160,140,100,0.6);
+  border: 1px solid rgba(160,140,100,0.2);
+  padding: 4px 10px; border-radius: 2px; margin-bottom: 12px;
+  background: rgba(30,25,15,0.4);
+}
+.bst-title {
+  font-family: 'Special Elite', 'Courier New', monospace;
+  color: #b8a070; margin: 0 0 6px; letter-spacing: 2px;
+}
+.bst-subtitle {
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  font-size: 12px; color: rgba(160,140,100,0.4); letter-spacing: 1px;
+  margin: 0 0 32px;
+}
+
+.bst-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 28px;
+}
+
+.bst-card {
+  position: relative;
+  background: #1a1710;
+  border-radius: 2px;
+  padding: 24px 22px 20px;
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  /* torn paper effect */
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.03),
+    2px 3px 12px rgba(0,0,0,0.6),
+    inset 0 0 40px rgba(0,0,0,0.3);
+  /* subtle paper texture via gradient */
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 27px,
+      rgba(160,140,80,0.04) 27px,
+      rgba(160,140,80,0.04) 28px
+    );
+  border-left: 3px solid rgba(160,120,60,0.15);
+  filter: contrast(1.02);
+  /* slight random tilt via nth-child */
+}
+.bst-card::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; border-radius: 2px; opacity: 0.5;
+  mix-blend-mode: overlay;
+}
+.bst-card:nth-child(odd)  { transform: rotate(-0.4deg); }
+.bst-card:nth-child(even) { transform: rotate(0.3deg); }
+.bst-card:nth-child(3n)   { transform: rotate(-0.2deg); }
+.bst-card:last-child      { transform: rotate(0.5deg); }
+.bst-card:hover { transform: rotate(0deg) scale(1.01); z-index:2; box-shadow: 3px 5px 20px rgba(0,0,0,0.7); transition: 0.2s; }
+
+/* torn top edge */
+.bst-card::after {
+  content: "";
+  position: absolute; top: -3px; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg,
+    #1a1710 0%, #111008 8%, #1a1710 15%, #0e0d08 23%,
+    #1a1710 31%, #131108 42%, #1a1710 55%, #0f0e09 67%,
+    #1a1710 78%, #121008 89%, #1a1710 100%
+  );
+  clip-path: polygon(0% 100%, 2% 0%, 5% 80%, 8% 10%, 12% 90%, 16% 20%, 20% 70%, 25% 0%, 30% 85%, 35% 15%, 40% 75%, 45% 5%, 50% 90%, 55% 20%, 60% 80%, 65% 10%, 70% 70%, 75% 0%, 80% 85%, 85% 15%, 90% 60%, 94% 0%, 97% 80%, 100% 30%, 100% 100%);
+}
+
+.bst-card-top {
+  display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(160,140,80,0.12);
+}
+.bst-carousel-wrapper {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.bst-grid {
+  display: flex;
+  gap: 14px;
+  transition: transform 0.35s ease;
+  width: 100%;
+}
+.bst-card {
+  min-width: 100%;
+  max-width: 100%;
+  flex: 0 0 100%;
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  box-sizing: border-box;
+  background: rgba(7, 7, 7, 0.82);
+  border: 1px solid rgba(200, 180, 120, 0.22);
+  border-radius: 10px;
+}
+.bst-card .bst-card-top, .bst-card .bst-desc, .bst-card .bst-classified-overlay { max-height: 100%; }
+.bst-card .bst-desc { overflow-y: auto; }
+.bst-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 999;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 12px rgba(0,0,0,0.4);
+}
+.bst-nav-btn:hover { background: rgba(255,255,255,0.08); }
+.bst-nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+#bst-prev { left: -18px; }
+#bst-next { right: -18px; }
+.bst-pagination { margin-top: 10px; text-align: center; color: #c7b182; font-size: 13px; }
+.bst-portrait {
+  width: 52px; height: 52px; border-radius: 2px; object-fit: cover;
+  border: 1px solid rgba(160,120,60,0.25);
+  filter: sepia(0.6) contrast(0.9) brightness(0.75);
+  flex-shrink: 0;
+}
+.bst-portrait-placeholder {
+  width: 52px; height: 52px; border-radius: 2px;
+  border: 1px solid rgba(160,120,60,0.15);
+  background: #0e0d08;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: rgba(160,140,80,0.2);
+  flex-shrink: 0;
+}
+.bst-card-meta { flex: 1; }
+.bst-entity-name {
+  font-family: 'Special Elite', 'Courier New', monospace;
+  font-size: 16px; color: #c8aa70; letter-spacing: 1px;
+  margin: 0 0 3px; line-height: 1.2;
+}
+.bst-entity-class {
+  font-size: 9px; color: rgba(160,140,80,0.35);
+  letter-spacing: 2px; text-transform: uppercase;
+  margin: 0 0 6px;
+}
+.bst-stamp {
+  display: inline-block; font-size: 7px; letter-spacing: 2px;
+  text-transform: uppercase; padding: 2px 6px;
+  border: 1px solid rgba(160,50,50,0.3); border-radius: 1px;
+  color: rgba(180,60,60,0.4); font-family: 'Special Elite', monospace;
+  transform: rotate(-2deg); display: inline-block;
+}
+.bst-desc {
+  font-size: 12.5px; color: rgba(200,185,140,0.55);
+  line-height: 1.75; margin: 0;
+  /* slight handwritten feel */
+}
+.bst-classified-overlay {
+  font-size: 11px; color: rgba(160,50,50,0.25);
+  font-family: 'Special Elite', monospace;
+  letter-spacing: 4px; text-transform: uppercase;
+  margin-top: 14px; text-align: right;
+}
+.bst-redacted {
+  background: rgba(20,15,8,0.9);
+  color: rgba(20,15,8,0.9);
+  border-radius: 1px;
+  user-select: none;
+  padding: 0 4px;
+}
+
+.bst-carousel-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  overflow: hidden;
+  position: relative;
+}
+.bst-grid {
+  display: flex;
+  gap: 16px;
+  transition: transform 0.32s ease;
+  width: 100%;
+}
+.bst-card {
+  min-width: 100%;
+  max-width: 100%;
+  flex: 0 0 100%;
+}
+.bst-nav-btn {
+  border: 1px solid rgba(255,255,255,0.24);
+  color: #fff;
+  background: rgba(0,0,0,0.55);
+  border-radius: 6px;
+  width: 42px;
+  height: 42px;
+  cursor: pointer;
+  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+}
+.bst-nav-btn:hover {
+  background: rgba(255,255,255,0.1);
+  transform: scale(1.05);
+}
+.bst-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.screens-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+.screens-grid img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: zoom-in;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+.screens-grid img:hover {
+  transform: scale(1.02);
+  filter: brightness(1.05);
+}
+.screens-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+.screens-lightbox.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.screens-lightbox img {
+  max-width: 92vw;
+  max-height: 92vh;
+  border-radius: 8px;
+  box-shadow: 0 0 32px rgba(0, 0, 0, 0.45);
+}
+.screens-lightbox .lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 28px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.screens-lightbox .lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+
+  </style>
+  <script>
+    const firebaseConfig = {
+      apiKey:"AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
+      authDomain:"etagames-b5d6a.firebaseapp.com",
+      projectId:"etagames-b5d6a",
+      messagingSenderId:"809625655346",
+      appId:"1:809625655346:web:3010a62960fde91787842b"
+    };
+    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth=firebase.auth();
+    const db=firebase.firestore();
+  </script>
 </head>
 <body>
-  <!-- HEADER -->
   <header>
     <div class="container">
       <nav>
@@ -38,7 +590,7 @@
         </div>
         <div class="nav-links">
           <a href="index.html">Home</a>
-          <a href="games.html"class="active">Giochi</a>
+          <a href="games.html" class="active">Giochi</a>
           <a href="extra.html">Extra</a>
           <a href="login.html">Profilo</a>
           <a href="blog.html">Blog</a>
@@ -47,17 +599,11 @@
     </div>
   </header>
 
-  <!-- HERO -->
   <section class="hero container">
     <div>
       <h1>The Valter House</h1>
-      <p>
-        Un horror psicologico che unisce mistero e atmosfera immersiva.  
-        È il 12/09/2016. Emily Yelter sparisce all’interno di una misteriosa casa nel mezzo di un bosco. Nessuno sa dove sia finita. Emily è stata rinchiusa all’interno della casa di Valter, una creatura demoniaca che ora la tiene prigioniera. Dovrà affrontare numerosi livelli e capitoli per trovare la via di fuga, prima che sia troppo tardi.
-      </p>
-	  <p> <strong>
-	    La beta di The Valter house sara disponibile a breve. non perderti i prossimi update
-	  </strong> </p>
+      <p>Un horror psicologico che unisce mistero e atmosfera immersiva. È il 12/09/2016. Emily Mason sparisce all'interno di una misteriosa casa nel mezzo di un bosco. Nessuno sa dove sia finita. Emily è stata rinchiusa all'interno della casa di Valter, una creatura demoniaca che ora la tiene prigioniera. Dovrà affrontare numerosi livelli e capitoli per trovare la via di fuga, prima che sia troppo tardi.</p>
+      <p><strong>La beta di The Valter house sara disponibile a breve. non perderti i prossimi update</strong></p>
       <div class="btn-group">
         <a href="#" class="btn">Scarica Demo</a>
         <a href="#characters" class="btn">Esplora i personaggi</a>
@@ -67,23 +613,22 @@
       <h2>Dettagli</h2>
       <p><strong>Genere:</strong> Horror</p>
       <p><strong>Piattaforme:</strong> PC/Windows</p>
-	  <p><strong>made in:</strong> UNREAL ENGINE 5.5</p>
+      <p><strong>made in:</strong> UNREAL ENGINE 5.5</p>
       <div class="tags">
         <span class="badge">Survival Horror</span>
         <span class="badge">Horror Psicologico</span>
         <span class="badge">FPS</span>
-		<span class="badge">Metroidvania</span>
+        <span class="badge">Metroidvania</span>
       </div>
     </div>
   </section>
-  
-  <!-- CARATTERISTICHE -->
+
   <section class="container">
     <h2>Caratteristiche principali</h2>
     <div class="cards">
       <div class="feature">
         <h3>🕯 Atmosfera unica</h3>
-        <p class="muted">Ambienti liminali e claustrofobici, la storia è ambientata in una cantina divise in zone spazzi piccoli e angusti </p>
+        <p class="muted">Ambienti liminali e claustrofobici, la storia è ambientata in una cantina divise in zone spazzi piccoli e angusti</p>
       </div>
       <div class="feature">
         <h3>🧩 Enigmi</h3>
@@ -93,14 +638,13 @@
         <h3>📖 Lore profonda</h3>
         <p class="muted">Una storia ricca di misteri e simbolismi, da ricostruire pezzo per pezzo.</p>
       </div>
-	  <div class="feature">
+      <div class="feature">
         <h3>🎸 capitoli Mai visti</h3>
         <p class="muted">ogni capitolo del gioco porta il titolo di un brano di deversi generi che variano dal nu metal all pop e al rap</p>
       </div>
     </div>
   </section>
 
-  <!-- SEZIONE SCREEN -->
   <section class="container">
     <h2>Screenshot e Immagini</h2>
     <div class="screens-grid">
@@ -109,88 +653,764 @@
       <img src="img/Screenshot-2025-07-16-015531.png" alt="Screenshot 3 di The Valter House">
       <img src="img/image.png" alt="Screenshot 4 di The Valter House">
     </div>
+    <div class="screens-lightbox" id="screens-lightbox" aria-hidden="true">
+      <button class="lightbox-close" id="lightbox-close" aria-label="Chiudi immagine">×</button>
+      <img id="lightbox-img" src="" alt="" />
+    </div>
   </section>
 
-  <!-- SEZIONE PERSONAGGI -->
   <section class="container" id="characters">
     <h2>Personaggi principali</h2>
     <div class="characters-section">
-      <!-- Lista personaggi -->
       <div class="characters-list">
-        <button class="character-btn active" data-img="img/valter.png" data-desc="Il Vecchio appare come un uomo anziano di circa 70 anni. I pochi dati riscontrati dall’A.R.C. dimostrano che possiede un notevole istinto per la caccia e per la cattura delle sue prede. Le immagini ottenute lo mostrano mentre attacca i viandanti con armi artigianali, come coltelli, tegole e, a volte, persino pugnali. Una volta ottenuta una presa sufficiente su una sua preda, la spinge verso il muro; da lì un liquido nero e denso apparirà sulla superficie, facendo sparire il viandante e il Vecchio all’interno. Nessuno, al momento dell’aggiornamento [16/07/2016], è stato più ritrovato. L’A.R.C. sta organizzando pattuglie per cercare di salvare l’ultima vittima.">Valter (il Vecchio)</button>
-        
-        <button class="character-btn" data-img="img/emily.png" data-desc="Emily Yelter è una ragazza di 16 anni, residente in un piccolo paese in mezzo al nulla. In data odierna [12/09/2016] di lei non si hanno più tracce. È stata vista l’ultima volta da tre dei suoi amici e, da allora, non si è saputo più nulla. I ragazzi giurano di non sapere dove si trovi e sono state avviate indagini di copertura nei loro confronti. La ragazza è stata ripresa per l’ultima volta all’esterno della casa. L’A.R.C. ha avviato una ricerca per tentare di salvarla, sempre che non sia già troppo tardi.">Emily Yelter</button>
-        
-        <button class="character-btn" data-img="img/stefano bianchi.png" data-desc="Stefano Bianchi è un uomo di circa 30 anni. È stato un avvocato riconosciuto nel suo paese e nei dintorni, avendo anche la possibilità di insegnare la professione nelle scuole, tutto fino al 18/08/2016, durante un’escursione in un bosco. La vicenda è stata rapidamente insabbiata dall’A.R.C., che ha offerto ingenti somme di denaro e aggiornamenti regolari in cambio del silenzio da parte delle autorità federali. Attualmente è confermata l’ultima apparizione dell’avvocato Bianchi in una zona limitrofa a quella della casa di Valter; non si hanno ancora notizie su di lui.">Stefano Bianchi</button>
-        
-        <button class="character-btn" data-img="img/demociccione.png" data-desc="Gli Abomini sono creature predatrici che cacciano le loro vittime grazie a una combinazione letale di forza bruta e velocità. La loro caratteristica più distintiva è la capacità di proteggere il cervello attraverso complesse strutture craniche, che ne rendono difficile l’eliminazione. Estremamente famelici, possono divorare in un solo pasto fino a quattro volte il proprio peso corporeo.
-Nonostante la loro potenza, possiedono alcune debolezze: la testa se non protetta rimane un punto vulnerabile e i loro sensi risultano poco sviluppati, costringendoli a fare affidamento soprattutto sull’aggressività fisica.
-Un mistero inquietante accompagna queste creature: tutti gli Abomini presentano il volto di una ragazza di circa 14 anni. Le ragioni di questa anomalia restano ignote, ma l’A.R.C. sta sviluppando diverse teorie per cercare di spiegare il fenomeno."">Abomini</button>
+        <button class="character-btn active" data-img="img/valter.png" data-desc="Il Vecchio appare come un uomo anziano di circa 70 anni. I pochi dati riscontrati dall'A.R.C. dimostrano che possiede un notevole istinto per la caccia e per la cattura delle sue prede. Le immagini ottenute lo mostrano mentre attacca i viandanti con armi artigianali, come coltelli, tegole e, a volte, persino pugnali. Una volta ottenuta una presa sufficiente su una sua preda, la spinge verso il muro; da lì un liquido nero e denso apparirà sulla superficie, facendo sparire il viandante e il Vecchio all'interno. Nessuno, al momento dell'aggiornamento [16/07/2016], è stato più ritrovato. L'A.R.C. sta organizzando pattuglie per cercare di salvare l'ultima vittima.">Valter (il Vecchio)</button>
+        <button class="character-btn" data-img="img/emily.png" data-desc="Emily Mason è una ragazza di 16 anni, residente in un piccolo paese in mezzo al nulla. In data odierna [12/09/2016] di lei non si hanno più tracce. È stata vista l'ultima volta da tre dei suoi amici e, da allora, non si è saputo più nulla. I ragazzi giurano di non sapere dove si trovi e sono state avviate indagini di copertura nei loro confronti. La ragazza è stata ripresa per l'ultima volta all'esterno della casa. L'A.R.C. ha avviato una ricerca per tentare di salvarla, sempre che non sia già troppo tardi.">Emily Mason</button>
+        <button class="character-btn" data-img="img/stefano bianchi.png" data-desc="Stefano Bianchi è un uomo di circa 30 anni. È stato un avvocato riconosciuto nel suo paese e nei dintorni, avendo anche la possibilità di insegnare la professione nelle scuole, tutto fino al 18/08/2016, durante un'escursione in un bosco. La vicenda è stata rapidamente insabbiata dall'A.R.C., che ha offerto ingenti somme di denaro e aggiornamenti regolari in cambio del silenzio da parte delle autorità federali. Attualmente è confermata l'ultima apparizione dell'avvocato Bianchi in una zona limitrofa a quella della casa di Valter; non si hanno ancora notizie su di lui.">Stefano Bianchi</button>
+        <button class="character-btn" data-img="img/ARC-soldier.png" data-desc="L'Advanced Reaserc Center (A.R.C.) è un'organizzazione classificata che opera nell'ombra da decenni. Il suo mandato ufficiale è il monitoraggio, lo studio e la neutralizzazione di entità soprannaturali che rappresentano una minaccia per la popolazione civile. La casa di Valter è uno dei loro dossier più vecchi e più scomodi — il file esiste dal 1987, ma le pagine centrali risultano rimosse. L'A.R.C. sa molto più di quello che dice.">A.R.C. — Agenzia</button>
       </div>
-
-      <!-- Visualizzazione grande -->
       <div class="character-display">
         <img id="char-image" src="img/valter.png" alt="Character">
-        <p id="char-desc">Il Vecchio appare come un uomo anziano di circa 70 anni. I pochi dati riscontrati dall’A.R.C. dimostrano che possiede un notevole istinto per la caccia e per la cattura delle sue prede. Le immagini ottenute lo mostrano mentre attacca i viandanti con armi artigianali, come coltelli, tegole e, a volte, persino pugnali. Una volta ottenuta una presa sufficiente su una sua preda, la spinge verso il muro; da lì un liquido nero e denso apparirà sulla superficie, facendo sparire il viandante e il Vecchio all’interno. Nessuno, al momento dell’aggiornamento [16/07/2016], è stato più ritrovato. L’A.R.C. sta organizzando pattuglie per cercare di salvare l’ultima vittima.</p>
+        <p id="char-desc">Il Vecchio appare come un uomo anziano di circa 70 anni. I pochi dati riscontrati dall'A.R.C. dimostrano che possiede un notevole istinto per la caccia e per la cattura delle sue prede. Le immagini ottenute lo mostrano mentre attacca i viandanti con armi artigianali, come coltelli, tegole e, a volte, persino pugnali. Una volta ottenuta una presa sufficiente su una sua preda, la spinge verso il muro; da lì un liquido nero e denso apparirà sulla superficie, facendo sparire il viandante e il Vecchio all'interno. Nessuno, al momento dell'aggiornamento [16/07/2016], è stato più ritrovato. L'A.R.C. sta organizzando pattuglie per cercare di salvare l'ultima vittima.</p>
       </div>
     </div>
   </section>
 
-  <!-- FOOTER -->
-    <footer>
+  <section class="container arc-terminal" id="levels">
+    <div class="arc-top">
+      <div class="arc-logo-wrapper">
+        <div class="arc-logo"></div>
+        <div class="arc-logo-ring"></div>
+      </div>
+      <div class="arc-chapter-info">
+        <h2 id="arc-chapter-name">CAPITOLO I</h2>
+        <p id="arc-chapter-sub">Anomalia Primaria</p>
+      </div>
+      <div class="arc-nav">
+        <button id="prevChapter">&#9664;</button>
+        <button id="nextChapter">&#9654;</button>
+      </div>
+    </div>
+
+    <div class="arc-levels-grid" id="arcLevels"></div>
+
+    <div class="arc-expanded-section" id="arcExpanded">
+      <button class="arc-close-expanded" id="arcCloseExpanded">&#10005; Chiudi</button>
+      <div class="arc-expanded-header">
+        <div class="arc-expanded-title">
+          <h2 id="expTitle"></h2>
+          <p id="expDesc"></p>
+          <p id="expQuote" style="font-style:italic;color:#f0f0f0;margin-top:8px;opacity:0.9;"></p>
+        </div>
+      </div>
+      <div class="arc-expanded-content">
+        <div class="arc-content-main"><p id="expContent"></p></div>
+        <div class="arc-objectives">
+          <h3>Obiettivi</h3>
+          <ul id="expObjectives"></ul>
+        </div>
+      </div>
+      <div class="arc-bosses-section" id="arcBossesSection">
+        <h3>&#9888; Pericoli Classificati &mdash; Dossier A.R.C.</h3>
+        <div class="arc-bosses-grid" id="arcBossesGrid"></div>
+      </div>
+      <div class="arc-expanded-gallery">
+        <h3>Galleria</h3>
+        <div class="arc-gallery-grid" id="expGallery"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ BESTIARIO ═══════════════ -->
+  <section class="container" id="bestiario">
+    <div style="margin-bottom:28px;">
+      <div class="bst-header-tag">A.R.C. — DOSSIER ENTITÀ CLASSIFICATE // USO INTERNO</div>
+      <h2 class="bst-title">Bestiario</h2>
+      <p class="bst-subtitle">aggiornamento: 16.07.2016 — compilatore: <span class="bst-redacted">████████</span></p>
+    </div>
+    <div class="bst-carousel-wrapper">
+      <button class="bst-nav-btn" id="bst-prev" aria-label="Mostra precedente">◀</button>
+      <div class="bst-grid" id="bst-grid">
+
+        <!-- ABOMINI -->
+        <div class="bst-card">
+          <div class="bst-card-top">
+          <img src="img/demociccione.png" class="bst-portrait" alt="Abomini">
+          <div class="bst-card-meta">
+            <div class="bst-entity-name">Abomini</div>
+            <div class="bst-entity-class">predatori — spawn di gruppo</div>
+            <div class="bst-stamp">pericolosità: alta</div>
+          </div>
+        </div>
+        <p class="bst-desc">Creature predatrici. Cacciano in branco, strutture craniche rinforzate. Famelici — divorano fino a quattro volte il loro peso. Debolezza primaria: testa scoperta se non protetta.<br><br>Nota: <em>tutti gli esemplari catalogati presentano il volto di una ragazza di circa 14 anni. origine del fenomeno <span class="bst-redacted">████ sconosciuta</span>.</em></p>
+        <div class="bst-classified-overlay">file #0041 — riservato</div>
+      </div>
+
+      <!-- THE TRANS'S -->
+      <div class="bst-card">
+        <div class="bst-card-top">
+          <img src="img/demociccione.png" class="bst-portrait" alt="The Trans">
+          <div class="bst-card-meta">
+            <div class="bst-entity-name">The Trans&#39;s</div>
+            <div class="bst-entity-class">entità parassita — spawn di gruppo</div>
+            <div class="bst-stamp">pericolosità: critica</div>
+          </div>
+        </div>
+        <p class="bst-desc">Origine: <span class="bst-redacted">████████████</span>. Ipotesi operativa: ex-agenti infiltrati assorbiti dalla struttura. Conservano brandelli di identità — nomi, voci, movimenti — e li utilizzano come esca. Debolezza: <span class="bst-redacted">reagente inc████████</span>.<br><br><em>chi li ha incontrati e sopravvissuto non ricorda nulla di preciso.</em></p>
+        <div class="bst-classified-overlay">file #0078 — alto segreto</div>
+      </div>
+
+      <!-- ONRYO -->
+      <div class="bst-card">
+        <div class="bst-card-top">
+          <img src="img/emily.png" class="bst-portrait" alt="Onryo">
+          <div class="bst-card-meta">
+            <div class="bst-entity-name">Onryo</div>
+            <div class="bst-entity-class">spettro invisibile — spawn di gruppo</div>
+            <div class="bst-stamp">pericolosità: alta</div>
+          </div>
+        </div>
+        <p class="bst-desc">Invisibili in condizioni normali. Presenza rilevabile tramite calo termico improvviso e distorsione audio. Metodo di neutralizzazione confermato: esposizione a luce diretta. Senza luce — <em>eliminazione praticamente impossibile.</em><br><br>Velocità registrata: 9.0 m/s. Massa: 0 kg.</p>
+        <div class="bst-classified-overlay">file #0093 — riservato</div>
+      </div>
+
+      <!-- THE MATRIX -->
+      <div class="bst-card">
+        <div class="bst-card-top">
+          <div class="bst-portrait-placeholder">?</div>
+          <div class="bst-card-meta">
+            <div class="bst-entity-name" style="color:rgba(200,185,140,0.25);">The Matrix</div>
+            <div class="bst-entity-class" style="color:rgba(160,140,80,0.15);">classificazione: sconosciuta</div>
+            <div class="bst-stamp" style="border-color:rgba(160,50,50,0.15);color:rgba(180,60,60,0.2);">dossier vuoto</div>
+          </div>
+        </div>
+        <p class="bst-desc" style="color:rgba(200,185,140,0.2);">[ pagine mancanti ]<br><br>l'analista assegnato a questo file non si è più presentato in ufficio dopo il <span class="bst-redacted">██/██/████</span>.<br><br><em style="color:rgba(200,185,140,0.12);">nessun altro ha aperto questo dossier da allora.</em></p>
+        <div class="bst-classified-overlay" style="color:rgba(160,50,50,0.12);">file #<span class="bst-redacted">████</span> — <span class="bst-redacted">███████████</span></div>
+      </div>
+
+    </div>
+    <button class="bst-nav-btn" id="bst-next" aria-label="Mostra successivo">▶</button>
+    <div class="bst-pagination" id="bst-pagination" aria-live="polite" style="margin-top:12px;text-align:center;color:#c7b182;font-size:13px;"></div>
+  </div>
+  </section>
+
+  <!-- ═══════════════ CAPITOLO 515: IS ALL IN YOUR DREEMS ═══════════════ -->
+  <!-- Hidden until 515 is triggered -->
+  <section id="dreems-section" style="display:none;margin-top:80px;" class="container">
+    <div style="background:#050505;border:1px solid rgba(255,0,0,0.08);border-radius:15px;padding:40px;position:relative;overflow:hidden;">
+      <div style="position:absolute;inset:0;background:repeating-linear-gradient(to bottom,rgba(255,0,0,0.015),rgba(255,0,0,0.015) 2px,transparent 2px,transparent 4px);pointer-events:none;"></div>
+      <div style="position:relative;z-index:1;">
+        <div style="font-size:9px;letter-spacing:4px;text-transform:uppercase;color:rgba(255,50,50,0.3);margin-bottom:16px;font-family:'Courier New',monospace;">A.R.C. — FILE NON CATALOGATO // ACCESSO NEGATO</div>
+        <h1 style="font-family:'Courier New',monospace;color:rgba(255,80,80,0.6);letter-spacing:6px;margin:0 0 8px;font-size:28px;">CAPITOLO 515: is all in your dreems</h1>
+        <div style="width:60px;height:1px;background:rgba(255,50,50,0.2);margin-bottom:28px;"></div>
+        <p style="font-size:13px;color:rgba(255,255,255,0.2);line-height:1.9;font-family:'Courier New',monospace;margin:0 0 18px;">non sei mai entrata nella casa.<br>la casa non esiste.<br>valter non esiste.<br>l'A.R.C. non esiste.</p>
+        <p style="font-size:13px;color:rgba(255,255,255,0.15);line-height:1.9;font-family:'Courier New',monospace;margin:0 0 18px;">emily mason è in ospedale dal 12 settembre 2016.<br>è stata trovata nel bosco, senza memoria.<br>i medici dicono che è in stato vegetativo.<br>i medici non sanno quello che ha visto.</p>
+        <p style="font-size:13px;color:rgba(255,80,80,0.25);line-height:1.9;font-family:'Courier New',monospace;margin:0 0 28px;">tutto quello che hai vissuto — i livelli, le creature, i corridoi —<br>è una costruzione della sua mente.<br>la casa è dentro di lei.<br>valter è dentro di lei.<br>il 515 è il numero del letto in cui giace.</p>
+        <div style="border-top:1px solid rgba(255,50,50,0.08);padding-top:20px;">
+          <div style="font-size:10px;letter-spacing:3px;color:rgba(255,50,50,0.2);font-family:'Courier New',monospace;text-transform:uppercase;">nota finale — analista sconosciuto — data: [REDACTED]</div>
+          <p style="font-size:12px;color:rgba(255,255,255,0.1);line-height:1.8;font-family:'Courier New',monospace;margin:12px 0 0;font-style:italic;">"se stai leggendo questo, hai trovato il numero.<br>significa che sai già la verità.<br>non cercare di svegliarla.<br>è meglio per tutti."</p>
+        </div>
+      </div>
+    </div>
+  
+    <!-- 515 level content shown after unlock -->
+    <div id="level515-expanded" style="display:none;margin-top:40px;padding:32px;background:rgba(255,0,0,0.02);border:1px solid rgba(255,50,50,0.06);border-radius:4px;"></div>
+  </section>
+
+
+
+  <footer>
     <div class="container">
       <div class="footer-grid">
         <div>
           <strong>ETA Games</strong>
-          <div class="muted">© ETA Games — Tutti i diritti riservati</div>
+          <div class="muted">© ETA Games — Tutti i diritti riservati<span style="opacity:0;user-select:none;font-size:0;position:absolute" aria-hidden="true">515</span></div>
         </div>
         <div class="socials muted">
           <a href="https://discord.gg/Da7sq3Mwpw" target="_blank">Discord</a>
           <a href="https://www.youtube.com/@HGames_studio" target="_blank">YouTube</a>
-		  <a href="https://www.instagram.com/eta.games_" target="_blank">instagram</a>
+          <a href="https://www.instagram.com/eta.games_" target="_blank">instagram</a>
         </div>
       </div>
     </div>
   </footer>
 
-  <!-- SCRIPT PERSONAGGI -->
   <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const buttons = document.querySelectorAll('.character-btn');
-  const img = document.getElementById('char-image');
-  const desc = document.getElementById('char-desc');
-  const display = document.querySelector('.character-display');
-
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      // Rimuove active da tutti
-      buttons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      // Fade out
-      display.classList.add('fade');
-
-      setTimeout(() => {
-        // Cambia immagine e descrizione
-        img.src = btn.dataset.img;
-        desc.textContent = btn.dataset.desc;
-        // Fade in
-        display.classList.remove('fade');
-      }, 250); // metà durata della transizione
+  document.addEventListener('DOMContentLoaded',()=>{
+    const buttons=document.querySelectorAll('.character-btn');
+    const img=document.getElementById('char-image');
+    const desc=document.getElementById('char-desc');
+    const display=document.querySelector('.character-display');
+    buttons.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        buttons.forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        display.classList.add('fade');
+        setTimeout(()=>{
+          img.src=btn.dataset.img;
+          desc.textContent=btn.dataset.desc;
+          display.classList.remove('fade');
+        },250);
+      });
     });
   });
-});
-</script>
-<script>
-  auth.onAuthStateChanged(async user => {
-    if (user) {
-      // Prende il tema dal profilo dell'utente loggato
-      const doc = await db.collection('users').doc(user.uid).get();
-      if (doc.exists && doc.data().theme) {
-        document.body.className = doc.data().theme + '-theme';
+  </script>
+
+  <script>
+    // Fallback night-theme se Firebase non risponde o utente non loggato
+    const _themeTimeout = setTimeout(()=>{
+      if(!document.body.className) document.body.className='night-theme';
+    }, 3000);
+
+    auth.onAuthStateChanged(async user=>{
+      clearTimeout(_themeTimeout);
+      if(user){
+        try {
+          const doc=await db.collection('users').doc(user.uid).get();
+          if(doc.exists&&doc.data().theme){
+            document.body.className=doc.data().theme+'-theme';
+          } else {
+            document.body.className='night-theme';
+          }
+        } catch(e){
+          document.body.className='night-theme';
+        }
+      } else {
+        document.body.className='night-theme';
+      }
+    });
+  </script>
+
+  <script>
+    function getThreatConfig(level){
+      const c={
+        "BASSO":    {color:"#4caf50",width:"20%"},
+        "MODERATO": {color:"#ff9800",width:"45%"},
+        "ALTO":     {color:"#f44336",width:"65%"},
+        "CRITICO":  {color:"#e91e63",width:"82%"},
+        "ESTREMO":  {color:"#9c27b0",width:"95%"},
+        "???":      {color:"#ffffff",width:"100%"}
+      };
+      return c[level]||c["MODERATO"];
+    }
+
+    /* Cuori HP: hp è una stringa chiave */
+    function renderHP(hp){
+      const map={
+        "bassa":    {hearts:"❤️",      empty:"🖤🖤🖤🖤", label:"BASSA"},
+        "media":    {hearts:"❤️❤️",    empty:"🖤🖤🖤",   label:"MEDIA"},
+        "alta":     {hearts:"❤️❤️❤️",  empty:"🖤🖤",     label:"ALTA"},
+        "anomalo":  {hearts:"❤️❤️❤️❤️",empty:"🖤",       label:"ANOMALO"},
+        "non registrato":{hearts:"⚫⚫⚫⚫⚫",empty:"",  label:"NON REGISTRATO"}
+      };
+      const k=(hp||"").toLowerCase();
+      const d=map[k]||{hearts:"⚫⚫⚫⚫⚫",empty:"",label:"???"};
+      return `<div class="arc-hp-hearts">${d.hearts}${d.empty}</div>
+              <div class="arc-hp-label">${d.label}</div>`;
+    }
+
+    /* Velocità: "5.0 m/s - 100%" */
+    function renderSpeed(speed){
+      if(!speed||speed==="???") return `<span class="arc-stat-value">???</span>`;
+      // atteso formato "5.0 m/s - 100%" oppure solo numero
+      return `<span class="arc-speed-main">${speed}</span>`;
+    }
+
+    function buildBossCard(boss){
+      const t=getThreatConfig(boss.threat);
+      const s=boss.stats;
+      const cardId="boss-"+Math.random().toString(36).slice(2,7);
+      return `<div class="arc-boss-card" id="${cardId}">
+        <div class="arc-boss-header" onclick="toggleBoss('${cardId}')">
+          <img src="${boss.image}" alt="${boss.name}" class="arc-boss-image">
+          <div class="arc-boss-header-text">
+            <p class="arc-boss-name">${boss.name}</p>
+            <p class="arc-boss-class">${boss.class}</p>
+          </div>
+          <span class="arc-boss-chevron">▼</span>
+        </div>
+        <div class="arc-boss-body">
+          <p class="arc-boss-description">${boss.description}</p>
+          ${!boss.noStats ? `<div class="arc-boss-stats">
+            <div class="arc-stat">
+              <span class="arc-stat-label">Vita</span>
+              ${renderHP(s.hp)}
+            </div>
+            <div class="arc-stat">
+              <span class="arc-stat-label">Velocità</span>
+              ${renderSpeed(s.velocita)}
+            </div>
+            <div class="arc-stat">
+              <span class="arc-stat-label">Danno</span>
+              <span class="arc-stat-value">${s.danno}</span>
+              <span class="arc-stat-unit">DPS</span>
+            </div>
+            <div class="arc-stat">
+              <span class="arc-stat-label">Altezza</span>
+              <span class="arc-stat-value">${s.altezza}</span>
+              <span class="arc-stat-unit">m</span>
+            </div>
+            <div class="arc-stat">
+              <span class="arc-stat-label">Peso</span>
+              <span class="arc-stat-value">${s.peso}</span>
+              <span class="arc-stat-unit">kg</span>
+            </div>
+            <div class="arc-stat">
+              <span class="arc-stat-label">Percezione</span>
+              <span class="arc-stat-value">${s.percezione}</span>
+              <span class="arc-stat-unit">/10</span>
+            </div>
+          </div>
+          <div class="arc-boss-threat">
+            <div class="arc-threat-row">
+              <span class="arc-threat-tag">Livello Minaccia</span>
+              <span class="arc-threat-level-text" style="color:${t.color}">${boss.threat}</span>
+            </div>
+            <div class="arc-threat-bar-bg">
+              <div class="arc-threat-bar-fill" style="width:${t.width};background:${t.color}"></div>
+            </div>
+          </div>
+          <div class="arc-boss-weakness">
+            <span class="arc-weakness-label">Debolezze</span>
+            ${boss.weaknesses.map(w=>`<span class="arc-weakness-tag">${w}</span>`).join('')}
+          </div>` : ''}
+        </div>
+      </div>`;
+    }
+
+    function toggleBoss(id){
+      const card=document.getElementById(id);
+      if(card) card.classList.toggle("open");
+    }
+
+    /* ── LIVELLO SEGRETO (515) ──
+       Hint nascosto: il numero e' nel footer, nella data di copyright.
+       Digitare 5-1-5 sulla tastiera per sbloccarlo.
+    */
+    const secretLevel = {
+            title:"(515)",
+            desc:"ṫ̵̢̨̛̛͖̟̠̦̗̩̬͓̺̰͚̣̯̩̭̩̬̯͓̰͔͕͓͚̦̥̞̟̝̜̬̦̋̓̈́̀̇̓̓̓̾̑̍̀̅̈̄͐͋̍̉̂̓͆̒̐̃̔̾͘͜͝ͅu̴̪͇͕̰̠̫̟̦̓̏̒̆̅̏̊͋̍̃̊̚͝͝t̸̘͖̟͎͙̞͙̓̋̅̒͘t̷̡̺͚̙̳͇̲͓̖̱͚̖̿̋̃̾̉̂̀̈́͠ͅơ̷͖̈͆̍̂̎̕͝ non sei qui.  i̸̡̢̜̥̥̜͙̖̱̥͓͒̃̾͂t̷̨̮͈̲̬͚̜̮̰̫̯̬̦̻͒̀́'̵̩̠͙̱͓͈̺̭̖̣̘͇̻̀͐̀̿͒͝s̵̩̹̱͙͓̰̬̗̰͓̺̥͎͎̉̉͊̈́̕ ̵̡̲̙̼͉̯̞͓̺̞̙̺̓͗̊̌̔͝y̴̙̠͍͉̖͙̙̗̺̝̻͕̘̓̓̓̇͌̋͆̽͂͘͝o̴͕̱͓̻̱̯͒̐͝ͅu̸̼̒̌̅̊͝r̴̞̙̙̫̺̤̺̭̬͒̀͊̒͒̍͌̽͌̉̉̏͘͘͘͝ ̴̨̣͖͇̦̰̦̟̙̖̬̬̻̎̅͜͝ f̴̢͔̩̗͔̊̊͊ȁ̷̘͓̙̪̳̟̹̖̱̬̣̭̀̔͑̐̕u̸̡̳̤̜̪̓̌̅́̊̀̚͝l̸̡̛̙̭̘̟͓̹̭̲͙͕̮͗̒̾͊͌̿͜ṫ̵̟̤͓̦̹̰͕̱͈̺̼̾̌.",
+            img:"img/image.png",
+            content:"i̸ ̴t̷ ̵'̷ ̸s̸   ̶y̸ ̴o̷ ̵u̵ ̶r̷   ̸f̷ ̵a̸ ̴u̷ ̵l̸ ̷t̷\n\nnon ricordi come sei arrivata qui.\nnon ricordi nemmeno se ci sei arrivata.\n\nITSYOURFAULT i̶t̷s̸y̸o̸u̴r̸f̵a̷u̷l̷t̷ itsyourfault\n\nle pareti non le riconosci. le hai già viste. no, non le hai mai viste. sì, le hai già viste, emily. hai già visto tutto questo prima. it's your fault. it's your fault. ı̸̡͔̹̗̣͆͋̿͠t̸̡͉̤͓̼͓̤̿͊̋̿̓̃'̷̡̹͔̞̈́̉̓̂͝s̵͎̗͎̐͊̀̀̿̊̕ ̷̧̜̲͍̩̖̐̓y̵͙̹̹͙̰̏̓́ǒ̷̧̧̩̲̀̓̚ų̸̛̬̪̞̯͔̹̙͎̫̇̊͊̑̚̕͘r̸̛͍̦͈̦̭̟̰̟̺̅̆̽̉̈̒͜͠ ̵̲͎̦͇̫̫̃͑͐̓͑͒̊͜͝f̷̮̩̬͍̑̓̿à̵̫̝̪͙͕̞̾̀̏͂̒͌͝ȗ̷͚̗͕̫͎͔͑̈́̊̿̿l̵̫̘̆͂t̶̬̖̼͙̤̖̎̈́͊\n\nnon uscire. non c'è un'uscita. c'era un'uscita. la conosci ancora?",
+            images:["img/image.png"],
+            objectives:["i̷t̸'̷s̸ ̵y̶o̴u̸r̷ ̷f̸a̶u̸l̷t̸","i̵̱͝ṱ̶͑'̴̠̈s̶̩̈ ̸͔̚ÿ̶͓́o̸̩͝u̸̗͒r̷̺̈ ̷̧̕f̴̜͠a̵̘̕ȕ̵͓l̷̪̈t̶̠̊","i̴̢̛̬̻͉̘͓̯̲͊̀̄̿̆̿̌̆̄̋t̵̢̖̥̟̰͈̩͕͙̿̈̏͜'̴͍̮͓̀̇s̴̝̐̾̐ ̷̢̝̗͍͇̭̤̲̩̣̑͛̔͐̐̆̑̅̃y̵̧̲̜͙̱̝̙̺̾̂͆̒͒̿̐̕ő̶̡̯̬͚̟͍͕̜͊̃͋̕͘ṵ̸̲͚̔̊r̷̭̟̞̋͒͑̒͌͝ ̸̛̺̘̃̏̇̾̈̒́f̷̘̈͗̍a̷͕̖̤͑̍̊͝ŭ̸͈̝̭̗͉̽̿̑͐̅l̸̡̢̟̙̫͊͂͝͝t̸̺͊̊̄"],
+            hasBosses:true,
+            bosses:[{
+              name:"T̴̢̗̖̼͓͖̙̟̓̊̈͆̒̽̍͝h̵̨̛̰̺̤̱̖̼̃̇̈̊̇̆̔͝ȩ̶̡̘̮̭͔͚̠̈̒̈́̐͐̓͠ ̵̛̩̤̗̳͈͖̰̑͐̀̐̃̽͑N̶͖̲̩̝̺̟̮̾̇͛̅͑̅̚͜͝i̴̠̩̜̺̠͉̼̜̎̑͌̒͊͠͠g̵̡̡̬̰͎̗̙̓̓̋͒̒̕͘h̶̨̙̫̦̬͉̖̿̃͗̅̔̿̚͘t̵͓͍̲͓̠̱̜͈̀̽̿͊̇͘͘m̸̤͈̹̝͈̭͋͒̇͆̒̄͜͠͝ȃ̴̡͍̞͕͓̫̤̫̂͛̈́͗̂͗͘r̸͙̤̫̰̻̻̓̍̓̀͘͘͜͠͠ê̷̦̠̣͉̫̱̘̼͊̂͊̈́̓̉͘", class:"̷̢̺̟̯̳̫̻̩͎̃̑̽̈́͒̅͝͝C̶̲͉̜̣̳̟̱̞̬̏̈́͑͘͜͝L̷̡͔͔͉̺͙̞̝̄͑̾̌̃̉̾͘A̵̝̰͎̠̰̣̻̓̓̔̂̕͘͝͝S̶̡̲̜͕͕̩̟̮̔̊̀̄̊͒͘S̸̢̩͓̱̣͔̺̖̊̒̅̉͐͋̿̐͘I̷̢̛̱̳̯̜̖̝̊̔͆̈́̒̄͝F̴̠͖͎̙̯̻̊̐͐͒̃̕̕͠Ị̵̗̠̘̳̬̔̾͑̽̉͘̕̚C̴̛̯͎̹͓͎̱͍͑̈̒̄͊̍̚A̵̛̗̩̯̼̜̩̲̿̀̐̂̈́͒̆T̵̬̰͎͎͓͉̱͌̽̐͊̂͑̑͠Ȩ̵̼͉̗̘͙̏̏̑̇̒̇̈́͘D̸̨̺̰̤͔̣͑̅̒̐͑̔̓͝", image:"img/emily.png",
+              description:"ì̴̱̩̥̯̞̊̅̕t̷̥̣̮̯̤̒̊̑̈̋ͅ'̶̙̤̗̗͈̈́̌̓̄̅ͅs̴̰̣̰̲̯̓̑̑͊̿ ̵̡̱̦̹̯̌͆̋̏̅ỹ̸̩͉̩̠̩́͋̓͊͝ő̸̝̱̝͈͍̾̂̈͝ų̷̛̱̣̩͈͊̓͌̀r̸̨̺͉͚̳͌̀̀̈̌ ̶̢̫͎͚̘̾̃̃͐̐f̸̱̘͍̗̱̊̋͗̅̿a̷̞̱͉͚͙͑̊̄̐͑ū̴̢̬̦͍̮̾̐͗̚l̴̤̤̲͍͚͆̎̿͗̕t̴͎̝̱͖͍̿͌̾̊͠\n\nnon è un nemico che puoi combattere. non è una creatura che la casa ha generato. è qualcosa che appartiene solo a te — è il 515, il numero che si ripete nei tuoi sogni da quando sei entrata, il numero scritto sulle pareti della stanza che non trovi, il numero che senti quando c'è silenzio.\n\nit's your fault. it's your fault. IT'S YOUR FAULT.\n\nL'A.R.C. non ha un dossier su questa entità. il dossier esiste ma è vuoto. le pagine ci sono ma non c'è scritto niente. qualcuno ha provato a scrivere qualcosa e poi ha smesso. l'ultimo analista che ha aperto il file ha lasciato solo questo: i̸t̸'̷s̸ ̷y̷o̴u̷r̸ ̸f̷a̸u̴l̷t̷",
+              stats:{hp:"???", velocita:"???", danno:"???", altezza:"???", peso:"???", percezione:"???"},
+              threat:"???", weaknesses:["i̸t̸'̷s̸ ̷y̷o̴u̷r̸ ̸f̷a̸u̴l̷t̷","i̸t̸'̷s̸ ̷y̷o̴u̷r̸ ̸f̷a̸u̴l̷t̷","i̸t̸'̷s̸ ̷y̷o̴u̷r̸ ̸f̷a̸u̴l̷t̷"]
+            }]
+    };
+
+    var secret515Unlocked = false;
+    let _secretBuf = '';
+    document.addEventListener('keydown', function(e){
+      if(secret515Unlocked) return; // already unlocked, ignore
+      if(e.key >= '0' && e.key <= '9'){
+        _secretBuf += e.key;
+        if(_secretBuf.length > 3) _secretBuf = _secretBuf.slice(-3);
+        if(_secretBuf === '515'){
+          _secretBuf = '';
+          triggerSecret515();
+        }
+      } else {
+        _secretBuf = '';
+      }
+    });
+
+    var secretChapterAdded = false;
+
+    function buildSecretChapter(){
+      return {
+        name: "CAPITOLO 515",
+        sub: "FILE NON CATALOGATO — ACCESSO NEGATO",
+        color: "#b30000",
+        levels: [{
+          title: secretLevel.title,
+          desc: secretLevel.desc,
+          img: secretLevel.img,
+          content: secretLevel.content,
+          images: secretLevel.images,
+          objectives: secretLevel.objectives,
+          hasBosses: secretLevel.hasBosses,
+          bosses: secretLevel.bosses
+        }]
+      };
+    }
+
+    // Auto stop/start 515 audio based on dreems section visibility
+    function setup515Observer(){
+      var dreamSection = document.getElementById('dreems-section');
+      if(!dreamSection || !window.IntersectionObserver) return;
+      var obs = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            // user scrolled into dreems section — start audio if not playing
+            if(!secret515Audio){
+              secret515Audio = new Audio('sound/colpa.mp3');
+              secret515Audio.loop = true;
+              secret515Audio.play().catch(function(){});
+            }
+          } else {
+            // user scrolled away — stop audio
+            if(secret515Audio){
+              secret515Audio.pause();
+              secret515Audio.currentTime = 0;
+              secret515Audio = null;
+            }
+          }
+        });
+      }, {threshold: 0.2});
+      obs.observe(dreamSection);
+    }
+
+    var secret515Audio = null;
+
+    function triggerSecret515(){
+      if(secret515Audio){ secret515Audio.pause(); secret515Audio.currentTime=0; secret515Audio=null; }
+      secret515Audio = new Audio('sound/colpa.mp3');
+      secret515Audio.loop = true;
+      secret515Audio.play().catch(function(){});
+      var overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:Courier New,monospace;cursor:default;';
+      var styleEl = document.createElement('style');
+      styleEl.textContent = '@keyframes g515{0%{transform:translate(3px,-1px) skewX(2deg);color:#fff}20%{transform:translate(-3px,2px) skewX(-3deg);color:#f00}40%{transform:translate(2px,1px) skewX(1deg);color:#0ff}60%{transform:translate(-2px,-2px) skewX(-1deg);color:#fff}80%{transform:translate(1px,3px) skewX(2deg);color:#f0f}100%{transform:translate(0,0);color:#fff}}@keyframes fadeOverlay{from{opacity:0}to{opacity:1}}';
+      overlay.appendChild(styleEl);
+      overlay.style.animation = 'fadeOverlay 0.3s ease';
+      var d1 = document.createElement('div');
+      d1.style.cssText = 'font-size:100px;letter-spacing:24px;text-shadow:4px 0 #f00,-4px 0 #0ff;animation:g515 0.08s infinite';
+      d1.textContent = '(515)';
+      var d2 = document.createElement('div');
+      d2.style.cssText = 'font-size:13px;color:#444;margin-top:28px;letter-spacing:6px;text-transform:uppercase';
+      d2.textContent = 'accesso non autorizzato';
+      var d3 = document.createElement('div');
+      d3.style.cssText = 'font-size:11px;color:#333;margin-top:12px;letter-spacing:3px';
+      d3.textContent = "it's your fault";
+      overlay.appendChild(d1);
+      overlay.appendChild(d2);
+      overlay.appendChild(d3);
+      document.body.appendChild(overlay);
+      setTimeout(function(){
+        overlay.remove();
+        secret515Unlocked = true;
+        // reveal dreems section
+        var dreamSection = document.getElementById('dreems-section');
+        if(dreamSection){
+          dreamSection.style.display = 'none';
+        }
+        // make 515 a proper chapter in the navigator and show it
+        if(!secretChapterAdded){
+          chapters.push(buildSecretChapter());
+          secretChapterAdded = true;
+        }
+        currentChapter = chapters.length - 1;
+        renderLevels();
+        // ensure audio starts immediately when 515 event is activated
+        playSecret515Audio();
+      }, 2000);
+    }
+
+        const chapters=[
+      {
+        name:"PROLOGO", sub:"12.09.2016 — ore 03:17", color:"#f40000",
+        levels:[
+          {
+            title:"The Valter House",
+            desc:"È il 12 settembre 2016. Emily Yelter entra in una casa nel mezzo del bosco. Nessuno la vedrà uscire.",
+            img:"img/the valter house banner.png",
+            content:"Non c'è niente di straordinario in quella notte, all'inizio. Emily cammina nel bosco con i suoi amici, come tante altre volte. Poi c'è la casa. È sempre stata lì — tutti lo sapevano, nessuno ci entrava mai davvero. Quella notte Emily entra. Forse per una scommessa, forse per curiosità, forse perché qualcosa dentro di lei la chiama. La porta si chiude. I suoi amici aspettano fuori. Dopo un'ora smettono di aspettare. Valter non è una leggenda. Non è una storia da raccontare al buio. È un uomo vecchissimo che abita quelle mura da più tempo di quanto chiunque ricordi — o forse è la casa stessa, intrappolata in una forma umana, che aspetta da secoli. Quando Emily attraversa la soglia, la caccia comincia.",
+            images:["img/the valter house banner.png","img/valter.png"],
+            objectives:["Sopravvivere al primo incontro con Valter","Trovare una via per scendere","Non farti vedere"],
+            hasBosses:true,
+            bosses:[{
+              name:"Valter (Il Vecchio)", class:"ENTITÀ PRIMARIA — BOSS", image:"img/valter.png",
+              noStats:true,
+              description:"Valter è la casa. Nessuno sa da quanto tempo sia lì, né se sia mai stato umano davvero. Si muove lentamente, con la certezza di chi sa che non puoi andare da nessuna parte. Attacca con strumenti artigianali — coltelli, tegole, pugnali — e quando riesce ad afferrare una preda la spinge contro il muro. Il muro la inghiotte. L'A.R.C. non ha mai recuperato nessuno di quelli che sono entrati in contatto diretto con lui. Il dossier riporta una sola nota a margine, scritta a mano da un analista sconosciuto: 'non cercarlo. è lui che trova te.'",
+              stats:{hp:"???", velocita:"???", danno:"???", altezza:"???", peso:"???", percezione:"???"},
+              threat:"???", weaknesses:["???","???","???"]
+            }]
+          }
+        ]
+      },
+      {
+        name:"CAPITOLO I", sub:"The Foundation's", color:"#8c00ff",
+        levels:[
+          {
+            title:"The prison son",
+            desc:"una prigione incastonata nelle fondamenta della casa, un rantolo di dolore si sente ogni giorno dai piani superiori.",
+            img:"img/Screenshot-2025-07-31-012718.png",
+            content:"La prigione rappresenta il fondamento della casa di Valter, un luogo dimenticato dal tempo dove echeggia il dolore di chiunque vi sia stato rinchiuso. Le mura sono ricoperte di graffi disperati e le catene arrugginite penzolano dalle pareti. Durante questo livello scoprirai i primi indizi sul passato della casa e sulla vera natura di Valter.",
+            images:["img/Screenshot-2025-07-31-012718.png","img/the valter house banner.png"],
+            objectives:["Trovare la chiave d'argento","Scoprire il diario nascosto","Risolvere l'enigma dei numeri"],
+            hasBosses:true,
+            bosses:[{
+              name:"Abomini", class:"PREDATORI DI BRANCO — SPAWN DI GRUPPO", image:"img/demociccione.png",
+              description:"Creature predatrici che cacciano in gruppo. Nelle fondamenta della prigione si muovono in branchi silenziosi, emergendo dagli angoli bui e dai cunicoli nascosti. Ogni Abomino è una minaccia contenuta, ma insieme diventano quasi imbattibili. La loro caratteristica più inquietante: tutti presentano il volto di una ragazza di circa 14 anni.",
+              stats:{hp:"media", velocita:"6.2 m/s — 124%", danno:"45", altezza:"1.70", peso:"88", percezione:"4.5"},
+              threat:"ALTO", weaknesses:["Testa scoperta","Isolamento individuale","Luce intensa"]
+            }]
+          },
+          {
+            title:"Sinfony of destruction",
+            desc:"una serie interminabile di tubi e gallerie che si intrecciano tra loro, creando un labirinto claustrofobico e disorientante.",
+            img:"img/Screenshot-2025-07-16-015531.png",
+            content:"Un labirinto di tubi metalici e gallerie strette che creano un'atmosfera di totale disorientamento. Non sai dove sei, non sai dove stai andando. Ogni angolo è una nuova sorpresa, ogni suono potrebbe essere pericolo. Dovrai usare solo i tuoi sensi per navigare questo incubo claustrofobico.",
+            images:["img/Screenshot-2025-07-16-015531.png"],
+            objectives:["Uscire dal labirinto","Raccogliere i frammenti di memoria","Raggiungere la sala superiore"],
+            hasBosses:true,
+            bosses:[
+              {
+                name:"The Trans's", class:"ENTITÀ PARASSITA — SPAWN DI GRUPPO", image:"img/demociccione.png",
+                description:"Nessuno sa con certezza cosa fossero prima. L'A.R.C. ha trovato i primi esemplari nelle gallerie inferiori del complesso, già trasformati, già a caccia. Le ipotesi più accreditate parlano di operatori infiltrati molto tempo prima, inghiottiti dalla casa e restituiti in una forma nuova. Conservano brandelli di identità — nomi, voci, movimenti — ma li usano come esca. Chi li ha incontrati e sopravvissuto descrive la stessa cosa: qualcuno che conoscevi, che ti chiama per nome, che si avvicina senza fretta. Poi non ricordi più niente. La casa li ha fatti a sua immagine: creature che si nutrono di fiducia.",
+                stats:{hp:"media", velocita:"6.5 m/s — 130%", danno:"55", altezza:"1.75", peso:"70", percezione:"8.5"},
+                threat:"CRITICO", weaknesses:["Fuoco sui tentacoli","Reagente incendiario","Evitare il Salasso III"]
+              },
+              {
+                name:"Soldati A.R.C.", class:"TASK FORCE — SPAWN DI GRUPPO", image:"img/valter.png",
+                description:"Unità operative dell'A.R.C. infiltrate nella casa con l'obiettivo di neutralizzare Valter e distruggere la struttura. Addestrati e armati per fronteggiare entità soprannaturali, si muovono in formazioni tattiche e comunicano via radio criptata. Non sono tuoi nemici per scelta — la casa li ha corrotti o li ha convinti che tu sia una minaccia. Affrontarli significa scontrarti con il tuo unico potenziale alleato.",
+                stats:{hp:"media", velocita:"5.2 m/s — 104%", danno:"70", altezza:"1.85", peso:"110", percezione:"7.0"},
+                threat:"ALTO", weaknesses:["Comunicazione diretta","Argento","Equipaggiamento A.R.C. danneggiato"]
+              }
+            ]
+          },
+          {
+            title:"left behind",
+            desc:"ora hai un nuovo compagno di viaggio che ti accompagnerà nei livelli più avanzati, Stefano sembrerebbe conoscere la casa e i suoi segreti, ma è difficile capire se sia un alleato o stia mentendo.",
+            img:"img/image.png",
+            content:"Dopo giorni di solitudine, incontri Stefano Bianchi. O almeno, quello che era Stefano prima di essere intrappolato in questa casa. Conosce questa prigione, conosce i passaggi segreti... ma cosa vuole veramente? Seguirlo potrebbe portarti alla salvezza o alla perdizione. La fiducia è il bene più prezioso quando sei perso.",
+            images:["img/image.png"],
+            objectives:["Guadagnare la fiducia di Stefano","Navigare la casa con il compagno","Scoprire il segreto di Stefano"],
+            hasBosses:true,
+            bosses:[
+              {
+                name:"Abominio", class:"BOSS — ENTITÀ PRIMORDIALE", image:"img/demociccione.png",
+                description:"La forma evoluta e dominante degli Abomini. Un'entità massiccia e deformata che comanda il branco con impulsi psichici. Il suo cranio è rinforzato da strutture ossee stratificate che rendono quasi impossibile colpire il cervello. Quando entra in sala, i normali Abomini diventano più aggressivi e coordinati. Va abbattuto prima che sia troppo tardi.",
+                stats:{hp:"anomalo", velocita:"5.5 m/s — 110%", danno:"115", altezza:"2.30", peso:"310", percezione:"8.2"},
+                threat:"CRITICO", weaknesses:["Testa scoperta — punto critico","Fuoco prolungato","Isolamento dal branco"]
+              },
+              {
+                name:"Onryo", class:"SPETTRO INVISIBILE — SPAWN DI GRUPPO", image:"img/emily.png",
+                description:"Spiriti vendicativi completamente invisibili in condizioni normali. La loro presenza si percepisce solo attraverso cali di temperatura improvvisi, distorsioni ambientali e suoni soffocati. L'unico modo per rivelarli è esporli a una fonte di luce diretta — solo allora la loro forma spettrale diventa visibile e vulnerabile. Nel buio attaccano liberamente e senza preavviso. Eliminarli senza luce è quasi impossibile.",
+                stats:{hp:"bassa", velocita:"9.0 m/s — 180%", danno:"35", altezza:"1.65", peso:"0", percezione:"10"},
+                threat:"ALTO", weaknesses:["Luce diretta — unico modo per rivelarli","Sale consacrato","Rituali di purificazione"]
+              }
+            ]
+          },
+          {
+            title:"My demons",
+            desc:"un livello che si svolge interamente al buio, dove dovrai affidarti solo ai tuoi sensi per sopravvivere. i suoni diventano il tuo unico punto di riferimento, ma attenzione: potrebbero ingannarti.",
+            img:"img/image.png",
+            content:"Il buio totale. Niente luce, niente speranza. Solo i suoni che ti guidano o ti ingannano. Ogni respiro che senti potrebbe essere il tuo o di qualcosa d'altro. I tuoi demoni interiori prendono forma in questo buio senza fine. Riuscirai a trovare la luce prima che ti consumino completamente?",
+            images:["img/image.png"],
+            objectives:["Trovare la fonte di luce","Affrontare i tuoi demoni","Raggiungere la consapevolezza finale"],
+            hasBosses:true,
+            bosses:[
+              {
+                name:"The Matrix", class:"BOSS — DISTORSIONE PSICO-DIMENSIONALE", image:"img/emily.png",
+                noStats:true,
+                description:"Un'entità che abita il confine tra la realtà e l'inconscio. Nel buio totale di questo livello, The Matrix manipola la percezione spazio-temporale, creando copie false dell'ambiente e dei corridoi. Non ha una forma fisica definita — è il buio stesso che prende coscienza. Ogni colpo su di esso causa un'eco di realtà alternativa che può disorientare definitivamente.",
+                stats:{hp:"???", velocita:"???", danno:"???", altezza:"???", peso:"???", percezione:"???"},
+                threat:"???", weaknesses:["???","???","???"]
+              },
+              {
+                name:"Abomini", class:"PREDATORI DI BRANCO — SPAWN DI GRUPPO", image:"img/demociccione.png",
+                description:"Nel buio totale del livello, gli Abomini operano a piena efficienza. I loro sensi poco sviluppati non li penalizzano — anche loro si muovono ad istinto, ma tu no. Sfruttano il tuo disorientamento per attaccare da direzioni inaspettate, spesso in ondate simultanee con più individui.",
+                stats:{hp:"media", velocita:"6.8 m/s — 136%", danno:"52", altezza:"1.70", peso:"88", percezione:"3.5"},
+                threat:"ALTO", weaknesses:["Testa scoperta","Qualsiasi fonte di luce","Suono ad alta frequenza"]
+              }
+            ]
+          }
+        ]
+      }
+    ];;
+
+    let currentChapter=0;
+    const expandedSection=document.getElementById("arcExpanded");
+    const closeExpandedBtn=document.getElementById("arcCloseExpanded");
+
+    var songQuotes = {
+      "The prison son": "System of a Down — Prison Song",
+      "Sinfony of destruction": "Megadeth — Symphony of Destruction",
+      "left behind": "Slipknot — Left Behind",
+      "My demons": "Starset — My Demons"
+    };
+
+    function expandLevel(level){
+      document.getElementById("expTitle").textContent=level.title;
+      document.getElementById("expDesc").textContent=level.desc;
+      var qEl=document.getElementById("expQuote");
+      if(qEl) qEl.textContent = songQuotes[level.title] ? "“" + songQuotes[level.title] + "”" : "";
+      document.getElementById("expContent").textContent=level.content;
+      const ol=document.getElementById("expObjectives");
+      ol.innerHTML="";
+      level.objectives.forEach(obj=>{const li=document.createElement("li");li.textContent=obj;ol.appendChild(li);});
+      const gallery=document.getElementById("expGallery");
+      gallery.innerHTML="";
+      level.images.forEach(src=>{const img=document.createElement("img");img.src=src;img.alt=level.title;gallery.appendChild(img);});
+      const bossesSection=document.getElementById("arcBossesSection");
+      const bossesGrid=document.getElementById("arcBossesGrid");
+      bossesGrid.innerHTML="";
+      if(level.hasBosses&&level.bosses&&level.bosses.length>0){
+        bossesSection.style.display="block";
+        level.bosses.forEach(boss=>{bossesGrid.innerHTML+=buildBossCard(boss);});
+      } else {
+        bossesSection.style.display="none";
+      }
+      expandedSection.classList.add("active");
+      expandedSection.scrollIntoView({behavior:"smooth",block:"start"});
+    }
+
+    function expand515Level(){
+      var container = document.getElementById('level515-expanded');
+      if(!container) return;
+      container.style.display = 'block';
+      container.innerHTML = '';
+
+      // Title block
+      var titleDiv = document.createElement('div');
+      titleDiv.style.cssText = 'font-family:Courier New,monospace;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid rgba(255,50,50,0.12);';
+      var h2 = document.createElement('h2');
+      h2.style.cssText = 'color:rgba(255,80,80,0.5);font-size:28px;letter-spacing:6px;margin:0 0 10px;';
+      h2.textContent = secretLevel.title;
+      var desc = document.createElement('p');
+      desc.style.cssText = 'color:rgba(255,255,255,0.15);font-size:13px;margin:0;font-style:italic;';
+      desc.textContent = secretLevel.desc;
+      titleDiv.appendChild(h2);
+      titleDiv.appendChild(desc);
+      container.appendChild(titleDiv);
+
+      // Content
+      var content = document.createElement('p');
+      content.style.cssText = 'font-size:13px;color:rgba(255,255,255,0.18);line-height:2;margin:0 0 28px;font-family:Courier New,monospace;white-space:pre-line;border-left:2px solid rgba(255,50,50,0.1);padding-left:18px;';
+      content.textContent = secretLevel.content;
+      container.appendChild(content);
+
+      // Objectives
+      var objTitle = document.createElement('div');
+      objTitle.style.cssText = 'font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,50,50,0.2);margin-bottom:12px;font-family:Courier New,monospace;';
+      objTitle.textContent = 'Obiettivi';
+      container.appendChild(objTitle);
+      var ul = document.createElement('ul');
+      ul.style.cssText = 'list-style:none;padding:0;margin:0 0 28px;';
+      secretLevel.objectives.forEach(function(obj){
+        var li = document.createElement('li');
+        li.style.cssText = 'padding:10px 12px;margin-bottom:8px;background:rgba(255,0,0,0.02);border-left:2px solid rgba(255,50,50,0.08);color:rgba(255,255,255,0.12);font-size:12px;font-family:Courier New,monospace;';
+        li.textContent = obj;
+        ul.appendChild(li);
+      });
+      container.appendChild(ul);
+
+      // Boss card
+      if(secretLevel.hasBosses && secretLevel.bosses){
+        var bossLabel = document.createElement('div');
+        bossLabel.style.cssText = 'font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,50,50,0.15);margin-bottom:14px;font-family:Courier New,monospace;';
+        bossLabel.textContent = '⚠ Pericoli Classificati';
+        container.appendChild(bossLabel);
+        var bossGrid = document.createElement('div');
+        bossGrid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;';
+        secretLevel.bosses.forEach(function(boss){
+          bossGrid.innerHTML += buildBossCard(boss);
+        });
+        container.appendChild(bossGrid);
       }
     }
-  });
-</script>
+
+    function playSecret515Audio(){
+      if(!secret515Audio){
+        secret515Audio = new Audio('sound/colpa.mp3');
+        secret515Audio.loop = true;
+        secret515Audio.play().catch(function(){});
+      }
+    }
+
+    function stopSecret515Audio(){
+      if(secret515Audio){ secret515Audio.pause(); secret515Audio.currentTime=0; secret515Audio=null; }
+    }
+    function closeExpanded(){
+      stopSecret515Audio();
+      expandedSection.classList.remove("active");
+    }
+
+    function renderLevels(){
+      // close any expanded level card first, then stop audio so we can restart for 515 when needed
+      closeExpanded();
+      const container=document.getElementById("arcLevels");
+      container.innerHTML="";
+      if(currentChapter >= chapters.length) currentChapter=0;
+      const chapter=chapters[currentChapter];
+      document.documentElement.style.setProperty("--arcColor",chapter.color);
+      document.getElementById("arc-chapter-name").textContent=chapter.name;
+      document.getElementById("arc-chapter-sub").textContent=chapter.sub;
+      if(chapter.name === "CAPITOLO 515"){
+        playSecret515Audio();
+      } else {
+        stopSecret515Audio();
+      }
+      chapter.levels.forEach(lvl=>{
+        const level=document.createElement("div");
+        level.className="arc-level";
+        level.innerHTML=`<img src="${lvl.img}"><div class="arc-level-text"><h4>${lvl.title}</h4><p>${lvl.desc}</p></div>`;
+        level.addEventListener("click",()=>expandLevel(lvl));
+        container.appendChild(level);
+      });
+    }
+
+    document.getElementById("nextChapter").addEventListener("click",()=>{currentChapter=(currentChapter+1)%chapters.length;renderLevels();});
+    document.getElementById("prevChapter").addEventListener("click",()=>{currentChapter=(currentChapter-1+chapters.length)%chapters.length;renderLevels();});
+    closeExpandedBtn.addEventListener("click",closeExpanded);
+
+    // Screenshot lightbox
+    const screenThumbs=document.querySelectorAll('.screens-grid img');
+    const lightbox=document.getElementById('screens-lightbox');
+    const lightboxImage=document.getElementById('lightbox-img');
+    const lightboxClose=document.getElementById('lightbox-close');
+
+    function closeLightbox(){
+      lightbox.classList.remove('active');
+      lightbox.setAttribute('aria-hidden','true');
+      document.body.style.overflow='';
+      lightboxImage.src='';
+      lightboxImage.alt='';
+    }
+
+    screenThumbs.forEach(img=>{
+      img.addEventListener('click',()=>{
+        lightboxImage.src=img.src;
+        lightboxImage.alt=img.alt || 'Screenshot ingrandito';
+        lightbox.classList.add('active');
+        lightbox.setAttribute('aria-hidden','false');
+        document.body.style.overflow='hidden';
+      });
+    });
+
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', e => { if(e.target === lightbox) closeLightbox(); });
+    document.addEventListener('keydown', e => { if(e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox(); });
+
+    // Bestiario carousel
+    const bstGrid = document.getElementById('bst-grid');
+    const bstCards = bstGrid ? Array.from(bstGrid.querySelectorAll('.bst-card')) : [];
+    const bstPrev = document.getElementById('bst-prev');
+    const bstNext = document.getElementById('bst-next');
+    const bstPagination = document.getElementById('bst-pagination');
+    let bstIndex = 0;
+
+    function updateBestiario() {
+      if (!bstGrid || !bstCards.length) return;
+      bstGrid.style.transform = `translateX(-${bstIndex * 100}%)`;
+      bstPrev.disabled = bstIndex <= 0;
+      bstNext.disabled = bstIndex >= bstCards.length - 1;
+      if (bstPagination) bstPagination.textContent = `Documento ${bstIndex + 1} di ${bstCards.length}`;
+    }
+    if (bstPrev && bstNext) {
+      bstPrev.addEventListener('click', () => { if (bstIndex > 0) { bstIndex--; updateBestiario(); } });
+      bstNext.addEventListener('click', () => { if (bstIndex < bstCards.length - 1) { bstIndex++; updateBestiario(); } });
+    }
+    updateBestiario();
+
+    renderLevels();
+  </script>
+
+
 </body>
 </html>

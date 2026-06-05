@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Libreria — ETA Games</title>
+<link rel="stylesheet" href="tvh.css">
+<link rel="icon" type="image/jpeg" href="img/channels4_profile.jpg">
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
+    authDomain: "etagames-b5d6a.firebaseapp.com",
+    projectId: "etagames-b5d6a",
+    messagingSenderId: "809625655346",
+    appId: "1:809625655346:web:3010a62960fde91787842b"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+</script>
+<script src="theme-loader.js"></script>
+
+<style>
+/* ── Titolo sezione ── */
+.lib-header {
+  padding: 40px 0 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 32px;
+}
+.lib-header h1 {
+  margin: 0 0 6px;
+  font-size: 30px;
+  color: var(--accent);
+}
+.lib-header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+/* ── Stato vuoto / non loggato ── */
+.lib-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 60px 20px;
+  text-align: center;
+  border: 1px dashed rgba(255,255,255,0.12);
+  border-radius: 12px;
+  margin-top: 8px;
+}
+.lib-empty-icon {
+  font-size: 40px;
+  line-height: 1;
+  opacity: 0.4;
+}
+.lib-empty p {
+  color: var(--muted);
+  margin: 0;
+  max-width: 340px;
+  font-size: 15px;
+}
+
+/* ── Lista giochi ── */
+.lib-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 40px;
+}
+
+/* ── Singola voce ── */
+.lib-entry {
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 160px 1fr auto;
+  align-items: stretch;
+  transition: border-color 0.2s;
+}
+.lib-entry:hover {
+  border-color: var(--accent);
+}
+.lib-entry-cover {
+  width: 160px;
+  height: 110px;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+}
+.lib-entry-info {
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+}
+.lib-entry-info h3 {
+  margin: 0;
+  font-size: 17px;
+  color: var(--text, #fff);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lib-entry-info .lib-desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lib-entry-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+.lib-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.lib-info-text {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ── Colonna azioni ── */
+.lib-entry-actions {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+  border-left: 1px solid rgba(255,255,255,0.07);
+  min-width: 148px;
+}
+
+/* Pulsante download — pieno */
+.lib-btn-download {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 14px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+.lib-btn-download:hover { opacity: 0.85; }
+.lib-btn-download:active { transform: scale(0.97); }
+
+/* Pulsante dettagli — outline */
+.lib-btn-outline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 14px;
+  background: transparent;
+  color: var(--text, #fff);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+.lib-btn-outline:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Pulsante rimuovi — testo rosso piccolo */
+.lib-btn-remove {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.25);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 0;
+  text-align: center;
+  transition: color 0.2s;
+}
+.lib-btn-remove:hover { color: #cc3333; }
+
+/* ── Toast ── */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--card);
+  border: 1px solid var(--accent);
+  color: var(--text, #fff);
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+  z-index: 100;
+  pointer-events: none;
+  white-space: nowrap;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .lib-entry {
+    grid-template-columns: 1fr;
+  }
+  .lib-entry-cover {
+    width: 100%;
+    height: 130px;
+  }
+  .lib-entry-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-left: none;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    min-width: unset;
+    padding: 12px 14px;
+  }
+  .lib-btn-remove {
+    width: 100%;
+    text-align: left;
+    padding: 6px 0 0;
+  }
+}
+</style>
+</head>
+
+<body class="night-theme">
+
+<header>
+  <div class="container">
+    <nav>
+      <div class="brand">
+        <img src="img/channels4_profile.jpg" alt="ETA Games" class="logo-img">
+        <div>
+          <div>ETA Games</div>
+          <div class="muted" style="font-size:12px;margin-top:2px">Libreria</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="games.html">Giochi</a>
+        <a href="extra.html">Extra</a>
+        <a href="profilo.html" id="navProfileLink">Profilo</a>
+        <a href="blog.html">Blog</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <div class="lib-header">
+    <h1>La mia Libreria</h1>
+    <p>I tuoi giochi. Scaricali quando vuoi.</p>
+  </div>
+  <div id="libContent"></div>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <strong>ETA Games</strong>
+        <div class="muted">© ETA Games — Tutti i diritti riservati</div>
+      </div>
+      <div class="socials muted">
+        <a href="https://discord.gg/Da7sq3Mwpw" target="_blank">Discord</a>
+        <a href="https://www.youtube.com/@HGames_studio" target="_blank">YouTube</a>
+        <a href="https://www.instagram.com/eta.games_" target="_blank">Instagram</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+const CATALOG = {
+  dantes_revenge: {
+    title:   "Dante's Revenge",
+    version: "Beta 1.0",
+    desc:    "WAD di Doom — Divina Commedia",
+    img:     "img/TITLEPIC.png",
+    file:    "SELV01.zip",
+    size:    "17,7 MB",
+    engine:  "GZDoom",
+    page:    "dantes_revenge.html"
+  }
+};
+
+let currentUser = null;
+let library = [];
+
+auth.onAuthStateChanged(async user => {
+  const navLink = document.getElementById('navProfileLink');
+  if (user) {
+    currentUser = user;
+    if (navLink) { navLink.href = 'profilo.html'; navLink.textContent = 'Profilo'; }
+    try {
+      const doc = await db.collection('users').doc(user.uid).get();
+      library = (doc.exists && Array.isArray(doc.data().library)) ? doc.data().library : [];
+    } catch(e) { library = []; }
+  } else {
+    currentUser = null;
+    if (navLink) { navLink.href = 'login.html'; }
+    library = [];
+  }
+  render();
+});
+
+function render() {
+  const el = document.getElementById('libContent');
+
+  if (!currentUser) {
+    el.innerHTML = `
+      <div class="lib-empty">
+        <div class="lib-empty-icon">🔒</div>
+        <p>Accedi per vedere e scaricare i giochi della tua libreria.</p>
+        <a href="login.html" class="btn">Accedi / Registrati</a>
+      </div>`;
+    return;
+  }
+
+  const owned = library.filter(id => CATALOG[id]);
+
+  if (owned.length === 0) {
+    el.innerHTML = `
+      <div class="lib-empty">
+        <div class="lib-empty-icon">🎮</div>
+        <p>Libreria vuota. Vai su un gioco e aggiungilo da lì.</p>
+        <a href="games.html" class="btn">Vai ai Giochi</a>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="lib-list">${owned.map(buildEntry).join('')}</div>`;
+}
+
+function buildEntry(id) {
+  const g = CATALOG[id];
+  return `
+    <div class="lib-entry" id="entry-${id}">
+      <img class="lib-entry-cover" src="${g.img}" alt="${g.title}">
+      <div class="lib-entry-info">
+        <h3>${g.title}</h3>
+        <p class="lib-desc">${g.desc}</p>
+        <div class="lib-entry-meta">
+          <span class="lib-tag">${g.version}</span>
+          <span class="lib-info-text">${g.size} · ${g.engine}</span>
+        </div>
+      </div>
+      <div class="lib-entry-actions">
+        <button class="lib-btn-download" onclick="downloadGame('${id}')">
+          ⬇ Scarica
+        </button>
+        <a class="lib-btn-outline" href="${g.page}">
+          Dettagli
+        </a>
+        <button class="lib-btn-remove" onclick="removeGame('${id}')">
+          Rimuovi dalla libreria
+        </button>
+      </div>
+    </div>`;
+}
+
+function downloadGame(id) {
+  const g = CATALOG[id];
+  if (!g) return;
+  const a = document.createElement('a');
+  a.href = g.file;
+  a.download = g.file;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast('Download avviato!');
+}
+
+async function removeGame(id) {
+  if (!currentUser) return;
+  const prev = [...library];
+  library = library.filter(x => x !== id);
+  render();
+  try {
+    await db.collection('users').doc(currentUser.uid).set({ library }, { merge: true });
+    showToast('Rimosso dalla libreria');
+  } catch(e) {
+    library = prev;
+    render();
+    showToast('Errore. Riprova.');
+  }
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+</script>
+</body>
+</html>
