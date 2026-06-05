@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Profilo utente — ETA Games</title>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
@@ -62,6 +61,191 @@ const db = firebase.firestore();
   border-radius:8px;
   font-size:13px;
 }
+
+/* ── STILI LIBRERIA INTEGRATI ── */
+.lib-header {
+  padding: 24px 0 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 20px;
+}
+.lib-header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: var(--accent);
+}
+.lib-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 40px 20px;
+  text-align: center;
+  border: 1px dashed rgba(255,255,255,0.12);
+  border-radius: 12px;
+  margin-top: 8px;
+}
+.lib-empty-icon {
+  font-size: 32px;
+  line-height: 1;
+  opacity: 0.4;
+}
+.lib-empty p {
+  color: var(--muted);
+  margin: 0;
+  font-size: 14px;
+}
+.lib-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 20px;
+}
+.lib-entry {
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 160px 1fr auto;
+  align-items: stretch;
+  transition: border-color 0.2s;
+}
+.lib-entry:hover {
+  border-color: var(--accent);
+}
+.lib-entry-cover {
+  width: 160px;
+  height: 110px;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+}
+.lib-entry-info {
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+}
+.lib-entry-info h3 {
+  margin: 0;
+  font-size: 17px;
+  color: var(--text, #fff);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lib-desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lib-entry-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+.lib-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.lib-info-text {
+  font-size: 12px;
+  color: var(--muted);
+}
+.lib-entry-actions {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+  border-left: 1px solid rgba(255,255,255,0.07);
+  min-width: 148px;
+}
+.lib-btn-download {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 14px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+.lib-btn-download:hover { opacity: 0.85; }
+.lib-btn-outline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 14px;
+  background: transparent;
+  color: var(--text, #fff);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+.lib-btn-outline:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── TOAST ── */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--card);
+  border: 1px solid var(--accent);
+  color: var(--text, #fff);
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+  z-index: 100;
+  pointer-events: none;
+  white-space: nowrap;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 640px) {
+  .lib-entry { grid-template-columns: 1fr; }
+  .lib-entry-cover { width: 100%; height: 130px; }
+  .lib-entry-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-left: none;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    min-width: unset;
+    padding: 12px 14px;
+  }
+}
 </style>
 <link rel="stylesheet" href="tvh.css">
 </head>
@@ -81,7 +265,7 @@ const db = firebase.firestore();
       <div class="nav-links">
         <a href="index.html">Home</a>
         <a href="games.html">Giochi</a>
-          <a href="extra.html">Extra</a>
+        <a href="extra.html">Extra</a>
         <a href="profilo.html">Profilo</a>
         <a href="blog.html">Blog</a>
       </div>
@@ -91,32 +275,44 @@ const db = firebase.firestore();
 
 <section class="container" style="max-width:900px">
 
-<!-- HEADER -->
-<div class="card-tvhouse profile-header">
-  <img id="banner" class="profile-banner" src="img/default-banner.jpg">
-  <img id="avatar" class="profile-avatar" src="img/default-avatar.png">
-</div>
-
-<!-- PROFILO -->
-<div class="card-tvhouse profile-box">
-
-  <h2 id="username">Caricamento…</h2>
-  <p id="bio" class="muted"></p>
-
-  <div class="profile-meta">
-    <span id="country"></span>
-    <span id="joined"></span>
-    <span id="status"></span>
+  <div class="card-tvhouse profile-header">
+    <img id="banner" class="profile-banner" src="img/default-banner.jpg">
+    <img id="avatar" class="profile-avatar" src="img/default-avatar.png">
   </div>
 
-  <div id="privateMsg" class="private-box" style="display:none">
-    🔒 <strong>Questo profilo è privato</strong><br>
-    <span class="muted">Solo il nome e l'immagine profilo sono visibili</span>
+  <div class="card-tvhouse profile-box">
+    <h2 id="username">Caricamento…</h2>
+    <p id="bio" class="muted"></p>
+
+    <div class="profile-meta">
+      <span id="country"></span>
+      <span id="joined"></span>
+      <span id="status"></span>
+    </div>
+
+    <div id="privateMsg" class="private-box" style="display:none">
+      🔒 <strong>Questo profilo è privato</strong><br>
+      <span class="muted">Solo il nome e l'immagine profilo sono visibili</span>
+    </div>
   </div>
 
-</div>
+  <div id="publicLibrarySection" style="display:none; margin-top: 32px;">
+    <div class="lib-header">
+      <h2>Libreria dell'utente</h2>
+    </div>
+    <div id="libContent" class="lib-list"></div>
+  </div>
+
+  <div id="playedGamesSection" style="display:none; margin-top: 32px;">
+    <div class="lib-header">
+      <h2>Giochi Giocati</h2>
+    </div>
+    <div id="playedContent" class="lib-list"></div>
+  </div>
 
 </section>
+
+<div id="toast"></div>
 
 <footer>
   <div class="container">
@@ -135,61 +331,159 @@ const db = firebase.firestore();
 </footer>
 
 <script>
-// UID dalla query (?uid=...)
-const params = new URLSearchParams(window.location.search);
-const uid = params.get("uid");
+// Catalogo globale dei giochi
+const CATALOG = {
+  dantes_revenge: {
+    title:   "Dante's Revenge",
+    version: "Beta 1.0",
+    desc:    "WAD di Doom — Divina Commedia",
+    img:     "img/TITLEPIC.png",
+    file:    "SELV01.zip",
+    size:    "17,7 MB",
+    engine:  "GZDoom",
+    page:    "dantes_revenge.html"
+  }
+};
 
-if(!uid){
-  document.body.innerHTML = "<p style='text-align:center'>Profilo non valido</p>";
-  throw "";
+// Funzione globale di download attivata dai bottoni del template
+function downloadGame(id) {
+  const g = CATALOG[id];
+  if (!g) return;
+  const a = document.createElement('a');
+  a.href = g.file;
+  a.download = g.file;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast('Download avviato!');
 }
 
-db.collection("users").doc(uid).get().then(doc=>{
-  if(!doc.exists){
-    document.body.innerHTML = "<p style='text-align:center'>Utente non trovato</p>";
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// Avvia tutto solo dopo che il DOM e Firebase sono pronti
+document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  const uid = params.get("uid");
+
+  if(!uid){
+    document.body.innerHTML = "<p style='text-align:center; padding-top: 50px;'>Profilo non valido</p>";
     return;
   }
 
-  const d = doc.data();
+  // Chiamata a Firestore con db sicuro
+  db.collection("users").doc(uid).get().then(doc=>{
+    if(!doc.exists){
+      document.body.innerHTML = "<p style='text-align:center; padding-top: 50px;'>Utente non trovato</p>";
+      return;
+    }
 
-  /* SEMPRE VISIBILI */
-  document.getElementById("username").textContent =
-    d.displayName || "Utente";
+    const d = doc.data();
 
-  if(d.photoBase64)
-    document.getElementById("avatar").src = d.photoBase64;
+    /* SEMPRE VISIBILI */
+    document.getElementById("username").textContent = d.displayName || "Utente";
 
-  /* PROFILO PRIVATO */
-  if(d.profilePublic !== true){
-    document.getElementById("banner").style.display = "none";
-    document.getElementById("bio").style.display = "none";
-    document.getElementById("country").style.display = "none";
-    document.getElementById("joined").style.display = "none";
-    document.getElementById("status").style.display = "none";
-    document.getElementById("privateMsg").style.display = "block";
-    return;
-  }
+    if(d.photoBase64)
+      document.getElementById("avatar").src = d.photoBase64;
 
-  /* DATI PUBBLICI */
-  if(d.banner)
-    document.getElementById("banner").src = d.banner;
+    /* SE IL PROFILO È PRIVATO */
+    if(d.profilePublic !== true){
+      document.getElementById("banner").style.display = "none";
+      document.getElementById("bio").style.display = "none";
+      document.getElementById("country").style.display = "none";
+      document.getElementById("joined").style.display = "none";
+      document.getElementById("status").style.display = "none";
+      document.getElementById("privateMsg").style.display = "block";
+      document.getElementById("publicLibrarySection").style.display = "none";
+      document.getElementById("playedGamesSection").style.display = "none";
+      return;
+    }
 
-  if(d.bio)
-    document.getElementById("bio").textContent = d.bio;
+    /* DATI PUBBLICI GENERALI */
+    if(d.banner) document.getElementById("banner").src = d.banner;
+    if(d.bio) document.getElementById("bio").textContent = d.bio;
+    if(d.country) document.getElementById("country").textContent = "🌍 " + d.country;
 
-  if(d.country)
-    document.getElementById("country").textContent = "🌍 " + d.country;
+    if(d.createdAt){
+      const date = d.createdAt.toDate ? d.createdAt.toDate() : new Date(d.createdAt);
+      document.getElementById("joined").textContent = "📅 Iscritto il " + date.toLocaleDateString();
+    }
+    document.getElementById("status").textContent = "🌐 Profilo pubblico";
 
-  if(d.createdAt){
-    const date = d.createdAt.toDate ? d.createdAt.toDate() : new Date(d.createdAt);
-    document.getElementById("joined").textContent =
-      "📅 Iscritto il " + date.toLocaleDateString();
-  }
+    /* ── 1. RENDERING LIBRERIA ── */
+    const library = Array.isArray(d.library) ? d.library : [];
+    const owned = library.filter(id => CATALOG[id]);
+    const libSection = document.getElementById("publicLibrarySection");
+    const libContent = document.getElementById("libContent");
 
-  document.getElementById("status").textContent =
-    d.profilePublic ? "🌐 Profilo pubblico" : "🔒 Privato";
+    libSection.style.display = "block";
+    if (owned.length === 0) {
+      libContent.innerHTML = `
+        <div class="lib-empty">
+          <div class="lib-empty-icon">🎮</div>
+          <p>Libreria vuota. Questo utente non ha giochi salvati.</p>
+        </div>`;
+    } else {
+      libContent.innerHTML = owned.map(id => buildGameRow(id, true)).join('');
+    }
+
+    /* ── 2. RENDERING GIOCHI GIOCATI ── */
+    const playedGames = Array.isArray(d.playedGames) ? d.playedGames : [];
+    const played = playedGames.filter(id => CATALOG[id]);
+    const playedSection = document.getElementById("playedGamesSection");
+    const playedContent = document.getElementById("playedContent");
+
+    playedSection.style.display = "block";
+    if (played.length === 0) {
+      playedContent.innerHTML = `
+        <div class="lib-empty">
+          <div class="lib-empty-icon">🕹️</div>
+          <p>Nessun gioco giocato di recente da questo utente.</p>
+        </div>`;
+    } else {
+      playedContent.innerHTML = played.map(id => buildGameRow(id, false)).join('');
+    }
+  }).catch(err => {
+    console.error("Errore nel recupero dati utente:", err);
+  });
 });
 
+// Funzione interna per strutturare i box grafici dei giochi
+function buildGameRow(id, showDownload) {
+  const g = CATALOG[id];
+  
+  const downloadBtn = showDownload ? `
+    <button class="lib-btn-download" onclick="downloadGame('${id}')">
+      ⬇ Scarica
+    </button>
+  ` : '';
+
+  return `
+    <div class="lib-entry" id="entry-${id}">
+      <img class="lib-entry-cover" src="${g.img}" alt="${g.title}">
+      <div class="lib-entry-info">
+        <h3>${g.title}</h3>
+        <p class="lib-desc">${g.desc}</p>
+        <div class="lib-entry-meta">
+          <span class="lib-tag">${g.version}</span>
+          <span class="lib-info-text">${g.size} · ${g.engine}</span>
+        </div>
+      </div>
+      <div class="lib-entry-actions">
+        ${downloadBtn}
+        <a class="lib-btn-outline" href="${g.page}">
+          Dettagli
+        </a>
+      </div>
+    </div>`;
+}
 </script>
 
 </body>
