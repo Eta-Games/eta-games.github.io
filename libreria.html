@@ -229,6 +229,91 @@
 }
 #toast.show { transform: translateX(-50%) translateY(0); }
 
+/* ── Modal Launcher ── */
+.launcher-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+  backdrop-filter: blur(4px);
+}
+.launcher-overlay.open { opacity: 1; pointer-events: all; }
+.launcher-modal {
+  background: var(--card);
+  border: 1px solid rgba(229,9,20,0.5);
+  border-radius: 16px;
+  padding: 32px 36px;
+  max-width: 460px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 0 60px rgba(229,9,20,0.18), 0 20px 60px rgba(0,0,0,0.6);
+  animation: modalIn 0.3s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes modalIn {
+  from { transform: scale(0.88) translateY(16px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+.launcher-modal .lm-icon { font-size: 50px; margin-bottom: 14px; line-height: 1; }
+.launcher-modal h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  color: var(--accent);
+}
+.launcher-modal p {
+  margin: 0 0 22px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+.launcher-modal p strong { color: #fff; }
+.lm-features {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+.lm-feature {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #ccc;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.lm-feature .fi { font-size: 16px; flex-shrink: 0; }
+.lm-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.lm-btn-dl {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 22px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.lm-btn-dl:hover { opacity: 0.85; }
+.lm-btn-cancel {
+  padding: 11px 20px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--muted);
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.lm-btn-cancel:hover { color: #fff; border-color: rgba(255,255,255,0.25); }
+
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .lib-entry {
@@ -303,6 +388,27 @@
 </footer>
 
 <div id="toast"></div>
+
+<!-- ── Modal: scarica il Launcher ── -->
+<div id="launcher-overlay" class="launcher-overlay">
+  <div class="launcher-modal">
+    <div class="lm-icon">🚀</div>
+    <h2>ETA Games Launcher</h2>
+    <p>Per scaricare e avviare <strong id="lm-game-title">questo gioco</strong> direttamente, usa il <strong>Launcher ETA Games</strong>.</p>
+    <div class="lm-features">
+      <div class="lm-feature"><span class="fi">⬇️</span> Scarica il file ZIP automaticamente</div>
+      <div class="lm-feature"><span class="fi">📦</span> Estrae e installa il gioco da solo</div>
+      <div class="lm-feature"><span class="fi">🎮</span> Lancia GZDoom con un clic</div>
+      <div class="lm-feature"><span class="fi">📂</span> Gestisce la tua doom2.wad</div>
+    </div>
+    <div class="lm-btns">
+      <a class="lm-btn-dl" href="downloads/ETA-Games-Launcher-Setup.exe" download>
+        ⬇ Scarica il Launcher
+      </a>
+      <button class="lm-btn-cancel" onclick="closeLauncherModal()">Forse dopo</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const CATALOG = {
@@ -396,14 +502,19 @@ function buildEntry(id) {
 function downloadGame(id) {
   const g = CATALOG[id];
   if (!g) return;
-  const a = document.createElement('a');
-  a.href = g.file;
-  a.download = g.file;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  showToast('Download avviato!');
+  // Mostra modal per scaricare il Launcher
+  const titleEl = document.getElementById('lm-game-title');
+  if (titleEl) titleEl.textContent = g.title;
+  document.getElementById('launcher-overlay').classList.add('open');
 }
+
+function closeLauncherModal() {
+  document.getElementById('launcher-overlay').classList.remove('open');
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const ov = document.getElementById('launcher-overlay');
+  if (ov) ov.addEventListener('click', e => { if (e.target === ov) closeLauncherModal(); });
+});
 
 async function removeGame(id) {
   if (!currentUser) return;
