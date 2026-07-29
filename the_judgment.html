@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>The Judgment — ETA Games</title>
+  <meta name="description" content="The Judgment: un tribunale virtuale multiplayer nel browser. Accusa, difenditi, vota — e lascia che un giudice AI pronunci il verdetto finale.">
+  <link rel="stylesheet" href="tvh.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <link rel="icon" type="image/png" href="https://gabry2317.github.io/the-judgment/assets/images/logo-mascot.png">
+  <style>
+:root { --arcColor: #d4af37; }
+
+.arc-terminal {
+  margin-top: 100px; padding: 40px; background: #050505;
+  border-radius: 15px; position: relative; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.arc-terminal::before {
+  content: ""; position: absolute; inset: 0;
+  background: repeating-linear-gradient(to bottom,rgba(255,255,255,0.03),rgba(255,255,255,0.03) 2px,transparent 2px,transparent 4px);
+  pointer-events: none; animation: lcdMove 6s linear infinite;
+}
+@keyframes lcdMove { from{transform:translateY(0)} to{transform:translateY(6px)} }
+
+.arc-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:40px; flex-wrap:wrap; gap:16px; }
+.arc-logo-wrapper { position:relative; width:90px; height:90px; }
+.arc-logo { width:90px; height:90px; border-radius:50%; border:3px solid var(--arcColor); animation:pulseLogo 2s infinite; background:#0a0a0a center/cover; background-image:url('https://gabry2317.github.io/the-judgment/assets/images/logo-mascot.png'); }
+.arc-logo-ring { position:absolute; inset:-8px; border-radius:50%; border:1px solid var(--arcColor); animation:rotateLogo 8s linear infinite; }
+@keyframes rotateLogo { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+@keyframes pulseLogo { 0%,100%{box-shadow:0 0 10px var(--arcColor)} 50%{box-shadow:0 0 25px var(--arcColor)} }
+.arc-chapter-info h2 { color:var(--arcColor); letter-spacing:4px; }
+.arc-nav button { background:none; border:1px solid var(--arcColor); color:var(--arcColor); padding:10px 15px; margin:0 5px; cursor:pointer; transition:0.3s; }
+.arc-nav button:hover { background:var(--arcColor); color:black; }
+
+.arc-levels-section { margin-top:36px; }
+.arc-levels-section > h3 {
+  font-size:10px; letter-spacing:3px; text-transform:uppercase;
+  color:rgba(255,255,255,0.25); margin-bottom:16px;
+  padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05);
+}
+
+.arc-levels-grid { display:grid; gap:16px; }
+
+.arc-level {
+  display:flex; gap:16px; border:1px solid rgba(255,255,255,0.08);
+  padding:16px; border-radius:8px; background:rgba(255,255,255,0.02);
+  cursor:pointer; transition:0.3s ease; align-items:stretch;
+}
+.arc-level:hover { border-color:var(--arcColor); background:rgba(255,255,255,0.04); }
+.arc-level-icon {
+  width:60px; height:60px; flex-shrink:0; border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:26px; background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.2);
+}
+.arc-level-text { flex:1; display:flex; flex-direction:column; justify-content:center; }
+.arc-level-text h4 { margin:0 0 6px; color:var(--arcColor); font-size:14px; font-weight:bold; }
+.arc-level-text p { margin:0; font-size:13px; color:rgba(255,255,255,0.6); }
+
+/* =============================================
+   DOSSIER CARD — collassabile (ruoli / esiti)
+   ============================================= */
+.arc-bosses-section { margin-top:36px; }
+.arc-bosses-section > h3 {
+  font-size:10px; letter-spacing:3px; text-transform:uppercase;
+  color:rgba(255,255,255,0.25); margin-bottom:16px;
+  padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05);
+}
+
+.arc-boss-card {
+  background:#0a0a0a; border:1px solid rgba(255,255,255,0.08);
+  border-radius:14px; overflow:hidden;
+  transition:border-color 0.3s, box-shadow 0.3s; position:relative;
+}
+.arc-boss-card::after {
+  content:""; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,transparent,var(--arcColor),transparent);
+}
+.arc-boss-header { display:flex; align-items:center; gap:16px; padding:16px 20px; cursor:pointer; user-select:none; transition:background 0.25s; }
+.arc-boss-header:hover { background:rgba(255,255,255,0.02); }
+.arc-boss-icon {
+  width:60px; height:60px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:26px;
+  border:2px solid var(--arcColor); box-shadow:0 0 12px var(--arcColor); transition:box-shadow 0.3s;
+  background:#0a0a0a;
+}
+.arc-boss-card.open .arc-boss-icon { box-shadow:0 0 22px var(--arcColor); }
+.arc-boss-header-text { flex:1; }
+.arc-boss-name { font-size:17px; font-weight:bold; color:var(--arcColor); margin:0 0 3px; letter-spacing:1px; font-family:'Courier New',monospace; }
+.arc-boss-class { font-size:10px; color:rgba(255,255,255,0.3); letter-spacing:3px; text-transform:uppercase; margin:0; }
+.arc-boss-chevron { font-size:12px; color:var(--arcColor); transition:transform 0.3s; margin-left:auto; flex-shrink:0; }
+.arc-boss-card.open .arc-boss-chevron { transform:rotate(180deg); }
+.arc-boss-body { max-height:0; overflow:hidden; transition:max-height 0.45s ease, opacity 0.3s; opacity:0; }
+.arc-boss-card.open .arc-boss-body { max-height:800px; opacity:1; }
+.arc-boss-description { padding:0 20px 16px; font-size:13px; color:#999; line-height:1.65; border-bottom:1px solid rgba(255,255,255,0.05); margin:0; }
+
+.arc-boss-stats { display:grid; grid-template-columns:repeat(3,1fr); border-bottom:1px solid rgba(255,255,255,0.05); }
+.arc-stat { padding:13px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.05); border-bottom:1px solid rgba(255,255,255,0.05); }
+.arc-stat:nth-child(3n) { border-right:none; }
+.arc-stat:nth-last-child(-n+3) { border-bottom:none; }
+.arc-stat-label { display:block; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.25); margin-bottom:6px; }
+.arc-stat-value { display:block; font-size:15px; font-weight:bold; color:var(--arcColor); font-family:'Courier New',monospace; line-height:1.2; }
+.arc-stat-unit { display:block; font-size:9px; color:rgba(255,255,255,0.2); margin-top:2px; }
+
+.arc-boss-threat { padding:13px 20px 10px; border-bottom:1px solid rgba(255,255,255,0.05); }
+.arc-threat-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:7px; }
+.arc-threat-tag { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.25); }
+.arc-threat-level-text { font-size:11px; font-weight:bold; letter-spacing:1px; }
+.arc-threat-bar-bg { height:3px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; }
+.arc-threat-bar-fill { height:100%; border-radius:3px; animation:threatPulse 2.2s ease-in-out infinite; }
+@keyframes threatPulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
+
+.arc-boss-weakness { padding:11px 20px 17px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.arc-weakness-label { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.2); }
+.arc-weakness-tag { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); border-radius:4px; padding:3px 8px; font-size:11px; color:#bbb; }
+
+.arc-bosses-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; }
+
+/* =============================================
+   RUOLI — schede personaggi
+   ============================================= */
+.arc-char-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:18px; }
+.arc-char-card {
+  background:#0a0a0a; border:1px solid rgba(255,255,255,0.07);
+  border-radius:14px; overflow:hidden; position:relative;
+  transition:border-color 0.3s, box-shadow 0.3s;
+}
+.arc-char-card::after {
+  content:""; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,transparent,var(--charColor,#d4af37),transparent);
+}
+.arc-char-card:hover { border-color:var(--charColor,#d4af37); box-shadow:0 0 28px rgba(0,0,0,0.5), 0 0 14px var(--charColor,#d4af37); }
+.arc-char-header-row { display:flex; align-items:center; gap:15px; padding:16px 18px; cursor:pointer; user-select:none; transition:background 0.2s; }
+.arc-char-header-row:hover { background:rgba(255,255,255,0.02); }
+.arc-char-icon {
+  width:60px; height:60px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:26px;
+  border:2px solid var(--charColor,#d4af37); box-shadow:0 0 10px var(--charColor,#d4af37);
+  background:#0a0a0a; transition:box-shadow 0.3s;
+}
+.arc-char-card.open .arc-char-icon { box-shadow:0 0 22px var(--charColor,#d4af37); }
+.arc-char-meta { flex:1; min-width:0; }
+.arc-char-name { font-size:15px; font-weight:bold; color:var(--charColor,#d4af37); margin:0 0 3px; letter-spacing:0.8px; font-family:'Courier New',monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.arc-char-role { font-size:10px; color:rgba(255,255,255,0.28); letter-spacing:2.5px; text-transform:uppercase; margin:0; }
+.arc-char-chevron { font-size:11px; color:var(--charColor,#d4af37); transition:transform 0.3s; flex-shrink:0; margin-left:auto; }
+.arc-char-card.open .arc-char-chevron { transform:rotate(180deg); }
+.arc-char-body { max-height:0; overflow:hidden; transition:max-height 0.45s ease, opacity 0.3s; opacity:0; }
+.arc-char-card.open .arc-char-body { max-height:900px; opacity:1; }
+.arc-char-desc { padding:14px 18px; font-size:13px; color:#999; line-height:1.65; border-bottom:1px solid rgba(255,255,255,0.05); margin:0; }
+.arc-char-tags { padding:11px 18px 16px; display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+.arc-char-tag-label { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.2); }
+.arc-char-tag { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:3px 8px; font-size:11px; color:#bbb; }
+
+.screens-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-top:16px; }
+.screens-grid img { width:100%; height:auto; border-radius:8px; object-fit:cover; cursor:zoom-in; transition:transform 0.25s ease, filter 0.25s ease; background:#0a0a0a; }
+.screens-grid img:hover { transform:scale(1.02); filter:brightness(1.05); }
+.screens-lightbox { position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:1500; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.22s ease; }
+.screens-lightbox.active { opacity:1; pointer-events:auto; }
+.screens-lightbox img { max-width:92vw; max-height:92vh; border-radius:8px; box-shadow:0 0 32px rgba(0,0,0,0.45); }
+.screens-lightbox .lightbox-close { position:absolute; top:16px; right:16px; font-size:28px; color:#fff; background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.4); border-radius:50%; width:42px; height:42px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background 0.2s; }
+.screens-lightbox .lightbox-close:hover { background:rgba(255,255,255,0.12); }
+
+.arc-expanded-section { display:none; margin-top:36px; padding-top:28px; border-top:1px solid rgba(255,255,255,0.06); }
+.arc-expanded-section.active { display:block; }
+.arc-close-expanded { background:none; border:1px solid rgba(255,255,255,0.15); color:#bbb; padding:8px 14px; cursor:pointer; margin-bottom:20px; border-radius:6px; transition:0.25s; }
+.arc-close-expanded:hover { border-color:var(--arcColor); color:var(--arcColor); }
+.arc-expanded-title h2 { color:var(--arcColor); margin:0 0 6px; letter-spacing:2px; }
+.arc-expanded-title p { color:#aaa; margin:0; }
+.arc-expanded-content { margin-top:22px; display:grid; grid-template-columns:2fr 1fr; gap:28px; }
+.arc-content-main p { color:#bbb; line-height:1.8; font-size:14px; }
+.arc-objectives h3 { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:12px; }
+.arc-objectives ul { list-style:none; padding:0; margin:0; }
+.arc-objectives li { padding:9px 12px; margin-bottom:8px; background:rgba(212,175,55,0.04); border-left:2px solid var(--arcColor); color:#ccc; font-size:12.5px; border-radius:3px; }
+.arc-expanded-gallery { margin-top:28px; }
+.arc-expanded-gallery h3 { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:12px; }
+.arc-gallery-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; }
+.arc-gallery-grid img { width:100%; border-radius:8px; object-fit:cover; height:110px; background:#0a0a0a; }
+@media (max-width:760px){ .arc-expanded-content{ grid-template-columns:1fr; } }
+  </style>
+  <script>
+    const firebaseConfig = {
+      apiKey:"AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
+      authDomain:"etagames-b5d6a.firebaseapp.com",
+      projectId:"etagames-b5d6a",
+      messagingSenderId:"809625655346",
+      appId:"1:809625655346:web:3010a62960fde91787842b"
+    };
+    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth=firebase.auth();
+    const db=firebase.firestore();
+  </script>
+</head>
+<body class="night-theme">
+  <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <img src="img/channels4_profile.jpg" alt="Logo ETA Games" class="logo-img">
+          <div>
+            <div>ETA Games</div>
+            <div class="muted" style="font-size:12px;margin-top:2px">Studio</div>
+          </div>
+        </div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="games.html" class="active">Giochi</a>
+          <a href="extra.html">Extra</a>
+          <a href="login.html">Profilo</a>
+          <a href="blog.html">Blog</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero container">
+    <div>
+      <h1>The Judgment</h1>
+      <p>Un tribunale virtuale multiplayer, tutto nel browser. Un giocatore viene accusato a caso da un altro, si difende per iscritto, e la giuria — cioè tutti gli altri — vota se assolverlo o condannarlo. Alla fine, un giudice AI (basato su Groq) legge accusa e difesa e pronuncia il proprio verdetto motivato, che si somma ai voti umani.</p>
+      <p><strong>Gioca gratis dal browser, nessuna installazione richiesta: basta un nome e un codice tribunale.</strong></p>
+      <div class="btn-group">
+        <a href="https://gabry2317.github.io/the-judgment/" class="btn" target="_blank">Gioca ora</a>
+        <a href="#roles" class="btn">Scopri i ruoli</a>
+      </div>
+    </div>
+    <div class="card-tvhouse">
+      <h2>Dettagli</h2>
+      <p><strong>Genere:</strong> Party / Social Deduction</p>
+      <p><strong>Piattaforme:</strong> Browser (PC/Mobile)</p>
+      <p><strong>made in:</strong> HTML/CSS/JS + Node.js/Socket.IO + Groq AI</p>
+      <div class="tags">
+        <span class="badge">Multiplayer</span>
+        <span class="badge">Tribunale Virtuale</span>
+        <span class="badge">Giudice AI</span>
+        <span class="badge">Browser</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="container">
+    <h2>Caratteristiche principali</h2>
+    <div class="cards">
+      <div class="feature">
+        <h3>⚖️ Accuse anonime</h3>
+        <p class="muted">Ogni round un giocatore viene accusato a caso da un altro. L'identità dell'accusatore non viene mai rivelata: potrebbe essere chiunque.</p>
+      </div>
+      <div class="feature">
+        <h3>🤖 Giudice AI (Groq)</h3>
+        <p class="muted">Dopo accusa e difesa, un giudice basato su Groq legge gli atti e pronuncia un verdetto motivato, che si aggiunge ai voti della giuria.</p>
+      </div>
+      <div class="feature">
+        <h3>🎭 Ruoli a sorpresa</h3>
+        <p class="muted">L'imputato viene scelto a caso ad ogni round: tutti possono trovarsi dall'altra parte della barra, senza preavviso.</p>
+      </div>
+      <div class="feature">
+        <h3>🔌 Zero installazione</h3>
+        <p class="muted">Il client gira interamente nel browser via GitHub Pages. Crea o unisciti a un tribunale con un semplice codice, oppure prova la modalità demo locale.</p>
+      </div>
+    </div>
+  </section>
+
+<section class="container">
+    <h2>Screenshot e Immagini</h2>
+    <div class="screens-grid">
+      <img src="https://gabry2317.github.io/the-judgment/assets/images/lobby-illustration.png" alt="Illustrazione della lobby">
+      <img src="https://gabry2317.github.io/the-judgment/assets/images/immagine-4.png" alt="Logo/Mascotte di The Judgment">
+      <img src="https://gabry2317.github.io/the-judgment/assets/images/immagine-3.png" alt="Schermata verdetto: assolto">
+      <img src="https://gabry2317.github.io/the-judgment/assets/images/immagine-2.png" alt="Schermata verdetto: assolto">
+    </div>
+    <div class="screens-lightbox" id="screens-lightbox" aria-hidden="true">
+      <button class="lightbox-close" id="lightbox-close" aria-label="Chiudi immagine">×</button>
+      <img id="lightbox-img" src="" alt="">
+    </div>
+  </section>
+
+  <section class="container" id="roles">
+    <h2>Ruoli in tribunale</h2>
+    <div class="arc-char-grid" id="rolesGrid"></div>
+  </section>
+
+  <section class="container arc-terminal" id="process">
+    <div class="arc-top">
+      <div class="arc-logo-wrapper">
+        <div class="arc-logo"></div>
+        <div class="arc-logo-ring"></div>
+      </div>
+      <div class="arc-chapter-info">
+        <h2 id="arc-chapter-name">FASE I</h2>
+        <p id="arc-chapter-sub">L'Accusa</p>
+      </div>
+      <div class="arc-nav">
+        <button id="prevChapter">&#9664;</button>
+        <button id="nextChapter">&#9654;</button>
+      </div>
+    </div>
+
+    <div class="arc-levels-section">
+      <h3>⚖ Come si svolge un round</h3>
+      <div class="arc-levels-grid" id="arcLevels"></div>
+    </div>
+
+    <div class="arc-expanded-section" id="arcExpanded">
+      <button class="arc-close-expanded" id="arcCloseExpanded">&#10005; Chiudi</button>
+      <div class="arc-expanded-header">
+        <div class="arc-expanded-title">
+          <h2 id="expTitle"></h2>
+          <p id="expDesc"></p>
+        </div>
+      </div>
+      <div class="arc-expanded-content">
+        <div class="arc-content-main"><p id="expContent"></p></div>
+        <div class="arc-objectives">
+          <h3>Cosa succede</h3>
+          <ul id="expObjectives"></ul>
+        </div>
+      </div>
+      <div class="arc-bosses-section" id="arcBossesSection">
+        <h3>&#9878; Dossier — Esiti e Attori del Processo</h3>
+        <div class="arc-bosses-grid" id="arcBossesGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <strong>ETA Games</strong>
+          <div class="muted">© ETA Games — Tutti i diritti riservati</div>
+        </div>
+        <div class="socials muted">
+          <a href="https://discord.gg/Da7sq3Mwpw" target="_blank">Discord</a>
+          <a href="https://www.youtube.com/@HGames_studio" target="_blank">YouTube</a>
+          <a href="https://www.instagram.com/eta.games_" target="_blank">instagram</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+  /* ---- Ruoli in tribunale ---- */
+  const roles = [
+    {
+      name:"Accusatore", role:"ANONIMO — TURNO CASUALE", icon:"🕵️", color:"#d4af37",
+      desc:"Ad ogni round, un giocatore viene scelto a caso per depositare un'accusa contro un altro membro del tribunale. Il testo dell'accusa è pubblico, ma chi l'ha scritta resta segreto: potrebbe essere chiunque, anche il tuo vicino di chat.",
+      tags:["Identità nascosta","Un'accusa a round","Nessun limite di fantasia"]
+    },
+    {
+      name:"Imputato", role:"SCELTO A CASO — SI DIFENDE PER ISCRITTO", icon:"🧑‍⚖️", color:"#c0392b",
+      desc:"Il giocatore accusato non sa chi lo ha incastrato. Ha un tempo limitato per scrivere una difesa che gli altri leggeranno prima di votare. Persuasione, umorismo o pura sfacciataggine: tutto è permesso pur di convincere la giuria.",
+      tags:["Ruolo a rotazione","Difesa a tempo","Nessun indizio sull'accusatore"]
+    },
+    {
+      name:"Giuria", role:"TUTTI GLI ALTRI GIOCATORI", icon:"🗳️", color:"#4c8bf5",
+      desc:"Chiunque non sia l'imputato di quel round vota: assolvere o condannare. I voti restano anonimi finché non viene mostrato il riepilogo finale del caso, incrociato con il giudizio dell'AI.",
+      tags:["Voto singolo per round","Anonimo fino al riepilogo","Assolvi o Condanna"]
+    },
+    {
+      name:"Giudice AI", role:"MOTORE GROQ — VERDETTO MOTIVATO", icon:"🤖", color:"#8a5cf6",
+      desc:"Un giudice artificiale, alimentato dall'API Groq, legge accusa e difesa e pronuncia un proprio verdetto con tanto di motivazione scritta. Il suo voto si somma a quelli della giuria umana nel riepilogo finale del caso.",
+      tags:["Verdetto motivato","Basato su Groq","Voto paritario in giuria"]
+    }
+  ];
+
+  function buildRoleCard(r){
+    const cardId="role-"+Math.random().toString(36).slice(2,7);
+    return `<div class="arc-char-card" id="${cardId}" style="--charColor:${r.color}">
+      <div class="arc-char-header-row" onclick="toggleRole('${cardId}')">
+        <div class="arc-char-icon">${r.icon}</div>
+        <div class="arc-char-meta">
+          <p class="arc-char-name">${r.name}</p>
+          <p class="arc-char-role">${r.role}</p>
+        </div>
+        <span class="arc-char-chevron">▼</span>
+      </div>
+      <div class="arc-char-body">
+        <p class="arc-char-desc">${r.desc}</p>
+        <div class="arc-char-tags">
+          <span class="arc-char-tag-label">Note</span>
+          ${r.tags.map(t=>`<span class="arc-char-tag">${t}</span>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  }
+  function toggleRole(id){ const c=document.getElementById(id); if(c) c.classList.toggle("open"); }
+
+  document.getElementById("rolesGrid").innerHTML = roles.map(buildRoleCard).join('');
+
+  /* ---- Le 4 fasi del processo ---- */
+  function getThreatConfig(level){
+    const c={
+      "ASSOLTO":  {color:"#4caf50", width:"35%"},
+      "IN BILICO":{color:"#ff9800", width:"55%"},
+      "CONDANNATO":{color:"#f44336", width:"80%"},
+      "VARIABILE":{color:"#8a5cf6", width:"60%"}
+    };
+    return c[level]||c["VARIABILE"];
+  }
+
+  function buildDossierCard(d){
+    const t=getThreatConfig(d.esito);
+    const cardId="dossier-"+Math.random().toString(36).slice(2,7);
+    return `<div class="arc-boss-card" id="${cardId}">
+      <div class="arc-boss-header" onclick="toggleBoss('${cardId}')">
+        <div class="arc-boss-icon">${d.icon}</div>
+        <div class="arc-boss-header-text">
+          <p class="arc-boss-name">${d.name}</p>
+          <p class="arc-boss-class">${d.class}</p>
+        </div>
+        <span class="arc-boss-chevron">▼</span>
+      </div>
+      <div class="arc-boss-body">
+        <p class="arc-boss-description">${d.description}</p>
+        <div class="arc-boss-threat">
+          <div class="arc-threat-row">
+            <span class="arc-threat-tag">Esito / Natura</span>
+            <span class="arc-threat-level-text" style="color:${t.color}">${d.esito}</span>
+          </div>
+          <div class="arc-threat-bar-bg">
+            <div class="arc-threat-bar-fill" style="width:${t.width};background:${t.color}"></div>
+          </div>
+        </div>
+        <div class="arc-boss-weakness">
+          <span class="arc-weakness-label">Fattori chiave</span>
+          ${d.fattori.map(w=>`<span class="arc-weakness-tag">${w}</span>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  }
+  function toggleBoss(id){ const c=document.getElementById(id); if(c) c.classList.toggle("open"); }
+
+  const chapters = [
+    {
+      name:"FASE I", sub:"L'Accusa", color:"#d4af37",
+      levels:[
+        {
+          title:"Deposita l'accusa",
+          icon:"📜",
+          desc:"Un giocatore viene selezionato a caso e scrive un'accusa contro un altro membro del tribunale, in totale anonimato.",
+          content:"All'inizio di ogni round il sistema sceglie casualmente chi dovrà accusare e chi verrà accusato. Chi accusa ha un tempo limitato per scrivere il capo d'imputazione: può essere serio, assurdo o completamente inventato, l'importante è che sia divertente da leggere e difendere. Il nome di chi scrive resta segreto per tutta la partita.",
+          objectives:["Il sistema assegna a caso accusatore e imputato","L'accusatore scrive il testo entro il tempo limite","L'accusa viene pubblicata in aula, in forma anonima"],
+          dossier:[]
+        }
+      ]
+    },
+    {
+      name:"FASE II", sub:"La Difesa", color:"#c0392b",
+      levels:[
+        {
+          title:"Presenta la difesa",
+          icon:"🗣️",
+          desc:"L'imputato legge l'accusa e ha un tempo limitato per scrivere una difesa convincente davanti a tutta l'aula.",
+          content:"L'imputato non sa chi lo ha accusato né perché — deve solo rispondere al testo che compare sullo schermo. Ha un timer per scrivere la propria difesa: retorica, ironia o negazione totale sono tutte strategie valide. La difesa viene poi mostrata a tutta la giuria prima del voto.",
+          objectives:["L'imputato legge l'accusa anonima","Scrive la difesa entro il tempo limite","La difesa viene pubblicata per la giuria"],
+          dossier:[]
+        }
+      ]
+    },
+    {
+      name:"FASE III", sub:"Il Voto della Giuria", color:"#4c8bf5",
+      levels:[
+        {
+          title:"Vota: assolvi o condanna",
+          icon:"🗳️",
+          desc:"Tutti i giocatori tranne l'imputato leggono accusa e difesa e votano in anonimato, mentre in parallelo il giudice AI esamina gli stessi atti.",
+          content:"Ogni membro della giuria esprime un solo voto per round: Assolvi o Condanna. I voti restano nascosti fino al riepilogo finale, per evitare effetti gregge. Nel frattempo il giudice artificiale, basato su Groq, analizza autonomamente accusa e difesa per preparare il proprio giudizio motivato.",
+          objectives:["Ogni giocatore vota una sola volta","I voti restano anonimi fino al riepilogo","Il giudice AI elabora in parallelo il proprio verdetto"],
+          dossier:[]
+        }
+      ]
+    },
+    {
+      name:"FASE IV", sub:"Il Verdetto", color:"#8a5cf6",
+      levels:[
+        {
+          title:"Riepilogo del caso",
+          icon:"🔨",
+          desc:"Il tribunale scopre il risultato: i voti della giuria si sommano al giudizio del giudice AI, che rivela anche la propria motivazione scritta.",
+          content:"Alla fine del round viene mostrato il riepilogo completo: il testo dell'accusa, quello della difesa, i voti della giuria e il verdetto — insieme alla motivazione — del giudice AI. Il caso si chiude con un esito grafico (Assolto o Condannato), poi il tribunale si prepara per un nuovo round con nuovi ruoli assegnati a caso.",
+          objectives:["Si sommano voti umani e voto del giudice AI","Viene mostrata la motivazione scritta dall'AI","Il tribunale riparte con un nuovo round"],
+          dossier:[
+            {
+              name:"Assolto", class:"ESITO — MAGGIORANZA A FAVORE", icon:"🕊️",
+              description:"L'imputato convince la giuria e/o il giudice AI: i voti a favore dell'assoluzione superano quelli di condanna. La schermata di verdetto mostra l'illustrazione dedicata e il caso si archivia senza conseguenze.",
+              esito:"ASSOLTO", fattori:["Difesa convincente","Accusa debole o inverosimile","Empatia della giuria"]
+            },
+            {
+              name:"Condannato", class:"ESITO — MAGGIORANZA CONTRARIA", icon:"⛓️",
+              description:"La maggioranza tra giuria e giudice AI ritiene fondata l'accusa. L'imputato viene dichiarato colpevole e il caso si chiude a suo sfavore, in attesa del prossimo round in cui i ruoli verranno riassegnati a caso.",
+              esito:"CONDANNATO", fattori:["Accusa ben argomentata","Difesa poco credibile","Voto AI sfavorevole"]
+            },
+            {
+              name:"Giudice AI", class:"MOTORE DI GIUDIZIO — GROQ", icon:"🤖",
+              description:"Non è un giocatore, ma pesa come uno. Analizza il testo di accusa e difesa e produce un verdetto scritto e motivato, sostituibile in futuro con un altro provider AI senza toccare il resto del sistema di lobby e turni.",
+              esito:"VARIABILE", fattori:["Verdetto motivato per iscritto","Voto paritario rispetto alla giuria","Provider AI intercambiabile"]
+            }
+          ]
+        }
+      ]
+    }
+  ];
+
+  let currentChapter=0;
+  const expandedSection=document.getElementById("arcExpanded");
+  const closeExpandedBtn=document.getElementById("arcCloseExpanded");
+
+  function expandLevel(level){
+    document.getElementById("expTitle").textContent=level.title;
+    document.getElementById("expDesc").textContent=level.desc;
+    document.getElementById("expContent").textContent=level.content;
+    const ol=document.getElementById("expObjectives");
+    ol.innerHTML="";
+    level.objectives.forEach(obj=>{const li=document.createElement("li");li.textContent=obj;ol.appendChild(li);});
+    const bossesSection=document.getElementById("arcBossesSection");
+    const bossesGrid=document.getElementById("arcBossesGrid");
+    bossesGrid.innerHTML="";
+    if(level.dossier && level.dossier.length>0){
+      bossesSection.style.display="block";
+      level.dossier.forEach(d=>{bossesGrid.innerHTML+=buildDossierCard(d);});
+    } else {
+      bossesSection.style.display="none";
+    }
+    expandedSection.classList.add("active");
+    expandedSection.scrollIntoView({behavior:"smooth",block:"start"});
+  }
+
+  function closeExpanded(){ expandedSection.classList.remove("active"); }
+
+  function renderLevels(){
+    closeExpanded();
+    const container=document.getElementById("arcLevels");
+    container.innerHTML="";
+    if(currentChapter >= chapters.length) currentChapter=0;
+    const chapter=chapters[currentChapter];
+    document.documentElement.style.setProperty("--arcColor",chapter.color);
+    document.getElementById("arc-chapter-name").textContent=chapter.name;
+    document.getElementById("arc-chapter-sub").textContent=chapter.sub;
+    chapter.levels.forEach(lvl=>{
+      const level=document.createElement("div");
+      level.className="arc-level";
+      level.innerHTML=`<div class="arc-level-icon">${lvl.icon}</div><div class="arc-level-text"><h4>${lvl.title}</h4><p>${lvl.desc}</p></div>`;
+      level.addEventListener("click",()=>expandLevel(lvl));
+      container.appendChild(level);
+    });
+  }
+
+  document.getElementById("nextChapter").addEventListener("click",()=>{currentChapter=(currentChapter+1)%chapters.length;renderLevels();});
+  document.getElementById("prevChapter").addEventListener("click",()=>{currentChapter=(currentChapter-1+chapters.length)%chapters.length;renderLevels();});
+  closeExpandedBtn.addEventListener("click",closeExpanded);
+
+  /* ---- Screenshot lightbox ---- */
+  const screenThumbs=document.querySelectorAll('.screens-grid img');
+  const lightbox=document.getElementById('screens-lightbox');
+  const lightboxImage=document.getElementById('lightbox-img');
+  const lightboxClose=document.getElementById('lightbox-close');
+
+  function closeLightbox(){
+    lightbox.classList.remove('active');
+    lightbox.setAttribute('aria-hidden','true');
+    document.body.style.overflow='';
+    lightboxImage.src='';
+    lightboxImage.alt='';
+  }
+  screenThumbs.forEach(img=>{
+    img.addEventListener('click',()=>{
+      lightboxImage.src=img.src;
+      lightboxImage.alt=img.alt || 'Screenshot ingrandito';
+      lightbox.classList.add('active');
+      lightbox.setAttribute('aria-hidden','false');
+      document.body.style.overflow='hidden';
+    });
+  });
+  lightboxClose.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', e => { if(e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox(); });
+
+  renderLevels();
+  </script>
+</body>
+</html>
