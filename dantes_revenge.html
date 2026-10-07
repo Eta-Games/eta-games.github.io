@@ -200,6 +200,7 @@ setTimeout(() => {
 .hero-titlepic { width:100%; border-radius:12px; border:1px solid rgba(255,255,255,0.08); box-shadow:0 0 40px rgba(0,0,0,0.6); }
 .arc-expanded-gallery { display:none; }
   </style>
+  <script src="i18n.js"></script>
 </head>
 <body>
 
@@ -491,6 +492,7 @@ setTimeout(() => {
 </section>
 
 <!-- ═══════════════════════════════ LIBRERIA ═══════════════════════════════ -->
+<section class="container" id="changelog"><h2>Changelog</h2><div id="clog" class="muted">Caricamento…</div></section>
 <section class="container" id="download">
   <h2>Download</h2>
   <div class="download-block">
@@ -775,5 +777,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   document.getElementById("arcCloseExpanded").addEventListener("click",closeExpanded);
 });
 </script>
+<script src="eta-feed.js"></script><script>loadChangelog("Eta-Games","Dante-s-Revenge").then(d=>renderChangelog(document.getElementById("clog"),d))</script><section class="container" style="padding:20px 0"><div id="reviews" data-game="dantes_revenge"></div></section>
+<script src="eta-reviews.js"></script>
 </body>
 </html>

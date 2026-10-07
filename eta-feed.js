@@ -1,0 +1,35 @@
+if(typeof etaLoc=="undefined")var etaLoc=v=>typeof v=="string"?v:(v&&(v.it||v.en))||"";
+const ETA_SOURCES=[{id:"launcher",name:"ETA Launcher",owner:"Eta-Games",repo:"Eta-louncer",color:"#4ea1ff"},{id:"dantes",name:"Dante's Revenge",owner:"Eta-Games",repo:"Dante-s-Revenge",color:"#3ddc84"}];
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+async function getJson(u){try{const r=await fetch(u);return r.ok?await r.json():null}catch(e){return null}}
+async function loadBroadcasts(){const all=[];await Promise.all(ETA_SOURCES.map(async s=>{const d=await getJson(`https://raw.githubusercontent.com/${s.owner}/${s.repo}/HEAD/broadcast.json`);(d?.messages||[]).forEach(m=>all.push({...m,src:s}))}));return all.sort((a,b)=>(b.date||"").localeCompare(a.date||""))}
+async function loadChangelog(owner,repo){const [rel,com]=await Promise.all([getJson(`https://api.github.com/repos/${owner}/${repo}/releases?per_page=5`),getJson(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=10`)]);return{rel:rel||[],com:com||[]}}
+function renderChangelog(el,{rel,com}){el.innerHTML=(rel.length?"<h3>Release</h3>"+rel.map(r=>`<div class="card-tvhouse" style="margin-bottom:10px"><b><a href="${esc(r.html_url)}" target="_blank">${esc(r.name||r.tag_name)}</a></b> <span class="muted">${esc((r.published_at||"").slice(0,10))}</span><p class="muted" style="white-space:pre-wrap">${esc((r.body||"").slice(0,400))}</p></div>`).join(""):"")+(com.length?"<h3>Ultimi commit</h3><ul class='muted'>"+com.map(c=>`<li>${esc(c.commit.message.split("\n")[0])} <small>(${esc(c.commit.author.date.slice(0,10))})</small></li>`).join("")+"</ul>":"")||"<p class='muted'>Nessun dato disponibile.</p>"}
+
+function bcRead(){try{return JSON.parse(localStorage.getItem("etaBcRead")||"[]")}catch(e){return[]}}
+function bcSave(a){try{localStorage.setItem("etaBcRead",JSON.stringify(a))}catch(e){}}
+function renderBroadcast(root,msgs){
+const S=ETA_SOURCES;let filter="",read=new Set(bcRead());
+if(!document.getElementById("bcCss")){const st=document.createElement("style");st.id="bcCss";st.textContent=".bc-chip{background:transparent;border:1px solid var(--c);color:var(--c);border-radius:16px;padding:5px 12px;cursor:pointer;font:inherit}.bc-chip:hover{background:color-mix(in srgb,var(--c) 15%,transparent)}.bc-chip.on{background:color-mix(in srgb,var(--c) 28%,transparent);font-weight:600}.bc-b{background:transparent;border:1px solid #555;color:inherit;border-radius:8px;padding:7px 14px;cursor:pointer;font:inherit}.bc-b:hover{border-color:#999}.bc-row{display:flex}.bc-g{position:relative;flex:none}.bc-g svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}.bc-card{flex:1;min-width:0;padding:14px 0 18px 6px}.bc-pill{display:inline-block;font-size:12px;border:1px solid;border-radius:9px;padding:0 8px;margin-left:8px}.bc-new{display:inline-block;font-size:11px;background:#e50914;color:#fff;border-radius:9px;padding:1px 8px;margin-left:6px}.bc-card ul{margin:6px 0 0;padding-left:18px}";document.head.appendChild(st)}
+root.innerHTML='<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap"><div><h2 style="margin:0">Broadcast</h2><p class="muted" style="margin:2px 0 0">Novità e avvisi da ETA Launcher e dai giochi. Scegli il ramo da vedere.</p></div><div style="display:flex;gap:8px"><button class="bc-b" id="bcR">Aggiorna</button><button class="bc-b" id="bcK">Segna come letto</button></div></div><div id="bcC" style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0"></div><div id="bcL"></div>';
+const vis=()=>msgs.filter(m=>!filter||m.src.id==filter);
+const draw=()=>{
+document.getElementById("bcC").innerHTML=[{id:"",name:"Tutto",color:"#9a9a9a"},...S].map(c=>{const n=msgs.filter(m=>(!c.id||m.src.id==c.id)&&!read.has(m.id)).length;return`<button class="bc-chip${filter==c.id?" on":""}" data-id="${c.id}" style="--c:${c.color}">${esc(c.name)}${n?" ("+n+")":""}</button>`}).join("");
+const L=document.getElementById("bcL"),list=vis();
+if(!list.length){L.innerHTML='<p class="muted">Nessun messaggio al momento.</p>';return}
+const trunk=!filter,lanes=trunk?S.length:1,lane=m=>trunk?S.findIndex(s=>s.id==m.src.id):0,first=[],last=[],n=list.length;
+list.forEach((m,i)=>{const l=lane(m);if(first[l]==null)first[l]=i;last[l]=i});
+const W=16*lanes+14,x=l=>10+l*16,colL=l=>trunk?S[l].color:S.find(s=>s.id==filter).color;
+L.innerHTML=list.map((m,i)=>{const l=lane(m),un=!read.has(m.id),c=colL(l);let g="";
+for(let k=0;k<lanes;k++){if(first[k]==null)continue;const tk=trunk&&k==0,from=tk?0:first[k],to=tk?n-1:last[k];if(i<from||i>to)continue;
+g+=`<line x1="${x(k)}" x2="${x(k)}" y1="${!tk&&i==first[k]?26:0}" y2="${!tk&&i==last[k]?26:"100%"}" stroke="${colL(k)}" stroke-width="2" stroke-linecap="round"/>`}
+if(trunk&&l>0&&i==last[l])g+=`<path class="bc-fork" data-x="${x(l)}" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round"/>`;
+g+=un?`<circle cx="${x(l)}" cy="26" r="6.5" fill="${c}"/>`:`<circle cx="${x(l)}" cy="26" r="5" fill="none" stroke="${c}" stroke-width="2"/>`;
+const nl=Array.isArray(m.notes)?m.notes.map(etaLoc):(m.notes&&typeof m.notes=="object"?(m.notes[window.ETA_LANG]||m.notes.it||m.notes.en||[]):[]),notes=nl.map(t=>`<li>${esc(t)}</li>`).join(""),lv=m.level&&m.level!="info"?" · "+esc(m.level):"";
+return`<div class="bc-row"><div class="bc-g" style="width:${W}px"><svg>${g}</svg></div><div class="bc-card"><b>${esc(etaLoc(m.title)||m.src.name)}</b><span class="bc-pill" style="color:${c}">${esc(m.src.name)}</span>${un?'<span class="bc-new">Nuovo</span>':""}<div class="muted" style="font-size:13px">${esc(m.date||"")}${lv}</div><div style="margin-top:6px;white-space:pre-wrap">${esc(etaLoc(m.message))}</div>${notes?"<ul>"+notes+"</ul>":""}${/^https?:/.test(m.url||"")?`<div style="margin-top:6px"><a href="${esc(m.url)}" target="_blank">Apri</a></div>`:""}</div></div>`}).join("");
+L.querySelectorAll(".bc-fork").forEach(p=>{const h=p.closest(".bc-row").offsetHeight,a=+p.dataset.x,b=10,cy=26;p.setAttribute("d",`M${a} ${cy}C${a} ${cy+(h-cy)*.7} ${b} ${cy+(h-cy)*.3} ${b} ${h}`)})};
+root.onclick=e=>{const c=e.target.closest(".bc-chip");if(c){filter=c.dataset.id;draw()}};
+document.getElementById("bcK").onclick=()=>{vis().forEach(m=>read.add(m.id));bcSave([...read]);draw()};
+document.getElementById("bcR").onclick=()=>loadBroadcasts().then(a=>{msgs=a;draw()});
+draw()}
+function renderHof(el){firebase.firestore().collection("users").orderBy("playSecs","desc").limit(10).get().then(s=>{if(s.empty){el.innerHTML="<p class='muted'>Ancora nessun dato.</p>";return}let i=0;el.innerHTML=s.docs.map(d=>{const u=d.data();i++;return`<a href="public-profile.html?uid=${encodeURIComponent(d.id)}" style="text-decoration:none"><div class="card-tvhouse" style="display:flex;gap:14px;margin-bottom:8px"><b>${i==1?"🥇":i==2?"🥈":i==3?"🥉":"#"+i}</b><span style="flex:1">${esc(u.displayName||"Giocatore")}</span><span class="muted">${((u.playSecs||0)/3600).toFixed(1)} h</span></div></a>`}).join("")}).catch(()=>{el.innerHTML="<p class='muted'>Classifica non disponibile.</p>"})}

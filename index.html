@@ -15,6 +15,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="i18n.js"></script>
 </head>
 
 <body class="night-theme"> <header>
@@ -33,6 +34,7 @@
           <a href="extra.html">Extra</a>
           <a href="login.html" id="navProfileLink">Profilo</a>
           <a href="blog.html">Blog</a>
+          <a href="novita.html">Novità</a>
         </div>
       </nav>
     </div>
@@ -47,6 +49,7 @@
           <p>Creiamo mondi, viviamo il Gaming</p>
           <div class="btn-group">
             <a class="btn" href="https://discord.gg/Da7sq3Mwpw" target="_blank">Unisciti alla community</a>
+            <a class="btn" id="dlLauncher" href="https://github.com/Eta-Games/Eta-louncer/releases/latest" target="_blank">Scarica il Launcher</a>
           </div>
         </div>
 
@@ -131,6 +134,12 @@
         </div>
       </section>
 
+      <section id="hof" class="container">
+        <h2>Hall of Fame</h2>
+        <p class="muted">Classifica per ore giocate (dati sincronizzati dal launcher).</p>
+        <div id="hofList"><p class="muted">Caricamento…</p></div>
+      </section>
+
     </div>
   </main>
 
@@ -183,5 +192,5 @@
       }
     });
   </script>
-</body>
+<script>fetch("https://api.github.com/repos/Eta-Games/Eta-louncer/releases/latest").then(r=>r.json()).then(r=>{const a=(r.assets||[]).find(x=>/\.(exe|msi)$/i.test(x.name))||(r.assets||[])[0];if(a){const b=document.getElementById("dlLauncher");b.href=a.browser_download_url;b.textContent="Scarica il Launcher "+(r.tag_name||"")}}).catch(()=>{})</script><script src="eta-feed.js"></script><script>renderHof(document.getElementById("hofList"))</script></body>
 </html>

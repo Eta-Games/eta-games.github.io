@@ -58,6 +58,7 @@ input:checked + .slider:before{
 }
 </style>
 
+  <script src="i18n.js"></script>
 </head>
 
 <body class="night-theme">
@@ -196,10 +197,25 @@ input:checked + .slider:before{
   </div>
 </div>
 
+<div class="card-tvhouse" id="statsCard" style="margin-bottom:20px">
+  <h2>Statistiche di gioco</h2>
+  <div id="statsList">Nessuna partita registrata.</div>
+</div>
+
 <div class="card-tvhouse" id="extraFeatures" style="margin-bottom:20px">
   <h2>Funzioni extra</h2>
   <p><strong>Badge utente:</strong> <span id="userBadge">Calcolo...</span></p>
   
+  <div style="margin-top:15px; border-top:1px solid var(--muted); padding-top:15px;">
+    <label for="langSelector">Lingua / Language:</label>
+    <select id="langSelector" class="themed-input" style="cursor:pointer;">
+      <option value="it">Italiano</option>
+      <option value="en">English</option>
+      <option value="de">Deutsch</option>
+    </select>
+    <small style="display:block;opacity:.7">Salvata sull'account: vale anche nel launcher.</small>
+  </div>
+
   <div style="margin-top:15px; border-top:1px solid var(--muted); padding-top:15px;">
     <label for="themeSelector">Tema Interfaccia:</label>
     <select id="themeSelector" class="themed-input" style="cursor:pointer;">
@@ -323,6 +339,23 @@ auth.onAuthStateChanged(async user => {
       document.getElementById('country').value = data.country;
     }
 
+    if(data.lang){
+      document.getElementById('langSelector').value = data.lang;
+      document.documentElement.lang = data.lang;
+      try{ localStorage.setItem('eta_lang', data.lang); }catch(e){}
+    }
+
+    /* 🔹 STATISTICHE (scritte anche dal launcher) */
+    if(data.stats){
+      const rows = Object.keys(data.stats).filter(k=>data.stats[k] && data.stats[k].n>0).map(k=>{
+        const s=data.stats[k], h=Math.floor(s.secs/3600), m=Math.floor((s.secs%3600)/60);
+        const title=(typeof GAME_CATALOG!=='undefined' && GAME_CATALOG[k]) ? GAME_CATALOG[k].title : k;
+        const last=s.last ? new Date(s.last*1000).toLocaleDateString() : '-';
+        return `<p><strong>${title}</strong>: ${h}h ${m}m · ${s.n} sessioni · ultima: ${last}</p>`;
+      });
+      if(rows.length) document.getElementById('statsList').innerHTML = rows.join('');
+    }
+
     if(data.theme){
       applyTheme(data.theme);
       document.getElementById('themeSelector').value = data.theme;
@@ -393,6 +426,18 @@ document.getElementById('deleteAccount').onclick = ()=>{
 document.getElementById('copyEmail').onclick = ()=>{
   navigator.clipboard.writeText(document.getElementById('email').textContent).then(()=>alert("Copiato!"));
 };
+
+const langSelector=document.getElementById('langSelector');
+if(langSelector){
+  langSelector.onchange = async ()=>{
+    const lang=langSelector.value;
+    document.documentElement.lang = lang;
+    try{ localStorage.setItem('eta_lang', lang); }catch(e){}
+    if(auth.currentUser){
+      await db.collection('users').doc(auth.currentUser.uid).set({lang},{merge:true});
+    }
+  };
+}
 
 const themeSelector=document.getElementById('themeSelector');
 if(themeSelector){

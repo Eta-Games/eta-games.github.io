@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ETA Games — Novità</title>
+  <meta name="description" content="ETA Games: giochi horror psicologici, crafting narrativo e atmosfere uniche. Scopri i nostri progetti, notizie e come unirti alla community.">
+  <meta property="og:title" content="ETA Games">
+  <meta property="og:description" content="Giochi horror psicologici, sogni e storytelling unico.">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="tvh.css">
+  <link rel="icon" type="image/jpeg" href="img/channels4_profile.jpg">
+
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="i18n.js"></script>
+</head>
+
+<body class="night-theme"> <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <img src="img/channels4_profile.jpg" alt="Logo ETA Games" class="logo-img">
+          <div>
+            <div>ETA Games</div>
+            <div class="muted" style="font-size:12px;margin-top:2px">Studio</div>
+          </div>
+        </div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="games.html">Giochi</a>
+          <a href="extra.html">Extra</a>
+          <a href="login.html" id="navProfileLink">Profilo</a>
+          <a href="blog.html">Blog</a>
+          <a href="novita.html" class="active">Novità</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main><div class="container"><div id="bc"><p class="muted">Caricamento…</p></div></div></main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <strong>ETA Games</strong>
+          <div class="muted">© ETA Games — Tutti i diritti riservati</div>
+        </div>
+        <div class="socials muted" style="display: flex; gap: 20px;">
+          <a href="https://discord.gg/Da7sq3Mwpw" target="_blank">Discord</a>
+          <a href="https://www.youtube.com/@HGames_studio" target="_blank">YouTube</a>
+          <a href="https://www.instagram.com/eta.games_" target="_blank">Instagram</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCiWCjKAsNYLnDJT1o3r_E3tGLyYTasDPc",
+      authDomain: "etagames-b5d6a.firebaseapp.com",
+      projectId: "etagames-b5d6a",
+      storageBucket: "etagames-b5d6a.firebasestorage.app",
+      messagingSenderId: "809625655346",
+      appId: "1:809625655346:web:3010a62960fde91787842b",
+      measurementId: "G-BG4HGVW7D6"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+  <script src="theme-loader.js"></script>
+  <script>
+    // Aggiornamento UI pulsanti auth
+    auth.onAuthStateChanged(async user => {
+      const authBtn = document.getElementById("authBtn");
+      const navProfileLink = document.getElementById("navProfileLink");
+
+      if (user) {
+        if(authBtn) { authBtn.textContent = "Vai al Profilo"; authBtn.href = "profilo.html"; }
+        if(navProfileLink) { navProfileLink.href = "profilo.html"; navProfileLink.textContent = "Profilo"; }
+      } else {
+        if(authBtn) { authBtn.textContent = "Accedi / Registrati"; authBtn.href = "login.html"; }
+        if(navProfileLink) { navProfileLink.href = "login.html"; }
+      }
+    });
+  </script>
+<script src="eta-feed.js"></script><script>
+let all=[],cur="all";
+function draw(){const l=all.filter(m=>cur=="all"||m.src.id==cur);document.getElementById("feed").innerHTML=l.map(m=>`<div class="card-tvhouse" style="margin:0 0 16px;position:relative;border-left:4px solid ${m.src.color}"><span style="color:${m.src.color};border:1px solid ${m.src.color};border-radius:9px;padding:1px 8px;font-size:12px">${esc(m.src.name)}</span> <span class="muted">${esc(m.date)} · ${esc(m.level||"info")}</span><h3>${esc(m.title)}</h3><p class="muted">${esc(m.message)}</p>${m.url?`<a href="${esc(m.url)}" target="_blank">Apri →</a>`:""}</div>`).join("")||"<p class='muted'>Nessuna novità.</p>"}
+loadBroadcasts().then(a=>renderBroadcast(document.getElementById("bc"),a));
+</script></body>
+</html>
