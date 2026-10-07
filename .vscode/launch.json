@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "pwa-chrome",
+            "request": "launch",
+            "name": "Open the valter house.html",
+            "file": "C:\\Users\\gabri\\eta-games.github.io\\the valter house.html",
+            "runtimeExecutable": "C:\\Users\\gabri\\AppData\\Local\\Programs\\Opera GX\\opera.exe"
+        }
+    ]
+}

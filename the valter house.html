@@ -864,7 +864,7 @@
         <button class="character-btn" data-img="img/arc_soldier.jpg" data-desc="L'Agenzia Ricerca e Contenimento (A.R.C.) è un'organizzazione classificata che opera nell'ombra da quasi vent'anni. Il suo mandato ufficiale è il monitoraggio, lo studio e la neutralizzazione di entità soprannaturali che rappresentano una minaccia per la popolazione civile. La casa di Valter è uno dei loro dossier più vecchi e più scomodi — il file esiste dal 1998, ma le pagine centrali risultano rimosse. L'A.R.C. sa molto più di quello che dice.">A.R.C. — Agenzia</button>
       </div>
       <div class="character-display">
-        <img id="char-image" src="img/stefano_bianchi.png" alt="Character">
+        <img id="char-image" src="img/valter.png" alt="Character">
         <p id="char-desc">Il Vecchio appare come un uomo anziano di circa 70 anni. I pochi dati riscontrati dall'A.R.C. dimostrano che possiede un notevole istinto per la caccia e per la cattura delle sue prede. Le immagini ottenute lo mostrano mentre attacca i viandanti con armi artigianali, come coltelli, tegole e, a volte, persino pugnali. Una volta ottenuta una presa sufficiente su una sua preda, la spinge verso il muro; da lì un liquido nero e denso apparirà sulla superficie, facendo sparire il viandante e il Vecchio all'interno. Nessuno, al momento dell'aggiornamento [16/07/2016], è stato più ritrovato. L'A.R.C. sta organizzando pattuglie per cercare di salvare l'ultima vittima.</p>
       </div>
     </div>
@@ -997,10 +997,10 @@
     /* Cuori HP: hp è una stringa chiave */
     function renderHP(hp){
       const map={
-        "bassa":    {hearts:"❤️",      empty:"🖤🖤🖤🖤", label:"BASSA"},
-        "media":    {hearts:"❤️❤️",    empty:"🖤🖤🖤",   label:"MEDIA"},
-        "alta":     {hearts:"❤️❤️❤️",  empty:"🖤🖤",     label:"ALTA"},
-        "anomalo":  {hearts:"❤️❤️❤️❤️",empty:"🖤",       label:"ANOMALO"},
+        "bassa":    {hearts:"⛔",      empty:"⚫⚫⚫⚫", label:"BASSA"},
+        "media":    {hearts:"⛔⛔",    empty:"⚫⚫⚫",   label:"MEDIA"},
+        "alta":     {hearts:"⛔⛔⛔",  empty:"⚫⚫",     label:"ALTA"},
+        "anomalo":  {hearts:"⛔⛔⛔⛔",empty:"⚫",       label:"ANOMALO"},
         "non registrato":{hearts:"⚫⚫⚫⚫⚫",empty:"",  label:"NON REGISTRATO"}
       };
       const k=(hp||"").toLowerCase();
@@ -1090,7 +1090,7 @@
     const secretLevel = {
             title:"(515)",
             desc:"ṫ̵̢̨̛̛͖̟̠̦̗̩̬͓̺̰͚̣̯̩̭̩̬̯͓̰͔͕͓͚̦̥̞̟̝̜̬̦̋̓̈́̀̇̓̓̓̾̑̍̀̅̈̄͐͋̍̉̂̓͆̒̐̃̔̾͘͜͝ͅu̴̪͇͕̰̠̫̟̦̓̏̒̆̅̏̊͋̍̃̊̚͝͝t̸̘͖̟͎͙̞͙̓̋̅̒͘t̷̡̺͚̙̳͇̲͓̖̱͚̖̿̋̃̾̉̂̀̈́͠ͅơ̷͖̈͆̍̂̎̕͝ non sei qui.  i̸̡̢̜̥̥̜͙̖̱̥͓͒̃̾͂t̷̨̮͈̲̬͚̜̮̰̫̯̬̦̻͒̀́'̵̩̠͙̱͓͈̺̭̖̣̘͇̻̀͐̀̿͒͝s̵̩̹̱͙͓̰̬̗̰͓̺̥͎͎̉̉͊̈́̕ ̵̡̲̙̼͉̯̞͓̺̞̙̺̓͗̊̌̔͝y̴̙̠͍͉̖͙̙̗̺̝̻͕̘̓̓̓̇͌̋͆̽͂͘͝o̴͕̱͓̻̱̯͒̐͝ͅu̸̼̒̌̅̊͝r̴̞̙̙̫̺̤̺̭̬͒̀͊̒͒̍͌̽͌̉̉̏͘͘͘͝ ̴̨̣͖͇̦̰̦̟̙̖̬̬̻̎̅͜͝ f̴̢͔̩̗͔̊̊͊ȁ̷̘͓̙̪̳̟̹̖̱̬̣̭̀̔͑̐̕u̸̡̳̤̜̪̓̌̅́̊̀̚͝l̸̡̛̙̭̘̟͓̹̭̲͙͕̮͗̒̾͊͌̿͜ṫ̵̟̤͓̦̹̰͕̱͈̺̼̾̌.",
-            img:"img/ucnown_entity.png",
+            img:"img/515.png",
             content:"i̸ ̴t̷ ̵'̷ ̸s̸   ̶y̸ ̴o̷ ̵u̵ ̶r̷   ̸f̷ ̵a̸ ̴u̷ ̵l̸ ̷t̷\n\nnon ricordi come sei arrivata qui.\nnon ricordi nemmeno se ci sei arrivata.\n\nITSYOURFAULT i̶t̷s̸y̸o̸u̴r̸f̵a̷u̷l̷t̷ itsyourfault\n\nle pareti non le riconosci. le hai già viste. no, non le hai mai viste. sì, le hai già viste, emily. hai già visto tutto questo prima. it's your fault. it's your fault. ı̸̡͔̹̗̣͆͋̿͠t̸̡͉̤͓̼͓̤̿͊̋̿̓̃'̷̡̹͔̞̈́̉̓̂͝s̵͎̗͎̐͊̀̀̿̊̕ ̷̧̜̲͍̩̖̐̓y̵͙̹̹͙̰̏̓́ǒ̷̧̧̩̲̀̓̚ų̸̛̬̪̞̯͔̹̙͎̫̇̊͊̑̚̕͘r̸̛͍̦͈̦̭̟̰̟̺̅̆̽̉̈̒͜͠ ̵̲͎̦͇̫̫̃͑͐̓͑͒̊͜͝f̷̮̩̬͍̑̓̿à̵̫̝̪͙͕̞̾̀̏͂̒͌͝ȗ̷͚̗͕̫͎͔͑̈́̊̿̿l̵̫̘̆͂t̶̬̖̼͙̤̖̎̈́͊\n\nnon uscire. non c'è un'uscita. c'era un'uscita. la conosci ancora?",
             images:["img/ucnown_entity.png"],
             objectives:["i̷t̸'̷s̸ ̵y̶o̴u̸r̷ ̷f̸a̶u̸l̷t̸","i̵̱͝ṱ̶͑'̴̠̈s̶̩̈ ̸͔̚ÿ̶͓́o̸̩͝u̸̗͒r̷̺̈ ̷̧̕f̴̜͠a̵̘̕ȕ̵͓l̷̪̈t̶̠̊","i̴̢̛̬̻͉̘͓̯̲͊̀̄̿̆̿̌̆̄̋t̵̢̖̥̟̰͈̩͕͙̿̈̏͜'̴͍̮͓̀̇s̴̝̐̾̐ ̷̢̝̗͍͇̭̤̲̩̣̑͛̔͐̐̆̑̅̃y̵̧̲̜͙̱̝̙̺̾̂͆̒͒̿̐̕ő̶̡̯̬͚̟͍͕̜͊̃͋̕͘ṵ̸̲͚̔̊r̷̭̟̞̋͒͑̒͌͝ ̸̛̺̘̃̏̇̾̈̒́f̷̘̈͗̍a̷͕̖̤͑̍̊͝ŭ̸͈̝̭̗͉̽̿̑͐̅l̸̡̢̟̙̫͊͂͝͝t̸̺͊̊̄"],
