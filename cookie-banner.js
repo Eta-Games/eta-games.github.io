@@ -112,7 +112,7 @@
       '<button type="button" data-v="all">' + t.accept + "</button>" +
       "</div>";
     box.addEventListener("change", function (e) {
-      if (e.target && e.target.id === "eta-cc-lang") { setLang(e.target.value); show(); }
+      if (e.target && e.target.id === "eta-cc-lang") { setLang(e.target.value); location.reload(); }
     });
     box.addEventListener("click", function (e) {
       var v = e.target && e.target.getAttribute && e.target.getAttribute("data-v");
